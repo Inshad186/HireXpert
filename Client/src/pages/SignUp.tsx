@@ -1,114 +1,162 @@
-import React, { useState } from "react";
+import React, { useState, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios"; // for making API calls
+import axios from "axios";
+import { UserSignUpType, UserSignupAction } from "@/types/user.type";
+import { validateForm } from "@/utils/validation/formValidation";
+import { formSchema } from "@/utils/validation/formSchema";
 
-const Signup = () => {
+export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
+  const [error, setError] = useState({ field: "", message: "" });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
-  // Step 1: Form state
-  const [formData, setFormData] = useState({
+  const initialState: UserSignUpType = {
     name: "",
     email: "",
     password: "",
-    confirmPassword: "",
-  });
-
-  // Step 2: Handle input change
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    confirmPassword: ""
   };
 
-  // Step 3: Handle submit
+  const reducer = (state: UserSignUpType, action: UserSignupAction) => {
+    switch (action.type) {
+      case "SET_NAME":
+        return { ...state, name: action.payload };
+      case "SET_EMAIL":
+        return { ...state, email: action.payload };
+      case "SET_PASSWORD":
+        return { ...state, password: action.payload };
+      case "SET_CONFIRM_PASSWORD":
+        return { ...state, confirmPassword: action.payload };
+      default:
+        return state;
+    }
+  };
+
+  const [formData, dispatch] = useReducer(reducer, initialState);
+
+  const signup = async (userData: UserSignUpType) => {
+    try {
+      const { data } = await axios.post("http://localhost:5000/api/auth/signup", {
+        name: userData.name,
+        email: userData.email,
+        password: userData.password,
+      });
+      return { success: true, data };
+    } catch (error: any) {
+      const message = error.response?.data?.error || "Something went wrong";
+      return { success: false, error: message };
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Optional: check password and confirm match
+    const validationError = validateForm(
+      formSchema,
+      formData as unknown as Record<string, string>
+    );
+
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+
     if (formData.password !== formData.confirmPassword) {
-      alert("Passwords do not match");
+      setError({ field: "confirmPassword", message: "Passwords do not match" });
       return;
     }
 
     try {
-      const response = await axios.post("http://localhost:5000/api/auth/signup", {
-        name: formData.name,
-        email: formData.email,
-        password: formData.password,
-      });
-      console.log("Response : ",response)
-
-      if (response.status === 200 || response.status === 201) {
+      setLoading(true);
+      const response = await signup(formData);
+      if (response.success) {
+        localStorage.setItem("email", response.data.email);
         alert("Signup successful!");
-        navigate("/login"); // redirect after success
+        navigate("/login");
+      } else {
+        alert(response.error || "Signup failed");
       }
-    } catch (err: any) {
-      alert(err.response?.data?.message || "Signup failed");
+    } catch (err) {
+      console.error("Registration failed:", err);
+      alert("An unexpected error occurred");
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
-        <h1 className="text-center font-bold text-3xl text-yellow-500 mb-6">HireXpert</h1>
+        <h1 className="text-center font-bold text-3xl text-black mb-6">HireXpert</h1>
 
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">Name</label>
             <input
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
               type="text"
+              value={formData.name}
+              onChange={(e) =>
+                dispatch({ type: "SET_NAME", payload: e.target.value })
+              }
               placeholder="Enter your name"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
+            {error.field === "name" && <p className="text-red-500 text-sm">{error.message}</p>}
           </div>
 
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">Email</label>
             <input
-              name="email"
-              value={formData.email}
-              onChange={handleChange}
               type="email"
+              value={formData.email}
+              onChange={(e) =>
+                dispatch({ type: "SET_EMAIL", payload: e.target.value })
+              }
               placeholder="Enter your email"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
+            {error.field === "email" && <p className="text-red-500 text-sm">{error.message}</p>}
           </div>
 
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">Password</label>
             <input
-              name="password"
-              value={formData.password}
-              onChange={handleChange}
               type="password"
+              value={formData.password}
+              onChange={(e) =>
+                dispatch({ type: "SET_PASSWORD", payload: e.target.value })
+              }
               placeholder="Enter your password"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
+            {error.field === "password" && <p className="text-red-500 text-sm">{error.message}</p>}
           </div>
 
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">Confirm Password</label>
             <input
-              name="confirmPassword"
-              value={formData.confirmPassword}
-              onChange={handleChange}
               type="password"
+              value={formData.confirmPassword}
+              onChange={(e) =>
+                dispatch({ type: "SET_CONFIRM_PASSWORD", payload: e.target.value })
+              }
               placeholder="Confirm your password"
               className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
             />
+            {error.field === "confirmPassword" && (
+              <p className="text-red-500 text-sm">{error.message}</p>
+            )}
           </div>
 
           <button
             type="submit"
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 rounded-md transition-colors">
-            Sign Up
+            disabled={loading}
+            className="w-full bg-black hover:bg-yellow-600 text-white font-semibold py-2 rounded-md transition-colors"
+          >
+            {loading ? "Signing Up..." : "Sign Up"}
           </button>
         </form>
       </div>
     </div>
   );
-};
-
-export default Signup;
+}

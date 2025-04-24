@@ -1,43 +1,4 @@
 
-// import dotenv from 'dotenv'
-
-// dotenv.config()
-
-// import express, {Application} from 'express'
-// import morgan from 'morgan';
-// import cookieParser from 'cookie-parser';
-
-
-// class App {
-//     public app: Application;
-
-//     constructor() {
-        
-
-//         this.app = express()
-
-//         // this.initializeMiddlewares()
-//         // this.initializeDB()
-//         // this.initializeRoutes()
-//     }
-
-//     private initializeMiddlewares(): void {
-//         this.app.use(express.json())
-//         this.app.use(express.urlencoded({extended:true}))
-//         this.app.use(cookieParser())
-//         this.app.use(morgan('combined'))
-//     }
-
-//     // private initializeRoutes(): void {
-//     //     this.app.use('/', userRouter)
-//     //     this.app.use('/admin', adminRouter)
-//     // }
-
-//     // private initializeDB(): void {
-//     //     connectDB()
-//     //     initializeRedisClient()
-//     // }
-
 //     public listen(): void {
 //         this.app.listen(3000, ()=>{
 //             console.log(`
@@ -84,5 +45,5 @@ app.use("/api/auth",userRouter)
 
 
 app.listen(PORT, () => {
-  console.log(`🚀 Server running on http://localhost:${PORT}`);
+  console.log(`Server running on http://localhost:${PORT}`);
 })

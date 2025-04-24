@@ -3,7 +3,7 @@ function Login() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md">
-        <h1 className="text-center font-bold text-3xl text-yellow-500 mb-6">HireXpert</h1>
+        <h1 className="text-center font-bold text-3xl text-black mb-6">HireXpert</h1>
         
         <form className="space-y-6">
           <div>
@@ -26,7 +26,7 @@ function Login() {
 
           <button
             type="submit"
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white font-semibold py-2 rounded-md transition-colors"
+            className="w-full bg-black hover:bg-yellow-600 text-white font-semibold py-2 rounded-md transition-colors"
           >
             Login
           </button>
