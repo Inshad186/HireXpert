@@ -16,5 +16,24 @@ export class UserController implements IUserController{
       next(error);
     }
   }
+
+  async login(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const {email, password} = req.body
+
+      const tokens = await this.userService.login(email, password)
+
+      res.cookie("refreshToken", tokens.refreshToken, {
+        httpOnly: true,
+        secure: false,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: "strict",
+      });
+
+      res.status(HttpStatus.OK).json({accessToken : tokens.accessToken})
+    } catch (err) {
+      next()
+    }
+  }
 }
 

@@ -4,6 +4,7 @@ import axios from "axios";
 import { UserSignUpType, UserSignupAction } from "@/types/user.type";
 import { validateForm } from "@/utils/validation/formValidation";
 import { formSchema } from "@/utils/validation/formSchema";
+import { responses } from "@/constants/response.constants";
 
 export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState({ field: "", message: "" });
@@ -43,7 +44,7 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
       });
       return { success: true, data };
     } catch (error: any) {
-      const message = error.response?.data?.error || "Something went wrong";
+      const message = error.response?.data?.error || responses.SOMETHING_WRONG;
       return { success: false, error: message };
     }
   };
@@ -72,7 +73,7 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
       if (response.success) {
         localStorage.setItem("email", response.data.email);
         alert("Signup successful!");
-        navigate("/login");
+        navigate("/otp");
       } else {
         alert(response.error || "Signup failed");
       }
@@ -99,7 +100,7 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
                 dispatch({ type: "SET_NAME", payload: e.target.value })
               }
               placeholder="Enter your name"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full px-4 py-2 border rounded-md "
             />
             {error.field === "name" && <p className="text-red-500 text-sm">{error.message}</p>}
           </div>
@@ -113,7 +114,7 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
                 dispatch({ type: "SET_EMAIL", payload: e.target.value })
               }
               placeholder="Enter your email"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full px-4 py-2 border rounded-md "
             />
             {error.field === "email" && <p className="text-red-500 text-sm">{error.message}</p>}
           </div>
@@ -127,7 +128,7 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
                 dispatch({ type: "SET_PASSWORD", payload: e.target.value })
               }
               placeholder="Enter your password"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full px-4 py-2 border rounded-md "
             />
             {error.field === "password" && <p className="text-red-500 text-sm">{error.message}</p>}
           </div>
@@ -141,7 +142,7 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
                 dispatch({ type: "SET_CONFIRM_PASSWORD", payload: e.target.value })
               }
               placeholder="Confirm your password"
-              className="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-yellow-400"
+              className="w-full px-4 py-2 border rounded-md"
             />
             {error.field === "confirmPassword" && (
               <p className="text-red-500 text-sm">{error.message}</p>
@@ -151,10 +152,11 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
           <button
             type="submit"
             disabled={loading}
-            className="w-full bg-black hover:bg-yellow-600 text-white font-semibold py-2 rounded-md transition-colors"
+            className="w-full bg-black hover:bg-gray-900 text-white font-semibold py-2 rounded-md transition-colors"
           >
             {loading ? "Signing Up..." : "Sign Up"}
           </button>
+          <p className="text-center">You already have an accout ? <a className="underline cursor-pointer text-blue-800" onClick={() => navigate("/login")}>Login</a></p>
         </form>
       </div>
     </div>

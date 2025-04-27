@@ -2,9 +2,7 @@ import { Request, Response, NextFunction } from "express";
 import { HttpStatus } from "@/constants/status.constant";
 import { HttpResponse } from "@/constants/response.constant";
 
-export const authMiddleware = (
-    validationSchema: Record<string, { rules: RegExp[]; messages: string[]; optional?: boolean }>
-) => {
+export const authMiddleware = ( validationSchema: Record<string, { rules: RegExp[]; messages: string[]; optional?: boolean }>) => {
     return (req: Request, res: Response, next: NextFunction): void => {
         for (const field in validationSchema) {
             const { rules, messages, optional } = validationSchema[field];

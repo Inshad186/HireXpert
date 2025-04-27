@@ -13,3 +13,15 @@ export type UserSignupAction =
     | { type: "SET_EMAIL"; payload: string }
     | { type: "SET_PASSWORD"; payload: string }
     | { type: "SET_CONFIRM_PASSWORD"; payload: string }
+
+
+export interface ErrorState {
+    field?: string;
+    message?: string;
+}
+
+export interface UserStoreType {
+    _id: string;
+    name: string;
+    email: string;
+}

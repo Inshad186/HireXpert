@@ -6,5 +6,6 @@ export const responses = {
     PASSWORD_DIGIT: "Your password must contain at least one number",
     PASSWORD_SPECIALCHAR: "Your password must contain at least one special character",
     USER_BLOCKED: "You are blocked User.",
-    LOGOUT_SUCCESS: "Logout Successful"
+    LOGOUT_SUCCESS: "Logout Successful",
+    SOMETHING_WRONG: "Something Went Wrong"
 }
