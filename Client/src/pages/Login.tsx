@@ -49,7 +49,7 @@ function Login({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
       }
     } catch (error) {
       console.log(error);
-      setError({ field: "form", message: "Invalid credentials" });
+      setError({ field: "form", message: "Invalid email" });
       setLoading(false);
     }
   };

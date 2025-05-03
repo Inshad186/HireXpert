@@ -1,14 +1,5 @@
-import mongoose, { Schema, Document } from "mongoose";
-
-export interface UserType extends Document {
-    name: string;
-    email: string;
-    password?: string;
-    role?: 'freelancer' | 'client' | 'admin';
-    isBlocked?: boolean;
-    createdAt?: Date;
-    updatedAt?: Date;
-}
+import mongoose, { Schema } from "mongoose";
+import { UserType } from "@/types/Type";
 
 const userSchema: Schema = new Schema<UserType>({
     name: {

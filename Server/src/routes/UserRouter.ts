@@ -14,5 +14,7 @@ const router = express.Router();
 
 router.post("/signup", authMiddleware(signupValidation), userController.signup.bind(userController));
 router.post("/login", userController.login.bind(userController))
+router.post('/verifyOtp', userController.verifyOtp.bind(userController))
+router.post("/resendOtp", userController.resendOtp.bind(userController))
 
 export default router;

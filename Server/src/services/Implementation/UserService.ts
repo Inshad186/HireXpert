@@ -1,7 +1,7 @@
 import { IUserService } from "../Interface/IUserService"; 
 import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 import bcrypt from "bcrypt"
-import { UserType } from "@/models/userModel";
+import { UserType } from "@/types/Type";
 import { HttpResponse } from "@/constants/response.constant";
 import { generateAccessToken, generateRefreshToken, } from "@/utils/jwt.util";
 import { generateHttpError } from "@/utils/http-error.util";
@@ -9,27 +9,55 @@ import { HttpStatus } from "@/constants/status.constant";
 import { ObjectId } from "mongoose";
 import generateOtp from "@/utils/generate-otp.util";
 import { env } from "@/config/env.config";
-import { transport } from "@/config/nodemailer.config";
-
+import { transporter } from "@/config/nodemailer.config";
+import { redisClient } from "@/config/redis.config";
 
 export class UserService implements IUserService {
   constructor(private userRepository: IUserRepository) {}
 
-  async signup(userData: Partial<UserType>): Promise<UserType> {
-    const existingUser = await this.userRepository.findByEmail(userData.email!);
+  async signup(user: UserType): Promise<string> {
+    const existingUser = await this.userRepository.findByEmail(user.email);
+  
+    if (existingUser) throw new Error(HttpResponse.USER_EXIST);
+  
+    const hashedPassword = await bcrypt.hash(user.password!, 10);
 
-    if (existingUser) throw new Error(HttpResponse.USER_EXIST)
-
-    const hashedPassword = await bcrypt.hash(userData.password!, 10);
-    const newUser = await this.userRepository.createUser({
-      ...userData,
-      password: hashedPassword,
+    console.log("HASHED PASSWORD : ",hashedPassword)
+  
+    const otp = generateOtp();
+    console.log("Generated OTP: ", otp);
+  
+    const mailOptions = {
+      from: env.SENDER_EMAIL,
+      to: user.email,
+      subject: "6-digit OTP",
+      text: `Your OTP code is ${otp}`,
+    };
+  
+    console.log("Sender Email: ", env.SENDER_EMAIL);
+    console.log("Sender Password: ", env.SENDER_PASSWORD);
+    console.log("Mail Options: ", mailOptions);
+  
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log("Email sent successfully: ", info.response);
+    } catch (err) {
+      console.error("Failed to send email:", err);
+    }
+    const tempData = JSON.stringify({
+      otp: otp,
+      userData: {
+        ...user,
+        password: hashedPassword 
+      }
     });
+    console.log("TEMPDATA : ",tempData)
 
-    const otp = generateOtp()
-    console.log("OTP  OTP  OTP  >>>>>>>>>>>>>>>>    >>>>>>>>>>>>  : ",otp)
-    return newUser;
+    await redisClient.setEx(user.email!, 300, tempData);
+
+    return user.email!;
   }
+  
 
   async login(email: string, password: string): Promise<{ accessToken: string; refreshToken: string; user: UserType; }> {
     const user = await this.userRepository.findByEmail(email)
@@ -57,10 +85,75 @@ export class UserService implements IUserService {
     return { accessToken, refreshToken, user}
   }
 
-  async otpVerify(otp:string, email:string):Promise<{accessToken:string, refreshToken:string }>{
-    const accessToken = ""
-    const refreshToken = ""
-    const user = ""
-    return {accessToken, refreshToken}
+
+  async verifyOtp(otp:string, email:string): Promise<{accessToken:string, refreshToken:string, user: UserType}> {
+
+    const storedDataString = await redisClient.get(email)
+    console.log("STORED DATA STRING >>>>>>>>>  : ",storedDataString)
+
+    if(!storedDataString) {
+      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_NOT_FOUND)
+    }
+    const storedData = JSON.parse(storedDataString)
+    console.log("STORED DATA >>>> : ",storedData)
+
+    if(storedData.otp !== otp) {
+      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_INCORRECT)
+    }
+      const user  = {
+        name : storedData.userData.name ,
+        email : storedData.userData.email,
+        password : storedData.userData.password 
+      }
+      console.log("user >>>>> : ",user)
+
+      const createdUser = await this.userRepository.createUser(user as UserType)
+      if (!createdUser) {
+        throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_CREATION_FAILED);
+      }
+
+      const accessToken = await generateAccessToken(createdUser._id);
+      const refreshToken = await generateRefreshToken(createdUser._id);
+
+      return { accessToken, refreshToken, user: createdUser };
   }
+
+  async resendOtp(email: string): Promise<void> {
+    const storedDataString = await redisClient.get(email);
+    console.log("Resend OTP Stored Data String >>>>>>>> : ", storedDataString);
+  
+    if (!storedDataString) {
+      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_NOT_FOUND);
+    }
+  
+    const storedData = JSON.parse(storedDataString);
+  
+    const newOtp = generateOtp();
+    console.log("Resend New OTP >>>> : ", newOtp);
+  
+    // Resend mail logic
+    const mailOptions = {
+      from: env.SENDER_EMAIL,
+      to: email,
+      subject: "6-digit OTP - Resend",
+      text: `Your new OTP code is ${newOtp}`,
+    };
+  
+    try {
+      const info = await transporter.sendMail(mailOptions);
+      console.log("Resent Email successfully: ", info.response);
+    } catch (err) {
+      console.error("Failed to resend OTP email:", err);
+      throw generateHttpError(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send OTP email");
+    }
+  
+    // Update Redis with new OTP
+    const updatedTempData = JSON.stringify({
+      ...storedData,
+      otp: newOtp,
+    });
+  
+    await redisClient.setEx(email, 300, updatedTempData); 
+  }
+  
 }

@@ -11,10 +11,10 @@ export const env = {
     get JWT_REFRESH_SECRET() {
         return process.env.JWT_REFRESH_SECRET
     },
-    get SENDER_MAIL(){
-        return process.env.SENDER_MAIL
+    get SENDER_EMAIL(){
+        return process.env.SENDER_EMAIL 
     },
     get SENDER_PASSWORD(){
-        return process.env.SENDER_PASSWORD
+        return process.env.SENDER_PASSWORD 
     }
 }

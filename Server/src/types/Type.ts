@@ -1,10 +1,12 @@
+import { ObjectId } from "mongoose";
 
 export interface UserType {
-    name: string;
+    _id?: ObjectId;
+    name?: string;
     email: string;
     password?: string;
     role?: 'freelancer' | 'client' | 'admin';
-    isBlocked?: false;
+    isBlocked?: boolean;
     createdAt?: Date;
     updatedAt?: Date;
 }

@@ -1,5 +1,5 @@
 import React, { useState, useReducer } from "react";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserSignUpType, UserSignupAction } from "@/types/user.type";
 import { validateForm } from "@/utils/validation/formValidation";
@@ -42,12 +42,14 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
         email: userData.email,
         password: userData.password,
       });
+
       return { success: true, data };
     } catch (error: any) {
       const message = error.response?.data?.error || responses.SOMETHING_WRONG;
       return { success: false, error: message };
     }
   };
+
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,12 +72,13 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
     try {
       setLoading(true);
       const response = await signup(formData);
+      
       if (response.success) {
         localStorage.setItem("email", response.data.email);
         alert("Signup successful!");
         navigate("/otp");
       } else {
-        alert(response.error || "Signup failed");
+        alert(response.error || "User already exists, try another email");
       }
     } catch (err) {
       console.error("Registration failed:", err);
