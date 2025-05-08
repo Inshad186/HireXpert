@@ -1,4 +1,4 @@
-import { UserType } from "@/models/userModel";
+import { UserType } from "@/types/Type";
 
 export interface IUserRepository {
   createUser(user: Partial<UserType>): Promise<UserType>;

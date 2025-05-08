@@ -1,12 +1,12 @@
 import React, { useState, useReducer } from "react";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { UserSignUpType, UserSignupAction } from "@/types/user.type";
 import { validateForm } from "@/utils/validation/formValidation";
 import { formSchema } from "@/utils/validation/formSchema";
 import { responses } from "@/constants/response.constants";
 
-export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
+export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState({ field: "", message: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
@@ -35,24 +35,25 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
 
   const [formData, dispatch] = useReducer(reducer, initialState);
 
-  const signup = async (userData: UserSignUpType) => {
-    try {
-      const { data } = await axios.post("http://localhost:5000/api/auth/signup", {
-        name: userData.name,
-        email: userData.email,
-        password: userData.password,
-      });
-
-      return { success: true, data };
-    } catch (error: any) {
-      const message = error.response?.data?.error || responses.SOMETHING_WRONG;
-      return { success: false, error: message };
-    }
-  };
-
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    console.log("Form DATA : ",{...formData})
+    const signup = async (userData: UserSignUpType) => {
+      try {
+        const { data } = await axios.post("http://localhost:5000/api/auth/signup", {
+          name: userData.name,
+          email: userData.email,
+          password: userData.password,
+        });
+
+        console.log("EMAIL - DATA >>>>>>  >>>>>>> : ",data)
+        return { success: true, data };
+      } catch (error: any) {
+        const message = error.response?.data?.error || responses.SOMETHING_WRONG;
+        return { success: false, error: message };
+      }
+    };
 
     const validationError = validateForm(
       formSchema,
@@ -89,10 +90,8 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+    <>
         <h1 className="text-center font-bold text-3xl text-black mb-6">HireXpert</h1>
-
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">Name</label>
@@ -161,7 +160,6 @@ export function Signup({ className, ...props }: React.ComponentPropsWithoutRef<"
           </button>
           <p className="text-center">You already have an accout ? <a className="underline cursor-pointer text-blue-800" onClick={() => navigate("/login")}>Login</a></p>
         </form>
-      </div>
-    </div>
+        </>
   );
 }

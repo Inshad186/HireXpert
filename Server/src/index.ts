@@ -5,6 +5,7 @@ dotenv.config()
 import express from "express"
 import cors from "cors"
 import userRouter from "./routes/UserRouter";
+import adminRouter from "./routes/AdminRouter"
 import morgan from "morgan";
 import { connectDB } from "./config/mongo.config";
 
@@ -26,7 +27,8 @@ app.use(
   })
 )
 
-app.use("/api/auth",userRouter)
+app.use("/api/auth", userRouter)
+app.use("/api/auth/admin", adminRouter)
 
 
 app.listen(PORT, () => {

@@ -7,7 +7,7 @@ import { setUser } from "@/redux/slices/userSlice";
 import { ErrorState } from "@/types/user.type";
 
 
-function Login({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
+export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -55,10 +55,8 @@ function Login({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white p-8 rounded-xl shadow-xl w-full max-w-md">
+    <>
         <h1 className="text-center font-bold text-3xl text-black mb-6">HireXpert</h1>
-
         <form className="space-y-6" onSubmit={handleSubmit}>
           <div>
             <label className="block mb-2 text-sm font-medium text-gray-700">Email</label>
@@ -96,9 +94,7 @@ function Login({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
           </button>
           <p className="text-center">Don't you have an account ? <a className="underline font-medium cursor-pointer text-blue-800" onClick={() => navigate("/signup")}>Signup</a></p>
         </form>
-      </div>
-    </div>
+    </>
   );
 }
 
-export default Login;

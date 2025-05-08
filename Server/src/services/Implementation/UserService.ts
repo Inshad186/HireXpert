@@ -21,8 +21,6 @@ export class UserService implements IUserService {
     if (existingUser) throw new Error(HttpResponse.USER_EXIST);
   
     const hashedPassword = await bcrypt.hash(user.password!, 10);
-
-    console.log("HASHED PASSWORD : ",hashedPassword)
   
     const otp = generateOtp();
     console.log("Generated OTP: ", otp);
@@ -72,7 +70,6 @@ export class UserService implements IUserService {
 
     const isMatchPassword = await bcrypt.compare(password, user.password as string)
 
-    console.log("CHECK PASSWORD  >>>>>>>> >>>>>>>>>     >>>>>>>>>>> : ",isMatchPassword)
     if(!isMatchPassword){
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.PASSWORD_INCORRECT)
     }
@@ -80,7 +77,7 @@ export class UserService implements IUserService {
     let accessToken = await generateAccessToken(user._id as ObjectId)
     let refreshToken = await generateRefreshToken(user._id as ObjectId)
 
-    console.log("ACCESS TOKEN >>>>>>>>    >>>>>>>>>     >>>>>>>>>>> : ",accessToken)
+    console.log("ACCESS TOKEN >>>>>>>>  : ",accessToken)
 
     return { accessToken, refreshToken, user}
   }
@@ -89,7 +86,6 @@ export class UserService implements IUserService {
   async verifyOtp(otp:string, email:string): Promise<{accessToken:string, refreshToken:string, user: UserType}> {
 
     const storedDataString = await redisClient.get(email)
-    console.log("STORED DATA STRING >>>>>>>>>  : ",storedDataString)
 
     if(!storedDataString) {
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_NOT_FOUND)
@@ -107,20 +103,19 @@ export class UserService implements IUserService {
       }
       console.log("user >>>>> : ",user)
 
-      const createdUser = await this.userRepository.createUser(user as UserType)
+      const createdUser = await this.userRepository.createUser(user)
       if (!createdUser) {
         throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_CREATION_FAILED);
       }
 
-      const accessToken = await generateAccessToken(createdUser._id);
-      const refreshToken = await generateRefreshToken(createdUser._id);
+      const accessToken = await generateAccessToken(createdUser._id as ObjectId);
+      const refreshToken = await generateRefreshToken(createdUser._id as ObjectId);
 
       return { accessToken, refreshToken, user: createdUser };
   }
 
   async resendOtp(email: string): Promise<void> {
     const storedDataString = await redisClient.get(email);
-    console.log("Resend OTP Stored Data String >>>>>>>> : ", storedDataString);
   
     if (!storedDataString) {
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_NOT_FOUND);
@@ -129,7 +124,6 @@ export class UserService implements IUserService {
     const storedData = JSON.parse(storedDataString);
   
     const newOtp = generateOtp();
-    console.log("Resend New OTP >>>> : ", newOtp);
   
     // Resend mail logic
     const mailOptions = {
