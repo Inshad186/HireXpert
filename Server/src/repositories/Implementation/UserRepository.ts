@@ -10,4 +10,12 @@ export class UserRepository implements IUserRepository {
   async findByEmail(email: string): Promise<UserType | null> {
     return await User.findOne({ email });
   }
+
+  async updateUserRole(email: string, role: string): Promise<void> {
+    try {
+      await User.updateOne({email}, {$set:{role}})
+    } catch (err) {
+      console.error(err)
+    }
+  }
 }

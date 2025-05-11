@@ -1,0 +1,15 @@
+export const userRoutes = {
+    LOGIN : "/login",
+    SIGNUP : "/signup",
+    OTP : "/otp",
+    FORGOT_PASSWORD: "/forgotpassword",
+    NEW_PASSWORD: "/newpassword",
+    DASHBOARD: '/dashboard',
+    PROFILE: '/profile',
+    HOME : "/",
+    PROJECTS:'/projects',
+    ABOUT : '/about',
+    CONTACT : '/contact',
+    PRICING : '/pricing',
+    LOGOUT : "/logout",
+}   

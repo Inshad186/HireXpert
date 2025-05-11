@@ -24,4 +24,6 @@ export interface UserStoreType {
     _id: string;
     name: string;
     email: string;
+    role?: 'freelancer' | 'client' | 'admin' | 'none' | '';
+    accessToken : null;
 }

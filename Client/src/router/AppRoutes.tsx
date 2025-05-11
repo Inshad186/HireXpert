@@ -11,6 +11,7 @@ import ForgotPassword from "@/pages/user/ForgotPassword";
 //! Admin
 import AdminLogin from "@/pages/admin/Login";
 import Dashboard from "@/pages/admin/Dashboard";
+import Home from "@/pages/user/Home";
 
 
 export const router = createBrowserRouter([
@@ -20,10 +21,16 @@ export const router = createBrowserRouter([
     {path : "otp" , element : <InputOTPDemo/>},
     {path : "forgotPassword" , element : <ForgotPassword/> },
     {element : <AppLayout/>,
-        children : []
+        children : [
+            {path : "home", element : <Home/>}
+        ]
     },
 
     //! Admin Routes
     {path : "adminLogin", element : <AdminLogin/>},
-    {path : "dashboard", element : <Dashboard/>},
+    {element : <AppLayout/>,
+        children : [
+            {path : "dashboard" , element : <Dashboard/>}
+        ]
+    },
 ])

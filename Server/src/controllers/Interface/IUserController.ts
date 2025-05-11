@@ -5,4 +5,6 @@ export interface IUserController {
     login(req:Request, res:Response, next:NextFunction) : Promise<void>;
     verifyOtp(req:Request, res:Response, next:NextFunction) : Promise<void>;
     resendOtp(req:Request, res:Response, next:NextFunction) : Promise<void>;
+    assignRole(req:Request, res:Response, next:NextFunction) : Promise<void>
+    logout(req:Request, res:Response, next:NextFunction) : Promise<void>;
 }

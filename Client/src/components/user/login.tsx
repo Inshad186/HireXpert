@@ -33,14 +33,19 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
 
     try {
       const response = await axios.post("http://localhost:5000/api/auth/login", formData);
-
+      
       if (response.status === 200) {
         dispatch(setUser({
-          token : response.data.accessToken,
+          name : response.data.user.name,
+          email : response.data.user.email,
+          role : response.data.user.role,
+          accessToken : response.data.accessToken,
         }));
 
+        console.log("RESPONSE >>>>>>>> : ",response.data)
+
         setTimeout(() => {
-          navigate("/");
+          navigate("/home");
           setLoading(false);
         }, 2000);
       } else {

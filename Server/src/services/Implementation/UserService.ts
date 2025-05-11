@@ -146,8 +146,17 @@ export class UserService implements IUserService {
       ...storedData,
       otp: newOtp,
     });
-  
     await redisClient.setEx(email, 300, updatedTempData); 
+  }
+
+  async assignRole(role: string, email: string): Promise<{userRole: string;}> {
+    const user = await this.userRepository.findByEmail(email)
+    if(!user){
+      throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND)
+    }
+    await this.userRepository.updateUserRole(user.email,role)
+
+    return {userRole : role}
   }
   
 }

@@ -16,5 +16,8 @@ router.post("/signup", authMiddleware(signupValidation), userController.signup.b
 router.post("/login", userController.login.bind(userController))
 router.post('/verifyOtp', userController.verifyOtp.bind(userController))
 router.post("/resendOtp", userController.resendOtp.bind(userController))
+router.patch("/assignRole", userController.assignRole.bind(userController))
+
+router.delete("/logout",userController.logout.bind(userController))
 
 export default router;
