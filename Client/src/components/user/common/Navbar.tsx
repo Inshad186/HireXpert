@@ -16,6 +16,7 @@ function Navbar() {
   const pageRoutes: { [key: string]: string } = {
     "about us": userRoutes.ABOUT,
     "contact us": userRoutes.CONTACT,
+    "profile": userRoutes.PROFILE
   };
 
   const handleLogout = async () => {

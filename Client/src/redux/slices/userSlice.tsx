@@ -7,6 +7,8 @@ const initialState : UserStoreType = {
     email : '',
     role : '',
     accessToken : null,
+    createdAt : new Date(),
+    updatedAt : new Date()
 }
 
 const userSlice = createSlice({

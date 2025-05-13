@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { RootState } from "@/redux/store";
 import { assignRole } from "@/api/user.api";
 import { setUser } from "@/redux/slices/userSlice";
+import Footer from "@/components/user/common/Footer";
 
 function Home() {
   const [role, setRole] = useState("");
@@ -16,11 +17,14 @@ function Home() {
   const dispatch = useDispatch();
 
   const user = useSelector((state: RootState) => state.user);
-  // console.log("USER >>>>>>>>>>>>> : ", user);
 
   useEffect(() => {
     if (user.role === "none") {
-      setShowModal(true);
+      setTimeout(()=>{
+        setShowModal(true);
+      },1500)
+    }else{
+      setShowModal(false)
     }
   }, []);
 
@@ -39,7 +43,6 @@ function Home() {
   const HandleAssignRole = async () => {
     setLoading(true);
     try {
-      console.log("ROLE >>>>>>>>>>   >>>>>>>>>>  : ",role)
       const response = await assignRole(role, user.email);
       if (response.success) {
         dispatch(setUser({ role }));
@@ -48,7 +51,7 @@ function Home() {
         if (role === "freelancer") {
           navigate("/freelancer-dashboard");
         } else {
-          navigate("/"); // optional, if you want to refresh home
+          navigate("/home"); 
         }
       } else {
         console.log("Something went wrong during role assignment.");
@@ -60,9 +63,27 @@ function Home() {
     }
   };
 
-  return (
-    <div>
-      <h1 className="text-center font-bold text-red-700"> HOME PAGE </h1>
+return (
+  <div className="min-h-screen bg-white text-gray-800">
+    <main className="flex-grow">
+      <section className="px-6 md:px-24 py-20 flex flex-col-reverse md:flex-row items-center justify-between bg-blue-200">
+        <div className="md:w-1/2 space-y-6">
+          <h1 className="text-4xl md:text-5xl font-bold leading-tight">
+            Find the perfect freelance services for your business
+          </h1>
+          <p className="text-lg text-gray-600">
+            Connect with skilled freelancers and get work done efficiently.
+          </p>
+        </div>
+        <div className="md:w-1/2 mb-10 md:mb-0">
+          <img
+            src="./src/assets/home.jpg"
+            alt="Freelancer working"
+            className="max-w-lg h-auto"
+          />
+        </div>
+      </section>
+
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
           <div className="bg-white rounded-lg p-6 w-[600px] text-center shadow-lg">
@@ -107,8 +128,12 @@ function Home() {
           </div>
         </div>
       )}
-    </div>
-  );
+    </main>
+
+    <Footer />
+  </div>
+);
+
 }
 
 export default Home;

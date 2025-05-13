@@ -27,6 +27,22 @@ export const assignRole = async(role:string, email:string) => {
     }
 }
 
+export const changeProfile = async (formData: FormData) => {
+    try {
+        const { data } = await Api.post(endpointUrl.CHANGE_PROFILE, formData, {
+            headers: {
+                ...headers,
+                "Content-Type": "multipart/form-data",
+            },
+        });
+        return { success: true, data } as any
+    } catch (error) {
+        const err = error as any;
+        const message = err.response?.data?.error || "Something went wrong.";
+        return { success: false, error: message, data: {} };
+    }
+};
+
 export const userLogout = async() => {
     try {
         await Api.delete(endpointUrl.LOGOUT, {headers})

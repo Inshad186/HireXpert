@@ -58,7 +58,7 @@ export function InputOTPDemo() {
       if (response.ok) {
         // 👉 OTP Verified successfully
         console.log("OTP Verified!")
-        navigate("/")
+        navigate("/login")
       } else {
         // 👉 OTP failed
         setError(data.message || "Invalid OTP. Please try again.")

@@ -15,15 +15,15 @@ const PORT = process.env.PORT
 
 app.use(express.json())
 app.use(express.urlencoded({ extended : true }))
-app.use(morgan("combined"))
-
+app.use(morgan("dev"))
 connectDB()
 
 app.use(
   cors({
     origin:process.env.CLIENT_URL,
     methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
-    credentials:true
+    credentials:true,
+    // allowedHeaders: ["Content-Type", "Authorization"]
   })
 )
 

@@ -1,11 +1,24 @@
-import Navbar from "@/components/user/common/Navbar";
+import Footer from "@/components/user/common/Footer";
+import { RootState } from "@/redux/store";
+import { useSelector } from "react-redux";
+import { useNavigate } from "react-router-dom";
 
 function LandingPage() {
+
+  const user = useSelector((state:RootState) => state.user)
+  const navigate = useNavigate()
+
+  const handleButton = ()=>{
+    if(user.accessToken) {
+      navigate("/home")
+    }else{
+      navigate("/login")
+    }
+  }
   return (
     <div className="min-h-screen bg-white text-gray-800">
-      <Navbar />
 
-      {/* Hero Section */}
+      {/* Section */}
       <section className="px-6 md:px-24 py-20 flex flex-col-reverse md:flex-row items-center justify-between bg-slate-100">
         <div className="md:w-1/2 space-y-6">
           <h1 className="text-4xl md:text-5xl font-bold leading-tight">
@@ -14,7 +27,8 @@ function LandingPage() {
           <p className="text-lg text-gray-600">
             Connect with skilled freelancers and get work done efficiently.
           </p>
-          <button className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+          <button className="bg-blue-600 text-white font-semibold px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+          onClick={handleButton}>
             Get Started
           </button>
         </div>
@@ -64,6 +78,9 @@ function LandingPage() {
           ))}
         </div>
       </section>
+      <div className="pt-24">
+        <Footer />
+      </div>
     </div>
   );
 }

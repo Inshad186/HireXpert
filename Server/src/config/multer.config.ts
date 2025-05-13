@@ -3,7 +3,8 @@ import { HttpStatus } from "@/constants/status.constant";
 import { HttpResponse } from "@/constants/response.constant";
 import { generateHttpError } from "@/utils/http-error.util";
 
-const allowedMimes = ["jpg", "image/jpeg", "image/png", "application/pdf"];
+const allowedMimes = ["image/jpeg", "image/png", "image/webp", "application/pdf"];
+
 const storage = multer.memoryStorage()
 
 export const upload = multer({

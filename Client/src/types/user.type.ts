@@ -4,7 +4,7 @@ export interface UserSignUpType {
     email : string,
     password : string,
     confirmPassword : string 
-    role? : "freelancer" | "client" | "admin" | "none" | ""
+    role? : "freelancer" | "client" | "admin" | "none" | "",
 }
 
 
@@ -25,5 +25,8 @@ export interface UserStoreType {
     name: string;
     email: string;
     role?: 'freelancer' | 'client' | 'admin' | 'none' | '';
+    createdAt?: Date;
+    updatedAt?: Date;
     accessToken : null;
+    profilePicture?: string;
 }

@@ -6,6 +6,7 @@ import { HttpStatus } from "@/constants/status.constant";
 import { redisClient } from "@/config/redis.config";
 import { env } from "@/config/env.config";
 import jwt from "jsonwebtoken";
+import { verifyToken } from "@/utils/jwt.util";
 
 export class UserController implements IUserController {
   constructor(private userService: IUserService) {}
@@ -14,9 +15,7 @@ export class UserController implements IUserController {
     try {
       const newUser = await this.userService.signup(req.body);
 
-      res
-        .status(HttpStatus.OK)
-        .json({ message: HttpResponse.USER_CREATION_SUCCESS, email: newUser });
+      res.status(HttpStatus.OK).json({ message: HttpResponse.USER_CREATION_SUCCESS, email: newUser });
     } catch (error) {
       next(error);
     }
@@ -26,10 +25,7 @@ export class UserController implements IUserController {
     try {
       const { email, password } = req.body;
 
-      const { accessToken, refreshToken, user } = await this.userService.login(
-        email,
-        password
-      );
+      const { accessToken, refreshToken, user } = await this.userService.login( email, password );
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -44,16 +40,11 @@ export class UserController implements IUserController {
     }
   }
 
-  async verifyOtp(
-    req: Request,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
+  async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { otp, email } = req.body;
       console.log("REQUEST BODY $$$$$$$$$ >>>>>>> : ", req.body);
-      const { accessToken, refreshToken, user } =
-        await this.userService.verifyOtp(otp, email);
+      const { accessToken, refreshToken, user } = await this.userService.verifyOtp(otp, email);
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -87,10 +78,38 @@ export class UserController implements IUserController {
     try {
       const {role,email} = req.body
       const { userRole } = await this.userService.assignRole(role, email)
-    } catch (error) {
-      
+      res.status(HttpStatus.OK).json({ userRole});
+    } catch (err) {
+      next(err)
     }
   }
+
+  async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userId = req.body.userId;
+      const profileImage = req.file;
+
+      console.log("USER ID >>>>>>>>>> : ",userId)
+      console.log("PROFILE IMAGE >>>>>>>> : ",profileImage)
+      
+      const {user} = await this.userService.updateProfile(userId, profileImage)
+      res.status(HttpStatus.OK).json({user})
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  // async getProfileImage(req: Request, res: Response, next: NextFunction): Promise<void> {
+  //   try {
+  //     console.log("HEADERS >>> ", req.headers);
+  //     const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
+  //     console.log("update PROFILE >>>>>>> : ",userId)
+  //     const {user} = await this.userService.getProfileImage(userId)
+  //     res.status(HttpStatus.OK).json({user})
+  //   } catch (err) {
+  //     next(err)
+  //   }
+  // }
 
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     const refreshToken = req.cookies?.refreshToken;

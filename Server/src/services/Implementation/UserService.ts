@@ -1,7 +1,7 @@
 import { IUserService } from "../Interface/IUserService"; 
 import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 import bcrypt from "bcrypt"
-import { UserType } from "@/types/Type";
+import { FileType, UserType } from "@/types/Type";
 import { HttpResponse } from "@/constants/response.constant";
 import { generateAccessToken, generateRefreshToken, } from "@/utils/jwt.util";
 import { generateHttpError } from "@/utils/http-error.util";
@@ -11,6 +11,7 @@ import generateOtp from "@/utils/generate-otp.util";
 import { env } from "@/config/env.config";
 import { transporter } from "@/config/nodemailer.config";
 import { redisClient } from "@/config/redis.config";
+import { handleProfileImageUpload } from "@/config/cloudinary.config";
 
 export class UserService implements IUserService {
   constructor(private userRepository: IUserRepository) {}
@@ -63,17 +64,14 @@ export class UserService implements IUserService {
     if(!user){
       throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND)
     }
-
     if(!user.password){
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.INVALID_PASSWORD)
     }
-
     const isMatchPassword = await bcrypt.compare(password, user.password as string)
 
     if(!isMatchPassword){
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.PASSWORD_INCORRECT)
     }
-
     let accessToken = await generateAccessToken(user._id as ObjectId)
     let refreshToken = await generateRefreshToken(user._id as ObjectId)
 
@@ -120,7 +118,6 @@ export class UserService implements IUserService {
     if (!storedDataString) {
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_NOT_FOUND);
     }
-  
     const storedData = JSON.parse(storedDataString);
   
     const newOtp = generateOtp();
@@ -132,7 +129,6 @@ export class UserService implements IUserService {
       subject: "6-digit OTP - Resend",
       text: `Your new OTP code is ${newOtp}`,
     };
-  
     try {
       const info = await transporter.sendMail(mailOptions);
       console.log("Resent Email successfully: ", info.response);
@@ -158,5 +154,31 @@ export class UserService implements IUserService {
 
     return {userRole : role}
   }
-  
+
+    async updateProfile(id: string, profileImage: FileType | undefined): Promise<{user: UserType}> {        
+        if (!profileImage) {            
+            throw generateHttpError(HttpStatus.BAD_REQUEST, "Profile image is required")
+        }
+
+        const imageURL = await handleProfileImageUpload(profileImage.buffer)
+        console.log("IMAGE URL >>>>> : ",imageURL)
+        
+        const user = await this.userRepository.findById(id)
+
+        if (!user) {
+            throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
+        }
+
+        user.profilePicture = imageURL;
+        await this.userRepository.updateUser(user);
+        return {user}
+    }
+
+  // async getProfileImage(userId: string): Promise<{ user: UserType; }> {
+  //   const user = await this.userRepository.findById(userId)
+  //   if(!user) {
+  //       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
+  //   }
+  //   return {user}
+  // }
 }

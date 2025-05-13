@@ -36,10 +36,14 @@ export function LoginForm({ className, ...props }: React.ComponentPropsWithoutRe
       
       if (response.status === 200) {
         dispatch(setUser({
+          _id : response.data.user._id,
           name : response.data.user.name,
           email : response.data.user.email,
           role : response.data.user.role,
           accessToken : response.data.accessToken,
+          createdAt : response.data.user.createdAt,
+          updatedAt : response.data.user.updatedAt,
+          profilePicture : response.data.user.profilePicture,
         }));
 
         console.log("RESPONSE >>>>>>>> : ",response.data)

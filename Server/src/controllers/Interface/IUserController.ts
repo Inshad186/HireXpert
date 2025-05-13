@@ -6,5 +6,7 @@ export interface IUserController {
     verifyOtp(req:Request, res:Response, next:NextFunction) : Promise<void>;
     resendOtp(req:Request, res:Response, next:NextFunction) : Promise<void>;
     assignRole(req:Request, res:Response, next:NextFunction) : Promise<void>
+    updateProfile(req: Request, res: Response, next: NextFunction): Promise<void>;
+    // getProfileImage(req:Request, res:Response, next:NextFunction) : Promise<void>
     logout(req:Request, res:Response, next:NextFunction) : Promise<void>;
 }
