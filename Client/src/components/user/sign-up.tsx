@@ -47,7 +47,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
           password: userData.password,
         });
 
-        console.log("EMAIL - DATA >>>>>>  >>>>>>> : ",data)
+        console.log("EMAIL DATA  >>>>>>> : ",data)
         return { success: true, data };
       } catch (error: any) {
         const message = error.response?.data?.error || responses.SOMETHING_WRONG;

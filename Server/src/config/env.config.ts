@@ -2,6 +2,9 @@ export const env = {
     get PORT() {
         return process.env.PORT
     },
+    get CLIENT_URL() {
+        return process.env.CLIENT_URL
+    },
     get MONGODB_URL() {
         return process.env.MONGODB_URL
     },

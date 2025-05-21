@@ -1,13 +1,10 @@
 import { endpointUrl } from "@/constants/endpointUrl";
 import Api from "@/services/axios";
 
-const headers= {
-    'X-User-Level': 'user'
-}
 
 export const resendOtp = async(email: string) => {
     try {
-        await Api.post(endpointUrl.RESEND_OTP, {email}, {headers})
+        await Api.post(endpointUrl.RESEND_OTP, {email})
         return {success:true}
     } catch (error) {
         const err = error as any;
@@ -18,7 +15,7 @@ export const resendOtp = async(email: string) => {
 
 export const assignRole = async(role:string, email:string) => {
     try {
-        await Api.patch(endpointUrl.ASSIGN_ROLE,{role, email},{headers})
+        await Api.patch(endpointUrl.ASSIGN_ROLE,{role, email})
         return {success : true}
     } catch (error) {
         const err = error as any;
@@ -31,7 +28,6 @@ export const changeProfile = async (formData: FormData) => {
     try {
         const { data } = await Api.post(endpointUrl.CHANGE_PROFILE, formData, {
             headers: {
-                ...headers,
                 "Content-Type": "multipart/form-data",
             },
         });
@@ -43,9 +39,42 @@ export const changeProfile = async (formData: FormData) => {
     }
 };
 
+export const getProfileImage = async()=>{
+    try {
+        const {data} = await Api.get(endpointUrl.GET_PROFILE_IMAGE)
+        return {success : true, data} as any
+    } catch (error) {
+        const err = error as any;
+        const message = err.response?.data?.error || "Something went wrong.";
+        return { success: false, error: message, data: {} };  
+    }
+}
+
+export const editUserName = async(name:string) => {
+    try {
+        const {data} = await Api.patch(endpointUrl.EDIT_USER_NAME, {name})
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any;
+        const message = err.response?.data?.error || "Something went wrong";
+        return { success: false, error: message, data: {} };
+    }
+}
+
+export const getFreelancer = async() =>{
+    try {
+        const {data} = await Api.get(endpointUrl.GET_FREELANCER, )
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };       
+    }
+}
+
 export const userLogout = async() => {
     try {
-        await Api.delete(endpointUrl.LOGOUT, {headers})
+        await Api.delete(endpointUrl.LOGOUT)
         return {success:true}
     } catch (error) {
         const err = error as any

@@ -1,19 +1,39 @@
 import { FaMapMarkerAlt, FaUser, FaLanguage } from "react-icons/fa";
 import { RootState } from "@/redux/store";
 import { useSelector, useDispatch } from "react-redux";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import DefaultImage from "../../assets/userProfile.png"
-import { changeProfile } from "@/api/user.api";
+import { changeProfile, editUserName, getProfileImage } from "@/api/user.api";
 import { setUser } from "@/redux/slices/userSlice";
+import { UserStoreType } from "@/types/user.type";
 
 function Profile() {
 
     const user = useSelector((state:RootState) => state.user)
 
+    const [fetchUser, setFetchUser] = useState<UserStoreType>({} as UserStoreType)
     const [profileImage, setProfileImage] = useState("")
-    // const [name, setName] = useState(user.name)
+    const [isEditingName, setIsEditingName] = useState(false)
+    const [isName, setIsName] = useState(user.name)
+    const [error, setError] = useState<string | null>(null);
 
     const dispatch = useDispatch()
+
+    useEffect(() => {
+      const getProfile = async() => {
+        try {
+          const response = await getProfileImage()
+          console.log("Get profile Image Response : ",response)
+          if(response.success){
+            setProfileImage(response.data.user.profilePicture)
+            setFetchUser(response.data.user)
+          }
+        } catch (error) {
+          
+        }
+      }
+      getProfile()
+    },[])
 
     const handleProfileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -36,13 +56,20 @@ function Profile() {
       if (response.success) {
       const imageUrl = response.data.user.profilePicture; 
       setProfileImage(imageUrl); 
-      dispatch(setUser({
-        ...user,
-        profileImage: imageUrl
-      }))
+      setFetchUser(response.data.user)
     }
     } catch (err) {
       console.error(err)
+    }
+  }
+
+  const handleNameUpdate = async() => {
+    if(isEditingName && isName){
+      const response = await editUserName(isName)
+      console.log("New Edited Name > : ",response.data.newName)
+      dispatch(setUser({ name: isName }))
+    }else{
+      setError(error)
     }
   }
 
@@ -72,7 +99,29 @@ function Profile() {
             </button>
           </div>
 
-          <h2 className="text-xl font-semibold">{user.name} ✏️</h2>
+          {isEditingName ? (
+            <div className="flex items-center gap-2">
+              <input
+                value={isName}
+                onChange={(e) => setIsName(e.target.value)}
+                className="border px-2 py-1 rounded text-sm"
+              />
+              <button
+                onClick={handleNameUpdate}
+                className="text-blue-600 text-sm font-medium hover:underline"
+              >
+                Save
+              </button>
+            </div>
+          ) : (
+            <h2
+              className="text-xl font-semibold flex items-center gap-1 cursor-pointer"
+              onClick={() => setIsEditingName(true)}
+            >
+              {user.name} <span className="text-sm">✏️</span>
+            </h2>
+          )}
+
           <p className="text-gray-600">{user.email}</p>
         </div>
 

@@ -6,7 +6,6 @@ import { HttpStatus } from "@/constants/status.constant";
 import { redisClient } from "@/config/redis.config";
 import { env } from "@/config/env.config";
 import jwt from "jsonwebtoken";
-import { verifyToken } from "@/utils/jwt.util";
 
 export class UserController implements IUserController {
   constructor(private userService: IUserService) {}
@@ -62,9 +61,7 @@ export class UserController implements IUserController {
     try {
       const { email } = req.body;
       if (!email) {
-        res
-          .status(HttpStatus.BAD_REQUEST)
-          .json({ message: HttpResponse.INVALID_EMAIL });
+        res.status(HttpStatus.BAD_REQUEST).json({ message: HttpResponse.INVALID_EMAIL });
         return;
       }
       await this.userService.resendOtp(email);
@@ -99,20 +96,58 @@ export class UserController implements IUserController {
     }
   }
 
-  // async getProfileImage(req: Request, res: Response, next: NextFunction): Promise<void> {
-  //   try {
-  //     console.log("HEADERS >>> ", req.headers);
-  //     const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
-  //     console.log("update PROFILE >>>>>>> : ",userId)
-  //     const {user} = await this.userService.getProfileImage(userId)
-  //     res.status(HttpStatus.OK).json({user})
-  //   } catch (err) {
-  //     next(err)
-  //   }
-  // }
+  async updateUserName(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      console.log("REQUEST BODY FROM UPDATEUSER NAME",req.body)
+      const {name} = req.body
+      const {userId} = JSON.parse(req.headers["x-user-payload"] as string)
+      console.log("???????????" , userId)
+      const newName = await this.userService.updateUserName(userId, name)
+      res.status(HttpStatus.OK).json({newName})
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const refreshToken = req.cookies.refreshToken
+      console.log("Refresh Token from userController : ",refreshToken)
+      if(!refreshToken){
+        res.status(HttpStatus.BAD_REQUEST).json({ message: HttpResponse.NO_TOKEN });
+        return;
+      }
+      const accessToken = await this.userService.refreshToken(refreshToken)
+      console.log("Access Token from userController",accessToken)
+      res.status(HttpStatus.OK).json({accessToken})
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  async getProfileImage(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = JSON.parse(req.headers['x-user-payload'] as string)
+      console.log("update PROFILE >>>>>>> : ",userId)
+      const {user} = await this.userService.getProfileImage(userId)
+      res.status(HttpStatus.OK).json({user})
+    } catch (err) {
+      next(err)
+    }
+  }
+
+  async getFreelancer(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const freelancers = await this.userService.getFreelancer()
+      res.status(HttpStatus.OK).json({ success: true, data: freelancers });
+    } catch (err) {
+      next(err)
+    }
+  }
 
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     const refreshToken = req.cookies?.refreshToken;
+    console.log("REFRESH TOKEN >>> : ",refreshToken)
     if (refreshToken) {
       const decoded = jwt.verify(
         refreshToken,

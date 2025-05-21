@@ -27,8 +27,8 @@ export class AdminService implements IAdminService {
             throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.INVALID_CREDENTIALS);
         }
     
-        const accessToken = await generateAccessToken(admin?._id as ObjectId);
-        const refreshToken = await generateRefreshToken(admin?._id as ObjectId);
+        const accessToken = await generateAccessToken(admin?._id as ObjectId, admin.role as string);
+        const refreshToken = await generateRefreshToken(admin?._id as ObjectId, admin.role as string);
     
         return { accessToken, refreshToken, admin };
     }

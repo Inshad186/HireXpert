@@ -12,6 +12,7 @@ import { env } from "@/config/env.config";
 import { transporter } from "@/config/nodemailer.config";
 import { redisClient } from "@/config/redis.config";
 import { handleProfileImageUpload } from "@/config/cloudinary.config";
+import { verifyToken } from "@/utils/jwt.util";
 
 export class UserService implements IUserService {
   constructor(private userRepository: IUserRepository) {}
@@ -72,8 +73,8 @@ export class UserService implements IUserService {
     if(!isMatchPassword){
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.PASSWORD_INCORRECT)
     }
-    let accessToken = await generateAccessToken(user._id as ObjectId)
-    let refreshToken = await generateRefreshToken(user._id as ObjectId)
+    let accessToken = await generateAccessToken(user._id as ObjectId, user.role as string)
+    let refreshToken = await generateRefreshToken(user._id as ObjectId, user.role as string)
 
     console.log("ACCESS TOKEN >>>>>>>>  : ",accessToken)
 
@@ -106,8 +107,8 @@ export class UserService implements IUserService {
         throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_CREATION_FAILED);
       }
 
-      const accessToken = await generateAccessToken(createdUser._id as ObjectId);
-      const refreshToken = await generateRefreshToken(createdUser._id as ObjectId);
+      const accessToken = await generateAccessToken(createdUser._id as ObjectId, createdUser.role as string);
+      const refreshToken = await generateRefreshToken(createdUser._id as ObjectId, createdUser.role as string);
 
       return { accessToken, refreshToken, user: createdUser };
   }
@@ -174,11 +175,42 @@ export class UserService implements IUserService {
         return {user}
     }
 
-  // async getProfileImage(userId: string): Promise<{ user: UserType; }> {
-  //   const user = await this.userRepository.findById(userId)
-  //   if(!user) {
-  //       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
-  //   }
-  //   return {user}
-  // }
+    async refreshToken(token: string): Promise<string> {
+      const payload = verifyToken(token)
+
+      if(!payload){
+        throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.NO_TOKEN)
+      }
+      const user = await this.userRepository.findById(payload.userId)
+
+      if(!user){
+        throw generateHttpError(HttpStatus.NOT_FOUND , HttpResponse.USER_NOT_FOUND)
+      }
+      const accessToken = await generateAccessToken(user._id as ObjectId, user.role as string)
+      return accessToken
+    }
+
+    async updateUserName(userId: string, name: string): Promise<{ newName: string; }> {
+      const user = await this.userRepository.findById(userId)
+      if(!user){
+        throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
+      }
+      user.name = name
+      await this.userRepository.updateUser(user)
+      const newName = user.name
+      return {newName}
+    }
+
+    async getFreelancer(): Promise<{ name: string; email: string; }[]> {
+      const freelancers = await this.userRepository.findFreelancer();
+      return freelancers as { name: string; email: string }[];
+    }
+
+  async getProfileImage(userId: string): Promise<{ user: UserType; }> {
+    const user = await this.userRepository.findById(userId)
+    if(!user) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
+    }
+    return {user}
+  }
 }

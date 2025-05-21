@@ -6,6 +6,9 @@ export const endpointUrl = {
   ASSIGN_ROLE : "/auth/assignRole",
   CHANGE_PROFILE : "/auth/changeProfile",
   EDIT_USER_NAME : '/auth/edit-user-name',
+  GET_PROFILE_IMAGE : "/auth/get-profile-img",
+  GET_FREELANCER : "/auth/get-freelancer",
+  REFRESH_TOKEN : "/auth/refreshToken",
   LOGOUT : '/auth/logout',
 }
 

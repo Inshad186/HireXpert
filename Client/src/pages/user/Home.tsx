@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { RootState } from "@/redux/store";
-import { assignRole } from "@/api/user.api";
+import { assignRole, getFreelancer } from "@/api/user.api";
 import { setUser } from "@/redux/slices/userSlice";
 import Footer from "@/components/user/common/Footer";
 
@@ -12,6 +12,8 @@ function Home() {
   const [leftClick, setLeftClick] = useState(false);
   const [rightClick, setRightClick] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [freelancers, setFreelancers] = useState<{ name: string; email: string }[]>([]);
+
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -39,6 +41,21 @@ function Home() {
     setLeftClick(false);
     setRole("freelancer");
   };
+
+  useEffect(() => {
+  const fetchFreelancers = async () => {
+    try {
+      const response = await getFreelancer();
+      if(response.success){
+        setFreelancers(response.data.data);
+      }
+    } catch (err) {
+      console.error("Failed to fetch freelancers", err);
+    }
+  };
+
+  fetchFreelancers();
+}, []);
 
   const HandleAssignRole = async () => {
     setLoading(true);
@@ -83,6 +100,26 @@ return (
           />
         </div>
       </section>
+      <section className="px-6 md:px-24 py-10">
+        <h2 className="text-2xl font-bold mb-4">Available Freelancers</h2>
+        <table className="min-w-full bg-white border border-gray-300">
+          <thead>
+            <tr className="bg-gray-200">
+              <th className="py-2 px-4 border">Name</th>
+              <th className="py-2 px-4 border">Email</th>
+            </tr>
+          </thead>
+          <tbody>
+            {freelancers.map((freelancer, index) => (
+              <tr key={index}>
+                <td className="py-2 px-4 border">{freelancer.name}</td>
+                <td className="py-2 px-4 border">{freelancer.email}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </section>
+
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">

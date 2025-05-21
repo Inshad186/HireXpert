@@ -1,43 +1,44 @@
 import { Request, Response, NextFunction } from "express";
-import { verifyToken } from "@/utils/jwt.util";
 import { HttpResponse } from "@/constants/response.constant";
 import { HttpStatus } from "@/constants/status.constant";
+import { env } from "@/config/env.config";
+import jwt from 'jsonwebtoken';
 
-export default function (
-  userLevel: "client" | "freelancer" | "admin"
-): (req: Request, res: Response, next: NextFunction) => void | Response {
-  return (req: Request, res: Response, next: NextFunction): void | Response => {
+export async function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction):Promise<void>{
     try {
       const authHeader = req.headers.authorization;
+      console.log("AUTH HEADER >>>>>>>>>>>>> : ",authHeader)
 
       if (!authHeader || !authHeader.startsWith("Bearer")) {
-        return res
-          .status(HttpStatus.UNAUTHORIZED)
-          .json({ error: HttpResponse.NO_TOKEN });
+        res.status(HttpStatus.UNAUTHORIZED).json({ error: HttpResponse.NO_TOKEN });
+        return
       }
 
       const token = authHeader.split(" ")[1];
+      console.log("token ??? >>>> ", token)
       if (!token) {
-        return res
-          .status(HttpStatus.UNAUTHORIZED)
-          .json({ error: HttpResponse.NO_TOKEN });
+        res.status(HttpStatus.UNAUTHORIZED).json({ error: HttpResponse.NO_TOKEN });
+        return
       }
 
-      const payload = verifyToken(token) as {userId : string};
+      const payload = jwt.verify(token, env.JWT_ACCESS_SECRET as string) as { userId: string; role: string };
+      (req as any).user = {
+      id: payload.userId,
+      role: payload.role,
+    };
+      console.log("PAYLOAD >>>>>>>>> : ",payload)
 
       req.headers["x-user-payload"] = JSON.stringify(payload);
+      console.log("Request.Headers >> : ",req.headers["x-user-payload"])
       next();
 
     } catch (err: any) {
       if (err.name === "TokenExpiredError") {
-        return res
-          .status(HttpStatus.FORBIDDEN)
-          .json({ error: HttpResponse.TOKEN_EXPIRED });
+        res.status(HttpStatus.FORBIDDEN).json({ error: HttpResponse.TOKEN_EXPIRED });
+        return
       } else {
-        return res
-          .status(HttpStatus.UNAUTHORIZED)
-          .json({ error: HttpResponse.TOKEN_EXPIRED });
+        res.status(HttpStatus.UNAUTHORIZED).json({ error: HttpResponse.TOKEN_EXPIRED });
+        return
       }
     }
   };
-}

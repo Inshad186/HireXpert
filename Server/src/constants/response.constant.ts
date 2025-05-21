@@ -22,5 +22,5 @@ export const HttpResponse = {
     PASSWORD_DIGIT: "Your password must contain at least one number",
     PASSWORD_SPECIALCHAR: "Your password must contain at least one special character",
     LOGIN_SUCCESS : "Login successful",
-    INVALID_FILE_FORMAT : "File format is not valid"
+    INVALID_FILE_FORMAT : "File format is not valid",
   };

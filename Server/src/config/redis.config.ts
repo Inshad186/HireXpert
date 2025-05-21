@@ -1,8 +1,7 @@
-// src/config/redis.config.ts
 import { createClient } from 'redis';
 
 export const redisClient = createClient({
-  url: 'redis://localhost:6379'  // default Redis running locally
+  url: 'redis://localhost:6379'  
 });
 
 redisClient.on('connect', () => {
@@ -13,7 +12,6 @@ redisClient.on('error', (err) => {
   console.error('Redis Client Error', err);
 });
 
-// IMPORTANT: Connect the client
 (async () => {
   await redisClient.connect();
 })();

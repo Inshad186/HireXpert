@@ -6,4 +6,5 @@ export interface IUserRepository extends IBaseRepository <UserType> {
   findByEmail(email: string): Promise<UserType | null>;
   updateUserRole(email:string , role:string) : Promise<void>;
   updateUser(user: UserType): Promise<void>;
+  findFreelancer() : Promise<Partial<UserType>[]>;
 }

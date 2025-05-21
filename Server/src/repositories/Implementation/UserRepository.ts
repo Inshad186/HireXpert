@@ -36,4 +36,11 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
       throw new Error("Error when updating the user");
     }
   }
+
+  async findFreelancer(): Promise<Partial<UserType>[]> {
+    const result = await User.find({ role: "freelancer" }).select("name email")
+    console.log("Result >>> : ",result);
+    return result
+    
+  }
 }
