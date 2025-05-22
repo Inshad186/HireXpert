@@ -72,6 +72,39 @@ export const getFreelancer = async() =>{
     }
 }
 
+export const forgetPassword = async(email: string)=>{
+    try {
+        const {data} = await Api.post(endpointUrl.FORGET_PASSWORD, {email})
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };  
+    }
+}
+
+export const fpVerifyOtp = async(otp:string, email:string) => {
+    try {
+        const {data} = await Api.post(endpointUrl.FP_VERIFY_OTP, {otp, email})
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };  
+    }
+}
+
+export const resetPassword = async (email: string, password: string) => {
+    try {
+        const {data} = await Api.post(endpointUrl.RESET_PASSWORD, {email, password})
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };    
+    }
+}
+
 export const userLogout = async() => {
     try {
         await Api.delete(endpointUrl.LOGOUT)

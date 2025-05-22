@@ -30,7 +30,6 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
   async updateUser(user: UserType): Promise<void> {
     try {
       await User.findByIdAndUpdate(user._id, user)
-      console.log('stored');
     } catch (error) {
       console.error(error);
       throw new Error("Error when updating the user");

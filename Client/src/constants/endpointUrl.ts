@@ -9,6 +9,9 @@ export const endpointUrl = {
   GET_PROFILE_IMAGE : "/auth/get-profile-img",
   GET_FREELANCER : "/auth/get-freelancer",
   REFRESH_TOKEN : "/auth/refreshToken",
+  FORGET_PASSWORD : "/auth/forget-password",
+  FP_VERIFY_OTP : "/auth/fp-verify-otp",
+  RESET_PASSWORD : "/auth/reset-password",
   LOGOUT : '/auth/logout',
 }
 

@@ -25,6 +25,8 @@ router.post("/changeProfile",verifyTokenMiddleware,allowRoles("client"), upload.
 router.patch("/edit-user-name", verifyTokenMiddleware, allowRoles("client"), userController.updateUserName.bind(userController))
 router.get("/get-profile-img",verifyTokenMiddleware,allowRoles("client"), userController.getProfileImage.bind(userController))
 router.get("/get-freelancer",verifyTokenMiddleware, userController.getFreelancer.bind(userController))
+router.post("/forget-password", userController.forgetPassword.bind(userController))
+router.post("/reset-password", userController.resetPassword.bind(userController))
 
 router.delete("/logout",userController.logout.bind(userController))
 

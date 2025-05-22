@@ -7,7 +7,6 @@ import jwt from 'jsonwebtoken';
 export async function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction):Promise<void>{
     try {
       const authHeader = req.headers.authorization;
-      console.log("AUTH HEADER >>>>>>>>>>>>> : ",authHeader)
 
       if (!authHeader || !authHeader.startsWith("Bearer")) {
         res.status(HttpStatus.UNAUTHORIZED).json({ error: HttpResponse.NO_TOKEN });
@@ -29,7 +28,6 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
       console.log("PAYLOAD >>>>>>>>> : ",payload)
 
       req.headers["x-user-payload"] = JSON.stringify(payload);
-      console.log("Request.Headers >> : ",req.headers["x-user-payload"])
       next();
 
     } catch (err: any) {

@@ -76,6 +76,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
       
       if (response.success) {
         localStorage.setItem("email", response.data.email);
+        localStorage.setItem("apiType","signup")
         alert("Signup successful!");
         navigate("/otp");
       } else {

@@ -9,8 +9,8 @@ export function InputOTPDemo() {
   const [otp, setOtp] = useState("")
   const [timeLeft, setTimeLeft] = useState(60)
   const [isActive, setIsActive] = useState(true)
-  const [error, setError] = useState("")    // 👉 for error message
-  const [loading, setLoading] = useState(false) // 👉 button loading
+  const [error, setError] = useState("") 
+  const [loading, setLoading] = useState(false) 
   const navigate = useNavigate()
 
   useEffect(() => {
@@ -33,8 +33,9 @@ export function InputOTPDemo() {
   const handleSubmit = async (event: React.FormEvent) => {
     event.preventDefault()
     const email = localStorage.getItem("email")
+    const apiType = localStorage.getItem("apiType")
 
-    if (!email) {
+    if (!email || !apiType) {
       navigate("/signup")
       return
     }
@@ -42,13 +43,12 @@ export function InputOTPDemo() {
     try {
       setLoading(true)
       setError("")
-      // 👉 API Call to verify OTP
       const response = await fetch("http://localhost:5000/api/auth/verifyOtp", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ email, otp })
+        body: JSON.stringify({ email, otp, apiType })
       })
 
       console.log("RESPONSE >>>>>>>>  : ",response)
@@ -56,11 +56,12 @@ export function InputOTPDemo() {
       const data = await response.json()
 
       if (response.ok) {
-        // 👉 OTP Verified successfully
         console.log("OTP Verified!")
-        navigate("/login")
+        // localStorage.removeItem("email");
+        // localStorage.removeItem("apiType");
+
+        navigate(apiType === "signup" ?"/login" : "/resetPassword")
       } else {
-        // 👉 OTP failed
         setError(data.message || "Invalid OTP. Please try again.")
       }
     } catch (error) {

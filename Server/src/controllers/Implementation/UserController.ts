@@ -41,9 +41,10 @@ export class UserController implements IUserController {
 
   async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { otp, email } = req.body;
+      const { otp, email, apiType } = req.body;
+      console.log("API TYPE ===>", apiType);
       console.log("REQUEST BODY $$$$$$$$$ >>>>>>> : ", req.body);
-      const { accessToken, refreshToken, user } = await this.userService.verifyOtp(otp, email);
+      const { accessToken, refreshToken, user } = await this.userService.verifyOtp(otp, email, apiType);
 
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
@@ -142,6 +143,27 @@ export class UserController implements IUserController {
       res.status(HttpStatus.OK).json({ success: true, data: freelancers });
     } catch (err) {
       next(err)
+    }
+  }
+
+  async forgetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const {email} = req.body
+      const response = await this.userService.forgetPassword(email)
+      console.log("Forget Password from userController : ",response)
+      res.status(HttpStatus.OK).json({ success: true, user:response });
+    } catch (error) {
+      next()
+    }
+  }
+
+  async resetPassword(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const {email, password} = req.body
+      const user = await this.userService.resetPassword(email, password)
+      res.status(HttpStatus.OK).json({ success: true, user });
+    } catch (error) {
+      next()
     }
   }
 

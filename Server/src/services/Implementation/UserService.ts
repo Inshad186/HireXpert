@@ -82,36 +82,43 @@ export class UserService implements IUserService {
   }
 
 
-  async verifyOtp(otp:string, email:string): Promise<{accessToken:string, refreshToken:string, user: UserType}> {
+async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessToken?: string, refreshToken?: string, user: UserType}> {
+  const storedDataString = await redisClient.get(email);
 
-    const storedDataString = await redisClient.get(email)
-
-    if(!storedDataString) {
-      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_NOT_FOUND)
-    }
-    const storedData = JSON.parse(storedDataString)
-    console.log("STORED DATA >>>> : ",storedData)
-
-    if(storedData.otp !== otp) {
-      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_INCORRECT)
-    }
-      const user  = {
-        name : storedData.userData.name ,
-        email : storedData.userData.email,
-        password : storedData.userData.password 
-      }
-      console.log("user >>>>> : ",user)
-
-      const createdUser = await this.userRepository.createUser(user)
-      if (!createdUser) {
-        throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_CREATION_FAILED);
-      }
-
-      const accessToken = await generateAccessToken(createdUser._id as ObjectId, createdUser.role as string);
-      const refreshToken = await generateRefreshToken(createdUser._id as ObjectId, createdUser.role as string);
-
-      return { accessToken, refreshToken, user: createdUser };
+  if (!storedDataString) {
+    throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_NOT_FOUND);
   }
+
+  const storedData = JSON.parse(storedDataString);
+
+  if (storedData.otp !== otp) {
+    throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_INCORRECT);
+  }
+
+  if (apiType === "signup") {
+    const user = {
+      name: storedData.user.name,
+      email: storedData.user.email,
+      password: storedData.user.password
+    };
+
+    const createdUser = await this.userRepository.createUser(user);
+    if (!createdUser) {
+      throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_CREATION_FAILED);
+    }
+
+    const accessToken = await generateAccessToken(createdUser._id as ObjectId, createdUser.role as string);
+    const refreshToken = await generateRefreshToken(createdUser._id as ObjectId, createdUser.role as string);
+
+    return { accessToken, refreshToken, user: createdUser };
+
+  } else if (apiType === "forgot-Password") {
+    return { user: storedData.user };
+  }
+
+  throw generateHttpError(HttpStatus.BAD_REQUEST, "Invalid apiType");
+}
+
 
   async resendOtp(email: string): Promise<void> {
     const storedDataString = await redisClient.get(email);
@@ -211,6 +218,43 @@ export class UserService implements IUserService {
     if(!user) {
         throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
     }
+    return {user}
+  }
+
+  async forgetPassword(email: string): Promise<{ user: UserType; }> {
+    const user = await this.userRepository.findByEmail(email)
+    if(!user) {
+      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
+    }
+    const newOtp = generateOtp()
+
+    await redisClient.setEx(email, 300, JSON.stringify({otp:newOtp , user}))
+
+    const mailOptions = {
+      from: env.SENDER_EMAIL,
+      to: email,
+      subject: "6-digit OTP - Resend",
+      text: `Your new OTP code is ${newOtp}`,
+    };
+
+    console.log("Mail Options >> : ",mailOptions)
+
+    try {
+      const info = await transporter.sendMail(mailOptions)
+    } catch (err) {
+      console.error("Failed to resend OTP email:", err);
+      throw generateHttpError(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to send OTP email");
+    }
+    return {user}
+  }
+
+  async resetPassword(email: string, password: string): Promise<{ user: UserType; }> {
+    const user = await this.userRepository.findByEmail(email)
+    if(!user){
+      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
+    }
+    user.password = await bcrypt.hash(password,10)
+    await this.userRepository.updateUser(user)
     return {user}
   }
 }
