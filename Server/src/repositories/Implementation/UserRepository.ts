@@ -9,8 +9,11 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
     super(User)
   }
 
-  async createUser(user: Partial<UserType>): Promise<UserType> {
-    return await User.create(user);
+  async createUser(user: UserType): Promise<UserType> {
+    console.log("verify OTP ? > ?")
+    const userData = await User.create(user)
+    console.log("User Repository User DAta",userData)
+    return userData
   }
 
   async findByEmail(email: string): Promise<UserType | null> {
@@ -25,7 +28,6 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
       console.error(err)
     }
   }
-
 
   async updateUser(user: UserType): Promise<void> {
     try {

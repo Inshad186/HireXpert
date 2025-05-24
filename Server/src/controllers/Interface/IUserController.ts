@@ -13,5 +13,6 @@ export interface IUserController {
     getFreelancer(req:Request, res:Response, next:NextFunction) : Promise<void>;
     forgetPassword(req:Request, res:Response, next:NextFunction): Promise<void>;
     resetPassword(req:Request, res:Response, next:NextFunction): Promise<void>;
+    updateUserDetails(req:Request, res:Response, next:NextFunction): Promise<void>;
     logout(req:Request, res:Response, next:NextFunction) : Promise<void>;
 }

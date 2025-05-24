@@ -12,5 +12,6 @@ export interface IUserService {
   getProfileImage(userId:string) : Promise<{user:UserType}>
   resendOtp(email: string) : Promise<void>;
   resetPassword(email: string, password: string) : Promise<{user:UserType}>
+  updateUserDetails(userId:string, userData:Partial<UserType>) : Promise<{userDetails:UserType}>
   forgetPassword(email:string) : Promise<{user:UserType}>
 }

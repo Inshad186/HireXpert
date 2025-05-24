@@ -7,9 +7,7 @@ export const userRoutes = {
     DASHBOARD: '/dashboard',
     PROFILE: '/profile',
     HOME : "/",
-    PROJECTS:'/projects',
     ABOUT : '/about',
     CONTACT : '/contact',
-    PRICING : '/pricing',
     LOGOUT : "/logout",
 }   

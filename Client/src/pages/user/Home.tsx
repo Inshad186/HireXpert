@@ -20,6 +20,12 @@ function Home() {
 
   const user = useSelector((state: RootState) => state.user);
 
+  const isClient = user.role
+  const isFreelancer = user.role
+
+  console.log("✅✅✅",isClient)
+  console.log("✅✅✅",isFreelancer)
+
   useEffect(() => {
     if (user.role === "none") {
       setTimeout(()=>{
@@ -41,6 +47,7 @@ function Home() {
     setLeftClick(false);
     setRole("freelancer");
   };
+
 
   useEffect(() => {
   const fetchFreelancers = async () => {

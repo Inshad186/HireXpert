@@ -3,7 +3,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { useNavigate } from "react-router-dom"
-import { resendOtp } from "@/api/user.api"
+import { resendOtp, verifyOtp } from "@/api/user.api"
 
 export function InputOTPDemo() {
   const [otp, setOtp] = useState("")
@@ -43,26 +43,18 @@ export function InputOTPDemo() {
     try {
       setLoading(true)
       setError("")
-      const response = await fetch("http://localhost:5000/api/auth/verifyOtp", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ email, otp, apiType })
-      })
+      const response = await verifyOtp(email, otp, apiType)
 
       console.log("RESPONSE >>>>>>>>  : ",response)
 
-      const data = await response.json()
-
-      if (response.ok) {
+      if (response?.success) {
         console.log("OTP Verified!")
         // localStorage.removeItem("email");
         // localStorage.removeItem("apiType");
 
         navigate(apiType === "signup" ?"/login" : "/resetPassword")
       } else {
-        setError(data.message || "Invalid OTP. Please try again.")
+        setError("Invalid OTP. Please try again.")
       }
     } catch (error) {
       console.error("Error verifying OTP:", error)

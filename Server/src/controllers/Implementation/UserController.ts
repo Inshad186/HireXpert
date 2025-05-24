@@ -52,7 +52,7 @@ export class UserController implements IUserController {
         sameSite: "strict",
         maxAge: 7 * 24 * 60 * 60 * 1000,
       });
-      res.status(HttpStatus.CREATED).json({ accessToken, user });
+      res.status(HttpStatus.CREATED).json({ accessToken, user});
     } catch (err) {
       next(err);
     }
@@ -166,6 +166,20 @@ export class UserController implements IUserController {
       next()
     }
   }
+
+async updateUserDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const userData = req.body;
+    console.log("userDetails in userController : > ? ",userData)
+    const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
+    const updatedUser = await this.userService.updateUserDetails(userId, userData);
+    console.log("userDetails in userController : > ??? ",updatedUser)
+    res.status(HttpStatus.OK).json({ success: true, userDetails: updatedUser });
+  } catch (error) {
+    next(error);
+  }
+}
+
 
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     const refreshToken = req.cookies?.refreshToken;

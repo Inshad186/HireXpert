@@ -12,6 +12,7 @@ export const endpointUrl = {
   FORGET_PASSWORD : "/auth/forget-password",
   FP_VERIFY_OTP : "/auth/fp-verify-otp",
   RESET_PASSWORD : "/auth/reset-password",
+  UPDATE_USERDETAILS : "/auth/update-userdetails",
   LOGOUT : '/auth/logout',
 }
 

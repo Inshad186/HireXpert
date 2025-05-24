@@ -1,6 +1,6 @@
-import { ObjectId } from "mongoose";
+import mongoose, { ObjectId } from "mongoose";
 
-export interface UserType {
+export interface UserType extends Document {
     _id?: ObjectId;
     name?: string;
     email: string;
@@ -10,6 +10,16 @@ export interface UserType {
     createdAt?: Date;
     updatedAt?: Date;
     profilePicture?: string;
+    companyName?: string;
+    website?: string;
+    industry?: string;
+    address?: string;
+    country?: string;
+    workType?: string[];
+    budgetRange?: string;
+    preferredTechStack?: string;
+    isIdentityVerified?: boolean;
+    ratingsFromFreelancers?: Array<{ rating: number; comment: string }>;
 }
 
 export interface FileType {
@@ -19,4 +29,21 @@ export interface FileType {
     mimetype: string;
     buffer: Buffer;
     size: number;
+}
+
+export interface FreelancerDetail {
+    user_id: mongoose.Schema.Types.ObjectId;
+    profession: string;
+    company: string;
+    qualification: string;
+    bio: string;
+    work_experience: string;
+    proficient_languages: string[];
+    skills: string[];
+    working_days: string;
+    active_hours: string;
+    basic_price: number;
+    standard_price: number;
+    premium_price: number;
+    portfolio: string;
 }

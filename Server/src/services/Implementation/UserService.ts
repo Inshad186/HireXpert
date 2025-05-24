@@ -85,27 +85,34 @@ export class UserService implements IUserService {
 async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessToken?: string, refreshToken?: string, user: UserType}> {
   const storedDataString = await redisClient.get(email);
 
+  console.log("verifyOtp from userSErvice >?> : ",storedDataString)
+
   if (!storedDataString) {
     throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_NOT_FOUND);
   }
 
   const storedData = JSON.parse(storedDataString);
 
+  console.log("storedDAta from userSErvice >?> : ",storedData)
+
   if (storedData.otp !== otp) {
     throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_INCORRECT);
   }
 
+  console.log("API TYPE ===>", apiType);
+
   if (apiType === "signup") {
     const user = {
-      name: storedData.user.name,
-      email: storedData.user.email,
-      password: storedData.user.password
+      name: storedData.userData.name,
+      email: storedData.userData.email,
+      password: storedData.userData.password
     };
 
     const createdUser = await this.userRepository.createUser(user);
     if (!createdUser) {
       throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_CREATION_FAILED);
     }
+    console.log("Create User from userService >?> : ",createdUser)
 
     const accessToken = await generateAccessToken(createdUser._id as ObjectId, createdUser.role as string);
     const refreshToken = await generateRefreshToken(createdUser._id as ObjectId, createdUser.role as string);
@@ -257,4 +264,21 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
     await this.userRepository.updateUser(user)
     return {user}
   }
+
+async updateUserDetails(userId: string, userData: UserType): Promise<{ userDetails: UserType }> {
+  const user = await this.userRepository.findById(userId);
+  if (!user) {
+    throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
+  }
+
+  // ✅ Mutate the existing Mongoose document directly
+  Object.assign(user, userData);
+
+  // Now pass the document to the repository as before
+  await this.userRepository.updateUser(user);
+
+  return { userDetails: user };
+}
+
+
 }

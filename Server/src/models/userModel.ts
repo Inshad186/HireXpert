@@ -12,7 +12,7 @@ const userSchema: Schema = new Schema<UserType>({
         unique: true
     },
     password: {
-        type: String
+        type: String    
     },
     profilePicture: {
         type: String,
@@ -27,6 +27,15 @@ const userSchema: Schema = new Schema<UserType>({
         type : Boolean,
         default: false
     },
+    companyName: { type: String },
+    website: { type: String },
+    industry: { type: String },
+    address: { type: String },
+    country: { type: String },
+    workType: { type: [String] },
+    budgetRange: { type: String },
+    preferredTechStack: { type: String },
+
 }, { timestamps: true })
 
 export default mongoose.model<UserType>("User", userSchema)
