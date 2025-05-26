@@ -61,6 +61,7 @@ export class UserController implements IUserController {
   async resendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email } = req.body;
+      console.log("RESEND OTP ? >> ? : ",email)
       if (!email) {
         res.status(HttpStatus.BAD_REQUEST).json({ message: HttpResponse.INVALID_EMAIL });
         return;
@@ -167,19 +168,18 @@ export class UserController implements IUserController {
     }
   }
 
-async updateUserDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
-  try {
-    const userData = req.body;
-    console.log("userDetails in userController : > ? ",userData)
-    const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
-    const updatedUser = await this.userService.updateUserDetails(userId, userData);
-    console.log("userDetails in userController : > ??? ",updatedUser)
-    res.status(HttpStatus.OK).json({ success: true, userDetails: updatedUser });
-  } catch (error) {
-    next(error);
+  async updateUserDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const userData = req.body;
+      console.log("userDetails in userController : > ? ",userData)
+      const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
+      const updatedUser = await this.userService.updateUserDetails(userId, userData);
+      console.log("userDetails in userController : > ??? ",updatedUser)
+      res.status(HttpStatus.OK).json({ success: true, userDetails: updatedUser });
+    } catch (error) {
+      next(error);
+    }
   }
-}
-
 
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     const refreshToken = req.cookies?.refreshToken;

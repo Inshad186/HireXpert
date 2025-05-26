@@ -31,7 +31,8 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
 
   async updateUser(user: UserType): Promise<void> {
     try {
-      await User.findByIdAndUpdate(user._id, user)
+      const hello = await User.findByIdAndUpdate(user._id, user)
+      console.log("oh baby oh yaay > ",hello)
     } catch (error) {
       console.error(error);
       throw new Error("Error when updating the user");
@@ -39,7 +40,7 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
   }
 
   async findFreelancer(): Promise<Partial<UserType>[]> {
-    const result = await User.find({ role: "freelancer" }).select("name email")
+    const result = await User.find({ role: "freelancer" }).select("name email profession work_experience working_days active_hours profilePicture")
     console.log("Result >>> : ",result);
     return result
     

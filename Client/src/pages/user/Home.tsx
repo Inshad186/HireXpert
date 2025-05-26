@@ -12,8 +12,9 @@ function Home() {
   const [leftClick, setLeftClick] = useState(false);
   const [rightClick, setRightClick] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [freelancers, setFreelancers] = useState<{ name: string; email: string }[]>([]);
+  const [freelancers, setFreelancers] = useState<{ name: string; email: string; profession: string; work_experience: string; working_days: string; active_hours: string; profilePicture: string }[]>([]);
 
+  console.log("Freelancers %% ",freelancers)
 
   const navigate = useNavigate();
   const dispatch = useDispatch();
@@ -22,9 +23,6 @@ function Home() {
 
   const isClient = user.role
   const isFreelancer = user.role
-
-  console.log("✅✅✅",isClient)
-  console.log("✅✅✅",isFreelancer)
 
   useEffect(() => {
     if (user.role === "none") {
@@ -107,26 +105,27 @@ return (
           />
         </div>
       </section>
-      <section className="px-6 md:px-24 py-10">
-        <h2 className="text-2xl font-bold mb-4">Available Freelancers</h2>
-        <table className="min-w-full bg-white border border-gray-300">
-          <thead>
-            <tr className="bg-gray-200">
-              <th className="py-2 px-4 border">Name</th>
-              <th className="py-2 px-4 border">Email</th>
-            </tr>
-          </thead>
-          <tbody>
-            {freelancers.map((freelancer, index) => (
-              <tr key={index}>
-                <td className="py-2 px-4 border">{freelancer.name}</td>
-                <td className="py-2 px-4 border">{freelancer.email}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
 
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6  max-w-screen-xl mx-auto mt-6">
+        {freelancers.map((freelancer, index) => (
+          <div key={index} className="max-w-sm bg-white rounded-xl shadow-md overflow-hidden">
+            <img
+              src={freelancer.profilePicture}
+              alt={freelancer.name}
+              className="w-full h-40 object-cover"
+            />
+            <div className="p-4">
+              <h3 className="text-lg font-bold">{freelancer.name}</h3>
+              <p className="text-gray-600">{freelancer.profession}</p>
+              <div className="mt-2 text-sm text-gray-700 space-y-1">
+                <p><strong>Experience:</strong> {freelancer.work_experience}</p>
+                <p><strong>Working Days:</strong> {freelancer.working_days}</p>
+                <p><strong>Active Hours:</strong> {freelancer.active_hours}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">

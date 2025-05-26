@@ -144,6 +144,7 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
       subject: "6-digit OTP - Resend",
       text: `Your new OTP code is ${newOtp}`,
     };
+    console.log("mailOptions : ",mailOptions)
     try {
       const info = await transporter.sendMail(mailOptions);
       console.log("Resent Email successfully: ", info.response);
@@ -215,9 +216,9 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
       return {newName}
     }
 
-    async getFreelancer(): Promise<{ name: string; email: string; }[]> {
+    async getFreelancer(): Promise<{ name: string; email: string; profession: string; work_experience: string; working_days: string; active_hours: string; profilePicture: string }[]> {
       const freelancers = await this.userRepository.findFreelancer();
-      return freelancers as { name: string; email: string }[];
+      return freelancers as { name: string; email: string; profession: string; work_experience: string; working_days: string; active_hours: string; profilePicture: string }[];
     }
 
   async getProfileImage(userId: string): Promise<{ user: UserType; }> {
@@ -265,20 +266,18 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
     return {user}
   }
 
-async updateUserDetails(userId: string, userData: UserType): Promise<{ userDetails: UserType }> {
-  const user = await this.userRepository.findById(userId);
-  if (!user) {
-    throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
+  async updateUserDetails(userId: string, userData: UserType): Promise<{ userDetails: UserType }> {
+    const user = await this.userRepository.findById(userId);
+    console.log("Update Details from userService > ",user)
+    if (!user) {
+      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
+    }
+    // ✅ Mutate the existing Mongoose document directly
+    Object.assign(user, userData);
+    await this.userRepository.updateUser(user);
+
+    return { userDetails: user };
   }
-
-  // ✅ Mutate the existing Mongoose document directly
-  Object.assign(user, userData);
-
-  // Now pass the document to the repository as before
-  await this.userRepository.updateUser(user);
-
-  return { userDetails: user };
-}
 
 
 }

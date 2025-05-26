@@ -13,6 +13,15 @@ export class AdminRepository implements IAdminRepository {
     }
   }
 
+  async countTotalUsers(): Promise<number> {
+    try {
+      return await User.countDocuments()
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error to getting the counts");
+    }
+  }
+
 //   async verifyAdmin(Id: string): Promise<boolean> {
 //     try {
 //         const data = await User.findById(Id)

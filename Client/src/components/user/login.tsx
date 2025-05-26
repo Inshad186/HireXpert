@@ -62,10 +62,10 @@ export function LoginForm({className, ...props} : React.ComponentPropsWithoutRef
               navigate("/home");
               break;
             case "admin":
-              navigate("adminLogin");
+              navigate("/adminLogin");
               break;
             default:
-              navigate("/");
+              navigate("/home");
           }
         }, 1500);
       } else {

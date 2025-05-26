@@ -17,6 +17,7 @@ import ResetPassword from "@/components/user/resetPassword";
 
 //! Admin
 import AdminLogin from "@/pages/admin/Login";
+import AdminLayout from "@/layouts/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 
 
@@ -38,7 +39,7 @@ export const router = createBrowserRouter([
 
     //! Admin Routes
     {path : "adminLogin", element : <AdminLogin/>},
-    {element : <AppLayout/>,
+    {path : "admin", element : <AdminLayout/>,
         children : [
             {path : "dashboard" , element : <Dashboard/>}
         ]

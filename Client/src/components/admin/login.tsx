@@ -17,9 +17,10 @@ function AdminLoginForm({className, ...props}:React.ComponentPropsWithoutRef<"di
         e.preventDefault()
         try {
             const response = await login(formData.email, formData.password);
-
             console.log("Admin Side Response >>>>>> : ",response)
-            navigate("/dashboard")
+            if(response.success){
+              navigate("/admin/dashboard")
+            }
         } catch (error) {
             console.log("not working bro sorrry >>>>>>>>>>>>> ")
         }

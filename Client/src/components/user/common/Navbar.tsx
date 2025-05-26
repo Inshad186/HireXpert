@@ -5,7 +5,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { userRoutes } from "@/constants/routeUrl";
 import { userLogout } from "@/api/user.api";
 import { removeUser } from "@/redux/slices/userSlice";
-import { Menu, X } from "lucide-react"; // Make sure to install lucide-react
+import { Menu, X } from "lucide-react"; 
 
 function Navbar() {
   const navigate = useNavigate();

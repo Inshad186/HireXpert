@@ -17,5 +17,6 @@ export const endpointUrl = {
 }
 
 export const adminEndpointUrl = {
-  LOGIN : "/auth/admin/login"
+  LOGIN : "/auth/admin/login",
+  TOTAL_USERS : "/auth/admin/totalUsers",
 }

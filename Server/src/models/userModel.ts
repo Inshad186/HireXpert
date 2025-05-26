@@ -36,6 +36,21 @@ const userSchema: Schema = new Schema<UserType>({
     budgetRange: { type: String },
     preferredTechStack: { type: String },
 
+    //! Freelancer-specific 
+    profession: { type: String },
+    company: { type: String },
+    qualification: { type: String },
+    bio: { type: String },
+    work_experience: { type: String },
+    proficient_languages: { type :[String]},
+    skills: { type: [String] },
+    working_days: { type: String },
+    active_hours: { type: String },
+    basic_price: { type: Number },
+    standard_price: { type: Number },
+    premium_price: { type: Number },
+    portfolio: { type: String },
+
 }, { timestamps: true })
 
 export default mongoose.model<UserType>("User", userSchema)

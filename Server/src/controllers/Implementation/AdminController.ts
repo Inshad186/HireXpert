@@ -22,4 +22,13 @@ export class AdminController implements IAdminController {
             next(error)
         }
     }
+
+    async getTotalUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const {totalUsers} = await this.adminService.getTotalUsers()
+            res.status(HttpStatus.OK).json({ success: true, totalUsers });
+        } catch (error) {
+            next()
+        }
+    }
 }

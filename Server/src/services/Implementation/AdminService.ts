@@ -32,4 +32,13 @@ export class AdminService implements IAdminService {
     
         return { accessToken, refreshToken, admin };
     }
+
+    async getTotalUsers(): Promise<{ totalUsers: number }> {
+        try {
+        const totalUsers = await this.adminRepository.countTotalUsers();
+        return { totalUsers };
+        } catch (error) {
+        throw new Error("Failed to get total users");
+        }
+    }
 }

@@ -10,5 +10,6 @@ const adminController = new AdminController(adminService)
 const adminRouter = express.Router();
 
 adminRouter.post("/login",adminController.login.bind(adminController))
+adminRouter.get("/totalUsers", adminController.getTotalUsers.bind(adminController))
 
 export default adminRouter

@@ -20,18 +20,8 @@ export interface UserType extends Document {
     preferredTechStack?: string;
     isIdentityVerified?: boolean;
     ratingsFromFreelancers?: Array<{ rating: number; comment: string }>;
-}
 
-export interface FileType {
-    fieldname: string;
-    originalname: string;
-    encoding: string;
-    mimetype: string;
-    buffer: Buffer;
-    size: number;
-}
-
-export interface FreelancerDetail {
+    //! Freelancer fields
     user_id: mongoose.Schema.Types.ObjectId;
     profession: string;
     company: string;
@@ -46,4 +36,14 @@ export interface FreelancerDetail {
     standard_price: number;
     premium_price: number;
     portfolio: string;
+}
+
+
+export interface FileType {
+    fieldname: string;
+    originalname: string;
+    encoding: string;
+    mimetype: string;
+    buffer: Buffer;
+    size: number;
 }
