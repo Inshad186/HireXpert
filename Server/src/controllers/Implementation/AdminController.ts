@@ -23,12 +23,35 @@ export class AdminController implements IAdminController {
         }
     }
 
-    async getTotalUsers(req: Request, res: Response, next: NextFunction): Promise<void> {
+    async getDashboardStats(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const {totalUsers} = await this.adminService.getTotalUsers()
-            res.status(HttpStatus.OK).json({ success: true, totalUsers });
+            const {totalUsers, totalFreelancers, totalClients} = await this.adminService.getDashboardStats()
+            res.status(HttpStatus.OK).json({ success: true, totalUsers, totalFreelancers, totalClients });
         } catch (error) {
             next()
         }
     }
+
+    async getUsersList(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            console.log("get UsersList from adminController")
+            const users = await this.adminService.getUsersList()
+            res.status(HttpStatus.OK).json({success : true, users})
+        } catch (error) {
+            next()
+        }
+    }
+
+async blockUser(req: Request, res: Response, next: NextFunction): Promise<void> {
+  try {
+    const { userId } = req.body;
+
+    const response = await this.adminService.blockUser(userId);
+
+    res.status(200).json({ success: true, message: "User block status updated" }); // ✅ return success response
+  } catch (error) {
+    next(error); // ✅ good practice to send it to error handler
+  }
+}
+
 }

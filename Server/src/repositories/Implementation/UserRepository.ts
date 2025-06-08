@@ -17,7 +17,8 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
   }
 
   async findByEmail(email: string): Promise<UserType | null> {
-    return await User.findOne({ email });
+    if(email === "admin123@gmail.com") return null
+    return await User.findOne({email})
   }
 
   
@@ -40,7 +41,7 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
   }
 
   async findFreelancer(): Promise<Partial<UserType>[]> {
-    const result = await User.find({ role: "freelancer" }).select("name email profession work_experience working_days active_hours profilePicture")
+    const result = await User.find({ role: "freelancer", isBlocked: false }).select("name email profession work_experience working_days active_hours profilePicture")
     console.log("Result >>> : ",result);
     return result
     

@@ -28,5 +28,8 @@ export const env = {
     },
     get CLOUDINARY_API_SECRET(){
         return process.env.CLOUDINARY_API_SECRET
+    },
+    get ADMIN_EMAIL(){
+        return process.env.ADMIN_EMAIL
     }
 }

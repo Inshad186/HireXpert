@@ -17,6 +17,7 @@ const router = express.Router();
 
 router.post("/signup", authMiddleware(signupValidation), userController.signup.bind(userController));
 router.post("/login", authMiddleware(loginValidation), userController.login.bind(userController))
+router.post("/google-auth", userController.googleAuth.bind(userController))
 router.post('/verifyOtp', userController.verifyOtp.bind(userController))
 router.post("/resendOtp", userController.resendOtp.bind(userController))
 router.patch("/assignRole",verifyTokenMiddleware, userController.assignRole.bind(userController))

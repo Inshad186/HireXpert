@@ -47,3 +47,9 @@ export interface FileType {
     buffer: Buffer;
     size: number;
 }
+
+export interface GoogleAuthUserType {
+    email: string;
+    name: string;
+    profilePicture?: string;
+}

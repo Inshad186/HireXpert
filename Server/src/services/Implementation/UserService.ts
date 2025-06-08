@@ -1,7 +1,7 @@
 import { IUserService } from "../Interface/IUserService"; 
 import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 import bcrypt from "bcrypt"
-import { FileType, UserType } from "@/types/Type";
+import { FileType, GoogleAuthUserType, UserType } from "@/types/Type";
 import { HttpResponse } from "@/constants/response.constant";
 import { generateAccessToken, generateRefreshToken, } from "@/utils/jwt.util";
 import { generateHttpError } from "@/utils/http-error.util";
@@ -65,6 +65,11 @@ export class UserService implements IUserService {
     if(!user){
       throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND)
     }
+
+    if(user?.isBlocked){
+      throw generateHttpError(HttpStatus.FORBIDDEN, HttpResponse.USER_BLOCKED)
+    }
+
     if(!user.password){
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.INVALID_PASSWORD)
     }
@@ -79,6 +84,32 @@ export class UserService implements IUserService {
     console.log("ACCESS TOKEN >>>>>>>>  : ",accessToken)
 
     return { accessToken, refreshToken, user}
+  }
+
+  async googleAuth(user: GoogleAuthUserType): Promise<{ accessToken: string; refreshToken: string; user: UserType; }> {
+    const userExisted = await this.userRepository.findByEmail(user.email)
+
+    if(userExisted){
+      if(userExisted.isBlocked){
+      throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND)
+    }
+      const accessToken = await generateAccessToken(userExisted._id as ObjectId, userExisted.role as string)
+      const refreshToken = await generateRefreshToken(userExisted._id as ObjectId, userExisted.role as string)
+
+      return {accessToken, refreshToken, user:userExisted}
+      
+    }else{
+      const newUser : Partial<UserType> = {
+        email : user.email,
+        name : user.name
+
+      }
+      const userData = await this.userRepository.createUser(newUser)
+
+      const accessToken = await generateAccessToken(userData._id as ObjectId, userData.role as string)
+      const refreshToken = await generateRefreshToken(userData._id as ObjectId, userData.role as string)
+      return {accessToken, refreshToken, user:userData}
+    }
   }
 
 

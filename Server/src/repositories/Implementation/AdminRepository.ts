@@ -13,6 +13,16 @@ export class AdminRepository implements IAdminRepository {
     }
   }
 
+  async findById(userId: string): Promise<UserType | null> {
+        try {
+            const client = await User.findById(userId)
+            return client
+        } catch (error) {
+            console.error(error);
+            return null
+        }
+  }
+
   async countTotalUsers(): Promise<number> {
     try {
       return await User.countDocuments()
@@ -21,6 +31,49 @@ export class AdminRepository implements IAdminRepository {
       throw new Error("Error to getting the counts");
     }
   }
+
+  async countTotalDashboardStats(): Promise<{totalUsers:number, totalFreelancers: number; totalClients: number;}> {
+    try {
+    const totalUsers = await User.countDocuments({role:{$ne:"admin"}});
+    const totalFreelancers = await User.countDocuments({ role: "freelancer" });
+    const totalClients = await User.countDocuments({ role: "client" });
+    return {
+    totalUsers,
+    totalFreelancers,
+    totalClients
+  };
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error to getting the counts");
+    }
+  }
+
+  async getAllUsers(): Promise<any[]> {
+    try {
+      const users = await User.find({ role: { $ne: "admin" } },{
+      _id: 1,                      
+      name: 1,
+      email: 1,
+      role: 1,
+      isBlocked: 1,
+      })
+      return users
+    } catch (error) {
+      console.error(error);
+      throw new Error("Error to getting the counts");
+    }
+  }
+
+async save(user: UserType): Promise<boolean> {
+  try {
+    await User.findByIdAndUpdate(user._id, { isBlocked: user.isBlocked }); // ✅ actually update the data
+    return true;
+  } catch (err) {
+    console.error(err);
+    return false;
+  }
+}
+
 
 //   async verifyAdmin(Id: string): Promise<boolean> {
 //     try {

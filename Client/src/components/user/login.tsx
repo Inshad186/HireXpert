@@ -1,12 +1,15 @@
 import { useNavigate } from "react-router-dom";
 import React, { useState } from "react";
 import { emailRegex } from "@/utils/validation/regex.util";
-import axios from "axios";
+import { useGoogleLogin } from "@react-oauth/google";
+import { decodeToken } from "@/utils/googleAuthToken.util";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
 import { ErrorState } from "@/types/user.type";
+import { login, googleAuth } from "@/api/user.api";
+import { userRoutes } from "@/constants/routeUrl";
 
-export function LoginForm({className, ...props} : React.ComponentPropsWithoutRef<"div">) {
+export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<"div">) {
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -17,6 +20,14 @@ export function LoginForm({className, ...props} : React.ComponentPropsWithoutRef
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
     setFormData({ ...formData, [name]: value });
+
+    if(name === "email"){
+      if(value.trim() === "" || !emailRegex.test(value.trim())){
+        setError({field :"email", message :"Enter a valid email"})
+      }else{
+        setError({})
+      }
+    }
   };
 
   const handleSubmit = async (event: React.FormEvent) => {
@@ -24,20 +35,9 @@ export function LoginForm({className, ...props} : React.ComponentPropsWithoutRef
     setError({});
     setLoading(true);
 
-    if (
-      formData.email.trim() === "" || !emailRegex.test(formData.email.trim())) {
-      setError({ field: "email", message: "Enter a valid email" });
-    } else {
-      setError({});
-    }
-
     try {
-      const response = await axios.post(
-        "http://localhost:5000/api/auth/login",
-        formData
-      );
-
-      if (response.status === 200) {
+      const response = await login(formData);
+      if (response.success) {
         dispatch(
           setUser({
             _id: response.data.user._id,
@@ -55,17 +55,15 @@ export function LoginForm({className, ...props} : React.ComponentPropsWithoutRef
 
         setTimeout(() => {
           switch (response.data.user.role) {
-            case "freelancer":
-              navigate("/freelancer-dashboard");
-              break;
+            case "none":
             case "client":
-              navigate("/home");
-              break;
-            case "admin":
-              navigate("/adminLogin");
+              navigate(userRoutes.HOME);
+              break;            
+            case "freelancer":
+              navigate(userRoutes.FREELANCER_DASH);
               break;
             default:
-              navigate("/home");
+              navigate(userRoutes.LOGIN);
           }
         }, 1500);
       } else {
@@ -78,6 +76,58 @@ export function LoginForm({className, ...props} : React.ComponentPropsWithoutRef
       setLoading(false);
     }
   };
+
+  const googleSignin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const decoded = await decodeToken(tokenResponse.access_token);
+        console.log("DECODED >> ? >>>>> : ",decoded)
+
+        const response = await googleAuth({
+          email: decoded.email,
+          name: decoded.given_name,
+          profilePicture: decoded.picture
+        });
+        console.log("Response ?? : ",response);
+
+        if (response.success) {
+          const {accessToken , user} = response.data
+          dispatch(
+            setUser({
+              _id: user._id,
+              name: user.name,
+              email: response.data.user.email,
+              role: user.role,
+              accessToken: accessToken,
+            })
+          );
+          setTimeout(() => {
+            switch(user.role){
+              case "none" : 
+              case "client" :
+              navigate(userRoutes.HOME)
+              break;
+              case "freelacer" : 
+              navigate(userRoutes.FREELANCER_DASH)
+              break;
+              default : navigate(userRoutes.SIGNUP)
+            }
+          },2000)
+        } else {
+          setError({
+            field: "form",
+            message: "Google Login Failed. Try again.",
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        setError({
+          field: "form",
+          message: "An error occurred while signing in with Google",
+        });
+      }
+    },
+  });
 
   return (
     <>
@@ -117,7 +167,7 @@ export function LoginForm({className, ...props} : React.ComponentPropsWithoutRef
         </div>
         <p
           className="text-blue-800 cursor-pointer"
-          onClick={() => navigate("/forgotPassword")}
+          onClick={() => navigate(userRoutes.FORGOT_PASSWORD)}
         >
           forgot Password?
         </p>
@@ -136,11 +186,27 @@ export function LoginForm({className, ...props} : React.ComponentPropsWithoutRef
           Don't you have an account ?{" "}
           <a
             className="underline font-medium cursor-pointer text-blue-800"
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate(userRoutes.SIGNUP)}
           >
             Signup
           </a>
         </p>
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            googleSignin();
+          }}
+          className="w-full border border-gray-300 text-gray-700 bg-white transition duration-300 ease-in-out hover:shadow-lg hover:bg-gray-100 rounded-md px-4 py-2 flex items-center justify-center gap-3 font-medium"
+        >
+          <img
+            src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+            alt="Google logo"
+            className="w-5 h-5"
+          />
+          <span>Login with Google</span>
+        </button>
+
       </form>
     </>
   );

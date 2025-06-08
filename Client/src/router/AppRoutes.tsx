@@ -13,12 +13,14 @@ import { PrivateRoute } from "./PrivateRoute";
 import { PublicRoute } from "./PublicRoute";
 import { RoleBasedRoute } from "./RoleBasedRoute";
 import ResetPassword from "@/components/user/resetPassword";
+import Services from "@/pages/user/Services";
 
 
 //! Admin
 import AdminLogin from "@/pages/admin/Login";
 import AdminLayout from "@/layouts/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
+import UserManagement from "@/pages/admin/UserManagement";
 
 
 
@@ -34,6 +36,7 @@ export const router = createBrowserRouter([
             {path : "home", element : (<PrivateRoute><Home/></PrivateRoute>)},
             {path : "profile" , element : (<PrivateRoute><Profile/></PrivateRoute>)},
             {path : "freelancer-dashboard", element : <FreelancerDashboard/>},
+            {path : "services", element : <Services/>},
         ]
     },
 
@@ -41,7 +44,8 @@ export const router = createBrowserRouter([
     {path : "adminLogin", element : <AdminLogin/>},
     {path : "admin", element : <AdminLayout/>,
         children : [
-            {path : "dashboard" , element : <Dashboard/>}
+            {path : "dashboard" , element : <Dashboard/>},
+            {path : "userManagement" , element : <UserManagement/>}
         ]
     },
 ])

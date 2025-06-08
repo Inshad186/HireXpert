@@ -1,8 +1,9 @@
-import { UserType, FileType } from "@/types/Type";
+import { UserType, FileType, GoogleAuthUserType } from "@/types/Type";
 
 export interface IUserService {
   signup(user: UserType): Promise<string>;
   login(email:string, password:string) : Promise<{accessToken: string, refreshToken: string, user:UserType}>;
+  googleAuth(user:GoogleAuthUserType) : Promise<{accessToken: string, refreshToken: string, user:UserType}>;
   verifyOtp(otp: string, email: string, apiType: string) : Promise<{accessToken?:string, refreshToken?:string, user: UserType}>;
   assignRole(role:string, email:string) : Promise<{userRole:string}>
   updateProfile(id: string, profileImage: FileType | undefined): Promise<{user: UserType}>;

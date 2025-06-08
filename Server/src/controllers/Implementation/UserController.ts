@@ -39,6 +39,24 @@ export class UserController implements IUserController {
     }
   }
 
+  async googleAuth(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const {...userData} = req.body.user
+      const { accessToken, refreshToken, user } = await this.userService.googleAuth(userData)
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: false,
+        maxAge: 7 * 24 * 60 * 60 * 1000,
+        sameSite: "strict",
+      });
+
+      res.status(HttpStatus.OK).json({ accessToken, user });
+    } catch (error) {
+      next()
+    }
+  }
+
   async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { otp, email, apiType } = req.body;

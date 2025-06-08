@@ -1,5 +1,5 @@
 export const endpointUrl = {
-  SIGNUP : "/auth/register",
+  SIGNUP : "/auth/signup",
   LOGIN : "/auth/login",
   VERIFY_OTP : "/auth/verifyOtp",
   RESEND_OTP : "/auth/resendOtp",
@@ -13,10 +13,13 @@ export const endpointUrl = {
   FP_VERIFY_OTP : "/auth/fp-verify-otp",
   RESET_PASSWORD : "/auth/reset-password",
   UPDATE_USERDETAILS : "/auth/update-userdetails",
+  GOOGLE_AUTH : "/auth/google-auth",
   LOGOUT : '/auth/logout',
 }
 
 export const adminEndpointUrl = {
   LOGIN : "/auth/admin/login",
-  TOTAL_USERS : "/auth/admin/totalUsers",
+  DASHBOARD_STATS : "/auth/admin/dashboardStats",
+  USERS_LIST : "/auth/admin/usersList",
+  BLOCK_USER : "/auth/admin/block-user"
 }

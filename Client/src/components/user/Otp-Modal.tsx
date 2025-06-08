@@ -124,7 +124,7 @@ const handleResendOTP = async (event: React.FormEvent) => {
               </InputOTP>
             </div>
 
-            {error && (   // 👉 if error, show error message
+            {error && ( 
               <div className="text-center text-red-500 text-sm mt-2">
                 {error}
               </div>

@@ -65,8 +65,16 @@ const freelancerFields = [
     const formData = new FormData();
     formData.append("profileImage", file);
     formData.append("userId", user._id);
-    const response = await changeProfile(formData);
-    if (response.success) setProfileImage(response.data.user.profilePicture);
+    try {
+      const response = await changeProfile(formData);
+      if (response.success){
+        setProfileImage(response.data.user.profilePicture);
+      }else{
+        console.error("Image Upload Failed",response)
+      }
+    } catch (err) {
+      console.error("Image Upload Failed",err)
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
@@ -74,10 +82,16 @@ const freelancerFields = [
   };
 
   const handleSave = async () => {
-    const response = await updateUserDetails(form);
-    console.log("Woow response got it >?>> : ",response.data)
-    if (response.success){
-      dispatch(setUser(response.data.userDetails.userDetails));
+    try {
+      const response = await updateUserDetails(form);
+      console.log("Woow response got it >?>> : ",response.data)
+      if (response.success){
+        dispatch(setUser(response.data.userDetails.userDetails));
+      }else{
+        console.error("Failed to update profile", response);
+      }
+    } catch (err) {
+      console.error("Profile update error", err);
     }
   };
 

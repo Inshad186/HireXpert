@@ -12,6 +12,7 @@ import { verifyTokenMiddleware } from "./middlewares/verifyToken.middleware";
 import { corsMiddleware } from "./middlewares/cors.middleware";
 
 
+
 const app = express()
 const PORT = process.env.PORT
 

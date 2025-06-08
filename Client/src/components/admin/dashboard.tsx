@@ -1,18 +1,22 @@
-import { getTotalUsers } from '@/api/admin.api';
+import { getDashboardStats } from '@/api/admin.api';
 import React, {useEffect, useState} from 'react';
 import { FaUsers, FaBriefcase, FaChartLine, FaChartBar, FaUserCheck } from 'react-icons/fa';
 
+
 function DashboardComponent() {
-    const [totalUsers, setTotalUsers] = useState(0)
-    const [totolGigs, setTotalGigs] = useState(0)
+    const [dashboardStats, setDashboardStats] = useState({
+        totalUsers: 0,
+        totalFreelancers: 0,
+        totalClients: 0,
+    })
 
     useEffect(()=>{
         const fetchDashboardData = async() => {
             try {
-                const response = await getTotalUsers()
+                const response = await getDashboardStats()
                 console.log("GEt total users > ",response)
                 if(response.success){
-                    setTotalUsers(response.data.totalUsers)
+                    setDashboardStats(response.data)
                 }
             } catch (error) {
                 console.error("Error fetching dashboard stats", error);
@@ -23,28 +27,44 @@ function DashboardComponent() {
 
   return (
     <div className="p-6 text-white">
+      <h1 className='text-left text-2xl mb-6 font-bold'>Dashboard</h1>
       {/* Stats cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-4 gap-6 mb-6">
         <div className="bg-white text-black p-4 rounded-2xl flex items-center gap-4">
           <FaUsers size={40} className="text-black" />
           <div>
             <h3 className="text-lg font-semibold">Total Users</h3>
-            <p className="text-2xl font-bold">{totalUsers}</p>
-            <p className="text-sm text-gray-500">Freelancers</p>
+            <p className="text-2xl font-bold">{dashboardStats.totalUsers}</p>
           </div>
         </div>
 
         <div className="bg-white text-black p-4 rounded-2xl flex items-center gap-4">
           <FaBriefcase size={40} className="text-black" />
           <div>
+            <h3 className="text-lg font-semibold">Freelancers</h3>
+            <p className="text-2xl font-bold">{dashboardStats.totalFreelancers}</p>
+          </div>
+        </div>
+
+        <div className="bg-white text-black p-4 rounded-2xl flex items-center gap-4">
+          <FaUsers size={40} className="text-black" />
+          <div>
+            <h3 className="text-lg font-semibold">Clients</h3>
+            <p className="text-2xl font-bold">{dashboardStats.totalClients}</p>
+          </div>
+        </div>
+
+        <div className="bg-white text-black p-4 rounded-2xl flex items-center gap-4">
+          <FaChartBar size={40} className="text-black" />
+          <div>
             <h3 className="text-lg font-semibold">Total Gigs</h3>
-            <p className="text-2xl font-bold">245</p>
+            <p className="text-2xl font-bold">{dashboardStats.totalFreelancers}</p>
           </div>
         </div>
       </div>
 
       {/* Graph cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-white text-black p-4 rounded-2xl">
           <h3 className="text-lg font-semibold mb-2">Orders per day</h3>
           <img src="/graphs/orders.png" alt="Orders graph" className="w-full h-32 object-cover" />
@@ -66,7 +86,7 @@ function DashboardComponent() {
             <div className="text-sm text-gray-500">Engagement Rate</div>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 }

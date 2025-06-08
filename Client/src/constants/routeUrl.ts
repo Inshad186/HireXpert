@@ -6,8 +6,11 @@ export const userRoutes = {
     NEW_PASSWORD: "/newpassword",
     DASHBOARD: '/dashboard',
     PROFILE: '/profile',
-    HOME : "/",
+    HOME : "/home",
+    LANDING_PAGE : "/",
     ABOUT : '/about',
     CONTACT : '/contact',
+    SERVICES : "/services",
+    FREELANCER_DASH : "/freelancer-dashboard",
     LOGOUT : "/logout",
 }   

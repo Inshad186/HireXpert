@@ -1,15 +1,21 @@
 import React, { useState, useReducer } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
+import { signup } from "@/api/user.api";
 import { UserSignUpType, UserSignupAction } from "@/types/user.type";
 import { validateForm } from "@/utils/validation/formValidation";
 import { formSchema } from "@/utils/validation/formSchema";
+import { useGoogleLogin } from "@react-oauth/google";
+import { decodeToken } from "@/utils/googleAuthToken.util";
+import { googleAuth } from "@/api/user.api";
+import { setUser } from "@/redux/slices/userSlice";
 import { responses } from "@/constants/response.constants";
+import { useDispatch } from "react-redux";
 
 export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState({ field: "", message: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const reduxDispatch = useDispatch()
 
   const initialState: UserSignUpType = {
     name: "",
@@ -39,21 +45,6 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
     e.preventDefault();
 
     console.log("Form DATA : ",{...formData})
-    const signup = async (userData: UserSignUpType) => {
-      try {
-        const { data } = await axios.post("http://localhost:5000/api/auth/signup", {
-          name: userData.name,
-          email: userData.email,
-          password: userData.password,
-        });
-
-        console.log("EMAIL DATA  >>>>>>> : ",data)
-        return { success: true, data };
-      } catch (error: any) {
-        const message = error.response?.data?.error || responses.SOMETHING_WRONG;
-        return { success: false, error: message };
-      }
-    };
 
     const validationError = validateForm(
       formSchema,
@@ -72,7 +63,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
 
     try {
       setLoading(true);
-      const response = await signup(formData);
+      const response = await signup({...formData});
       
       if (response.success) {
         localStorage.setItem("email", response.data.email);
@@ -89,6 +80,58 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
       setLoading(false);
     }
   };
+
+    const googleSignin = useGoogleLogin({
+    onSuccess: async (tokenResponse) => {
+      try {
+        const decoded = await decodeToken(tokenResponse.access_token);
+        console.log("DECODED >> ? >>>>> : ",decoded)
+
+        const response = await googleAuth({
+          email: decoded.email,
+          name: decoded.given_name,
+          profilePicture: decoded.picture
+        });
+        console.log("Response ?? : ",response);
+
+        if (response.success) {
+          const {accessToken , user} = response.data
+          reduxDispatch(
+            setUser({
+              _id: user._id,
+              name: user.name,
+              email: response.data.user.email,
+              role: user.role,
+              accessToken: accessToken,
+            })
+          );
+          setTimeout(() => {
+            switch(user.role){
+              case "none" : 
+              case "client" : 
+              navigate("/home")
+              break;
+              case "freelacer" : 
+              navigate("/freelancer-dashboard")
+              break;
+              default : navigate("/signup")
+            }
+          },2000)
+        } else {
+          setError({
+            field: "form",
+            message: "Google Login Failed. Try again.",
+          });
+        }
+      } catch (err) {
+        console.error(err);
+        setError({
+          field: "form",
+          message: "An error occurred while signing in with Google",
+        });
+      }
+    },
+  });
 
   return (
     <>
@@ -160,6 +203,21 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
             {loading ? "Signing Up..." : "Sign Up"}
           </button>
           <p className="text-center">You already have an accout ? <a className="underline cursor-pointer text-blue-800" onClick={() => navigate("/login")}>Login</a></p>
+            <button
+              type="button"
+              onClick={(e) => {
+                e.preventDefault();
+                googleSignin();
+              }}
+              className="w-full border border-gray-300 text-gray-700 bg-white transition duration-300 ease-in-out hover:shadow-lg hover:bg-gray-100 rounded-md px-4 py-2 flex items-center justify-center gap-3 font-medium"
+            >
+              <img
+                src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg"
+                alt="Google logo"
+                className="w-5 h-5"
+              />
+              <span>Login with Google</span>
+          </button>
         </form>
         </>
   );

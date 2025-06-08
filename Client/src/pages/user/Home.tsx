@@ -14,17 +14,12 @@ function Home() {
   const [loading, setLoading] = useState(false);
   const [freelancers, setFreelancers] = useState<{ name: string; email: string; profession: string; work_experience: string; working_days: string; active_hours: string; profilePicture: string }[]>([]);
 
-  console.log("Freelancers %% ",freelancers)
-
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
   const user = useSelector((state: RootState) => state.user);
 
-  const isClient = user.role
-  const isFreelancer = user.role
-
-  useEffect(() => {
+  useEffect(() => { 
     if (user.role === "none") {
       setTimeout(()=>{
         setShowModal(true);
@@ -48,19 +43,19 @@ function Home() {
 
 
   useEffect(() => {
-  const fetchFreelancers = async () => {
-    try {
-      const response = await getFreelancer();
-      if(response.success){
-        setFreelancers(response.data.data);
+    const fetchFreelancers = async () => {
+      try {
+        const response = await getFreelancer();
+        if(response.success){
+          setFreelancers(response.data.data);
+        }
+      } catch (err) {
+        console.error("Failed to fetch freelancers", err);
       }
-    } catch (err) {
-      console.error("Failed to fetch freelancers", err);
-    }
-  };
+    };
 
-  fetchFreelancers();
-}, []);
+    fetchFreelancers();
+  }, []);
 
   const HandleAssignRole = async () => {
     setLoading(true);
@@ -105,27 +100,37 @@ return (
           />
         </div>
       </section>
+      
+      <section className="px-6 md:px-24 py-16 bg-white">
+        <h2 className="text-3xl font-extrabold text-gray-800 tracking-wide text-center md:text-left mb-10">
+          <span className="border-b-4 border-indigo-500 pb-1">TOP FREELANCERS</span>
+        </h2>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6  max-w-screen-xl mx-auto mt-6">
-        {freelancers.map((freelancer, index) => (
-          <div key={index} className="max-w-sm bg-white rounded-xl shadow-md overflow-hidden">
-            <img
-              src={freelancer.profilePicture}
-              alt={freelancer.name}
-              className="w-full h-40 object-cover"
-            />
-            <div className="p-4">
-              <h3 className="text-lg font-bold">{freelancer.name}</h3>
-              <p className="text-gray-600">{freelancer.profession}</p>
-              <div className="mt-2 text-sm text-gray-700 space-y-1">
-                <p><strong>Experience:</strong> {freelancer.work_experience}</p>
-                <p><strong>Working Days:</strong> {freelancer.working_days}</p>
-                <p><strong>Active Hours:</strong> {freelancer.active_hours}</p>
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-screen-xl mx-auto">
+          {freelancers.slice(0,6).map((freelancer, index) => (
+            <div
+              key={index}
+              className="bg-white rounded-2xl shadow-lg overflow-hidden"
+            >
+              <img
+                src={freelancer.profilePicture}
+                alt={freelancer.name}
+                className="w-full h-40 object-cover"
+              />
+              <div className="p-4">
+                <h3 className="text-lg font-bold">{freelancer.name}</h3>
+                <p className="text-gray-600">{freelancer.profession}</p>
+                <div className="mt-2 text-sm text-gray-700 space-y-1">
+                  <p><strong>Experience:</strong> {freelancer.work_experience}</p>
+                  <p><strong>Working Days:</strong> {freelancer.working_days}</p>
+                  <p><strong>Active Hours:</strong> {freelancer.active_hours}</p>
+                </div>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      </section>
+
 
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">

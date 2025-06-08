@@ -1,6 +1,39 @@
 import { endpointUrl } from "@/constants/endpointUrl";
 import Api from "@/services/axios";
+import { UserSignUpType } from "@/types/user.type";
 
+export const signup = async(formData : UserSignUpType) => {
+    try {
+        const {data} = await Api.post(endpointUrl.SIGNUP,formData)
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any;
+        const message = err.response?.data?.error || "Something went wrong";
+        return { success: false, error: message, data: {} };        
+    }
+}
+
+export const login = async (formData: any) => {
+    try {
+        const {data} = await Api.post(endpointUrl.LOGIN, formData)
+        return {success : true , data}
+    } catch (error) {
+        const err = error as any;
+        const message = err.response?.data?.error || "Something went wrong";
+        return { success: false, error: message, data: {} };  
+    }
+}
+
+export const googleAuth = async (user: Omit<UserSignUpType, "password"> & {profilePicture?: string;}) => {
+    try {
+      const { data } = await Api.post(endpointUrl.GOOGLE_AUTH,{user});      
+      return { success: true, data }
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return { success:false, error:message, data:{} };
+    }
+};
 
 export const resendOtp = async(email: string) => {
     try {
