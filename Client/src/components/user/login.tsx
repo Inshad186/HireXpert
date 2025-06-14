@@ -8,6 +8,7 @@ import { setUser } from "@/redux/slices/userSlice";
 import { ErrorState } from "@/types/user.type";
 import { login, googleAuth } from "@/api/user.api";
 import { userRoutes } from "@/constants/routeUrl";
+import toast from "react-hot-toast";
 
 export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<"div">) {
   const navigate = useNavigate();
@@ -37,7 +38,9 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
 
     try {
       const response = await login(formData);
+      const userRole = response.data?.user?.role
       if (response.success) {
+        toast.success("Login successfully")
         dispatch(
           setUser({
             _id: response.data.user._id,
@@ -52,9 +55,8 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
         );
 
         console.log("RESPONSE >>>>>>>> : ", response.data);
-
         setTimeout(() => {
-          switch (response.data.user.role) {
+          switch (userRole) {
             case "none":
             case "client":
               navigate(userRoutes.HOME);
@@ -68,6 +70,7 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
         }, 1500);
       } else {
         setLoading(false);
+        toast.error("Something went wrong")
         setError({ field: "form", message: response.data.error });
       }
     } catch (error) {

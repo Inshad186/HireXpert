@@ -1,5 +1,5 @@
 import React from 'react'
-import UsersComponent from '@/components/admin/usersComponent'
+import UsersComponent from '@/components/admin/usersListComp'
 
 function UserManagement() {
   return (

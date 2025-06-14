@@ -50,13 +50,7 @@ export class AdminRepository implements IAdminRepository {
 
   async getAllUsers(): Promise<any[]> {
     try {
-      const users = await User.find({ role: { $ne: "admin" } },{
-      _id: 1,                      
-      name: 1,
-      email: 1,
-      role: 1,
-      isBlocked: 1,
-      })
+      const users = await User.find({ role: { $ne: "admin" } })
       return users
     } catch (error) {
       console.error(error);
@@ -73,6 +67,27 @@ async save(user: UserType): Promise<boolean> {
     return false;
   }
 }
+
+async getAllSkills(): Promise<string[]> {
+  try {
+    const users = await User.find(
+      { role: { $ne: "admin" } },
+      { skills: 1, _id: 0 }
+    );
+
+    const allSkills = users.flatMap(user =>
+      user.skills?.flatMap((s: string) => s.split(",").map(s => s.trim())) || []
+    );
+
+    const uniqueSkills = Array.from(new Set(allSkills));
+    return uniqueSkills;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error fetching skills");
+  }
+}
+
+
 
 
 //   async verifyAdmin(Id: string): Promise<boolean> {

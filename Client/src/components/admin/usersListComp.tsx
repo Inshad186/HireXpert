@@ -1,6 +1,7 @@
 import { getUsersList } from '@/api/admin.api';
 import React, { useState, useEffect } from 'react';
 import { blockUsers } from '@/api/admin.api';
+import toast from 'react-hot-toast';
 
 interface User {
   _id: string;
@@ -11,7 +12,7 @@ interface User {
 }
 
 
-function UsersComponent() {
+function UsersListComponent() {
   const [users, setUsers] = useState<User[]>([]);
 
 
@@ -44,13 +45,11 @@ const handleToggleBlock = async (userId: string) => {
         )
       );
     }
+
   } catch (error) {
     console.error("Failed to toggle block status:", error);
   }
 };
-
-
-
 
   return (
     <div className="p-6 text-white">
@@ -71,7 +70,7 @@ const handleToggleBlock = async (userId: string) => {
         <table className="w-full table-auto border-collapse">
           <thead>
             <tr className="bg-black text-white text-left">
-              <th className="p-3">UserID</th>
+              <th className="p-3">Id</th>
               <th className="p-3">Name</th>
               <th className="p-3">Email</th>
               <th className="p-3">Role</th>
@@ -109,4 +108,4 @@ const handleToggleBlock = async (userId: string) => {
   );
 }
 
-export default UsersComponent;
+export default UsersListComponent;

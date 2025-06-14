@@ -6,10 +6,15 @@ import { setUser } from "@/redux/slices/userSlice";
 import ProfileImageUploader from "./ProfileImageUploader";
 import EditableName from "./EditableName";
 import ProfileForm from "./ProfileForm";
+import { getSkills } from "@/api/admin.api";
 
 export default function Profile() {
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
+
+  const [form, setForm] = useState<any>({});
+  const [profileImage, setProfileImage] = useState("");
+  const [adminSkills, setAdminSkills] = useState<string[]>([]);
 
 const clientFields = [
   { name: "companyName", placeholder: "Company Name" },
@@ -29,7 +34,7 @@ const freelancerFields = [
   { name: "bio", placeholder: "Bio" },
   { name: "work_experience", placeholder: "Work Experience" },
   { name: "proficient_languages", placeholder: "Languages (comma-separated)" },
-  { name: "skills", placeholder: "Skills (comma-separated)" },
+  { name: "skills", type: "multiselect", placeholder:"Skills", options: adminSkills },
   { name: "working_days", placeholder: "Working Days" },
   { name: "active_hours", placeholder: "Active Hours" },
   { name: "basic_price", placeholder: "Basic Price" },
@@ -39,27 +44,31 @@ const freelancerFields = [
 ];
 
 
-  const [form, setForm] = useState<any>({});
-  const [profileImage, setProfileImage] = useState("");
-
   const isClient = user.role === "client";
   const isFreelancer = user.role === "freelancer";
   const formFields = isClient ? clientFields : freelancerFields;
 
-  useEffect(() => {
-    const load = async () => {
-      try {
-        const response = await getProfileImage();
-        if (response.success) {
-          setProfileImage(response.data.user.profilePicture);
-          setForm({ ...form, ...response.data.user });
-        }
-      } catch (e) {
-        console.error(e);
+useEffect(() => {
+  const load = async () => {
+    try {
+      const response = await getProfileImage();
+      if (response.success) {
+        setProfileImage(response.data.user.profilePicture);
+        setForm({ ...form, ...response.data.user });
       }
-    };
-    load();
-  }, []);
+
+      const skillsRes = await getSkills();
+      if (skillsRes.success) {
+        setAdminSkills(skillsRes.data.skills || []);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  load();
+}, []);
+
 
   const handleImageChange = async (file: File) => {
     const formData = new FormData();
@@ -84,7 +93,6 @@ const freelancerFields = [
   const handleSave = async () => {
     try {
       const response = await updateUserDetails(form);
-      console.log("Woow response got it >?>> : ",response.data)
       if (response.success){
         dispatch(setUser(response.data.userDetails.userDetails));
       }else{

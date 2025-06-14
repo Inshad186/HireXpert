@@ -2,6 +2,7 @@ import User from "@/models/userModel";
 import { IUserRepository } from "../Interface/IUserRepository";
 import { UserType } from "@/types/Type";
 import { BaseRepository } from "../BaseRepository/implementation";
+import { env } from "@/config/env.config";
 
 export class UserRepository extends BaseRepository <UserType> implements IUserRepository {
 
@@ -17,7 +18,7 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
   }
 
   async findByEmail(email: string): Promise<UserType | null> {
-    if(email === "admin123@gmail.com") return null
+    if(email === env.ADMIN_EMAIL) return null
     return await User.findOne({email})
   }
 

@@ -5,4 +5,5 @@ export interface IAdminService {
     getDashboardStats() : Promise<{totalUsers: number; totalFreelancers: number; totalClients: number;}>
     getUsersList(): Promise<any[]>
     blockUser(userId : string) : Promise<void>
+    getSkills():Promise<any[]>
 }

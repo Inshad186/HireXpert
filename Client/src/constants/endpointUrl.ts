@@ -21,5 +21,6 @@ export const adminEndpointUrl = {
   LOGIN : "/auth/admin/login",
   DASHBOARD_STATS : "/auth/admin/dashboardStats",
   USERS_LIST : "/auth/admin/usersList",
-  BLOCK_USER : "/auth/admin/block-user"
+  BLOCK_USER : "/auth/admin/block-user",
+  GET_SKILLS : "/auth/admin/getSkills"
 }

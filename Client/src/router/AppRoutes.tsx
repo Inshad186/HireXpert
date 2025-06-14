@@ -21,7 +21,7 @@ import AdminLogin from "@/pages/admin/Login";
 import AdminLayout from "@/layouts/AdminLayout";
 import Dashboard from "@/pages/admin/Dashboard";
 import UserManagement from "@/pages/admin/UserManagement";
-
+import SkillManagement from "@/pages/admin/SkillManagement";
 
 
 export const router = createBrowserRouter([
@@ -45,7 +45,8 @@ export const router = createBrowserRouter([
     {path : "admin", element : <AdminLayout/>,
         children : [
             {path : "dashboard" , element : <Dashboard/>},
-            {path : "userManagement" , element : <UserManagement/>}
+            {path : "userManagement" , element : <UserManagement/>},
+            {path : "skillManagement" , element : <SkillManagement/>},
         ]
     },
 ])

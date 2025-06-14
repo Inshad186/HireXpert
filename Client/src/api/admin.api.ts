@@ -45,3 +45,15 @@ export const blockUsers = async(userId : string) => {
     }
 }
 
+
+export const getSkills = async() => {
+    try {
+        const {data} = await Api.get(adminEndpointUrl.GET_SKILLS)
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };    
+    }
+}
+

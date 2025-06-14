@@ -10,6 +10,7 @@ import { googleAuth } from "@/api/user.api";
 import { setUser } from "@/redux/slices/userSlice";
 import { responses } from "@/constants/response.constants";
 import { useDispatch } from "react-redux";
+import toast from "react-hot-toast";
 
 export function SignupForm({ className, ...props }: React.ComponentPropsWithoutRef<"div">) {
   const [error, setError] = useState({ field: "", message: "" });
@@ -68,7 +69,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
       if (response.success) {
         localStorage.setItem("email", response.data.email);
         localStorage.setItem("apiType","signup")
-        alert("Signup successful!");
+        toast.success("Signup successful!");
         navigate("/otp");
       } else {
         alert(response.error || "User already exists, try another email");

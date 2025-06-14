@@ -6,4 +6,5 @@ export interface IAdminRepository {
     countTotalDashboardStats(): Promise<{totalUsers:number, totalFreelancers: number; totalClients: number;}>
     getAllUsers():Promise<any[]>
     save(user:UserType): Promise<boolean>;
+    getAllSkills():Promise<any[]>
 }
