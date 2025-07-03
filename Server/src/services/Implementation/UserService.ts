@@ -13,9 +13,15 @@ import { transporter } from "@/config/nodemailer.config";
 import { redisClient } from "@/config/redis.config";
 import { handleProfileImageUpload } from "@/config/cloudinary.config";
 import { verifyToken } from "@/utils/jwt.util";
+import { IClientRepository } from "@/repositories/Interface/IClientRepository";
+import { IFreelancerRepository } from "@/repositories/Interface/IFreelancerRepository";
 
 export class UserService implements IUserService {
-  constructor(private userRepository: IUserRepository) {}
+  constructor(  
+    private userRepository: IUserRepository,
+    private clientRepository: IClientRepository,
+    private freelancerRepository: IFreelancerRepository,
+  ) {}
 
   async signup(user: UserType): Promise<string> {
     const existingUser = await this.userRepository.findByEmail(user.email);
@@ -86,31 +92,37 @@ export class UserService implements IUserService {
     return { accessToken, refreshToken, user}
   }
 
-  async googleAuth(user: GoogleAuthUserType): Promise<{ accessToken: string; refreshToken: string; user: UserType; }> {
-    const userExisted = await this.userRepository.findByEmail(user.email)
+async googleAuth(user: GoogleAuthUserType): Promise<{ accessToken: string; refreshToken: string; user: UserType; }> {
+  const userExisted = await this.userRepository.findByEmail(user.email);
 
-    if(userExisted){
-      if(userExisted.isBlocked){
-      throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND)
+  if (userExisted) {
+    if (userExisted.isBlocked) {
+      throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND);
     }
-      const accessToken = await generateAccessToken(userExisted._id as ObjectId, userExisted.role as string)
-      const refreshToken = await generateRefreshToken(userExisted._id as ObjectId, userExisted.role as string)
 
-      return {accessToken, refreshToken, user:userExisted}
-      
-    }else{
-      const newUser : Partial<UserType> = {
-        email : user.email,
-        name : user.name
+    const accessToken = await generateAccessToken(userExisted._id as ObjectId, userExisted.role as string);
+    const refreshToken = await generateRefreshToken(userExisted._id as ObjectId, userExisted.role as string);
 
-      }
-      const userData = await this.userRepository.createUser(newUser)
+    return { accessToken, refreshToken, user: userExisted };
+  } else {
+    const newUser: Partial<UserType> = {
+      email: user.email,
+      name: user.name,
+      role: "freelancer" // or default role
+    };
 
-      const accessToken = await generateAccessToken(userData._id as ObjectId, userData.role as string)
-      const refreshToken = await generateRefreshToken(userData._id as ObjectId, userData.role as string)
-      return {accessToken, refreshToken, user:userData}
+    const userData = await this.userRepository.createUser(newUser);
+
+    if (userData && userData._id) {
+      const accessToken = await generateAccessToken(userData._id as ObjectId, userData.role as string);
+      const refreshToken = await generateRefreshToken(userData._id as ObjectId, userData.role as string);
+      return { accessToken, refreshToken, user: userData };
+    } else {
+      throw generateHttpError(HttpStatus.INTERNAL_SERVER_ERROR, "Failed to create user");
     }
   }
+}
+
 
 
 async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessToken?: string, refreshToken?: string, user: UserType}> {
@@ -138,7 +150,6 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
       email: storedData.userData.email,
       password: storedData.userData.password
     };
-
     const createdUser = await this.userRepository.createUser(user);
     if (!createdUser) {
       throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_CREATION_FAILED);
@@ -192,32 +203,74 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
     await redisClient.setEx(email, 300, updatedTempData); 
   }
 
-  async assignRole(role: string, email: string): Promise<{userRole: string;}> {
-    const user = await this.userRepository.findByEmail(email)
-    if(!user){
-      throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND)
-    }
-    await this.userRepository.updateUserRole(user.email,role)
-
-    return {userRole : role}
+async assignRole(role: string, email: string): Promise<{ userRole: string }> {
+  const user = await this.userRepository.findByEmail(email);
+  console.log(">>>>>>>***>>>>>>>>>>",user)
+  if (!user) {
+    throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND);
   }
+
+  await this.userRepository.updateUserRole(user.email, role);
+
+  // Create profile only if it doesn't exist
+  if (role === "client") {
+    const existingClient = await this.clientRepository.findById(String(user._id));
+    console.log("Existing > ",existingClient)
+    if (!existingClient) {
+      await this.clientRepository.createUser({
+        _id: user._id,
+        name: user.name,
+        role: user.role,
+        companyName: "",
+        website: "",
+        industry: "",
+        address: "",
+        country: "",
+        workType: [],
+        budgetRange: "",
+        preferredTechStack: "",
+      });
+    }
+  }else if(role === "freelancer"){
+    const existingFreelancer = await this.freelancerRepository.findById(String(user._id))
+    if(!existingFreelancer){
+      await this.freelancerRepository.createUser({
+        _id: user._id,
+        name: user.name,
+        role: user.role,
+        profession: "",
+        company: "",
+        qualification: "",
+        bio: "",
+        work_experience:"",
+        proficient_languages: [],
+        skills: [],
+        working_days: "",
+        active_hours: "",
+        basic_price: 0,
+        standard_price: 0,
+        premium_price: 0,
+        portfolio: "",
+      })
+    }
+  }
+  return { userRole: role };
+}
+
 
     async updateProfile(id: string, profileImage: FileType | undefined): Promise<{user: UserType}> {        
         if (!profileImage) {            
             throw generateHttpError(HttpStatus.BAD_REQUEST, "Profile image is required")
         }
-
         const imageURL = await handleProfileImageUpload(profileImage.buffer)
-        console.log("IMAGE URL >>>>> : ",imageURL)
         
         const user = await this.userRepository.findById(id)
 
         if (!user) {
             throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
         }
-
         user.profilePicture = imageURL;
-        await this.userRepository.updateUser(user);
+        await this.userRepository.updateUser(id, user);
         return {user}
     }
 
@@ -242,7 +295,7 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
         throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
       }
       user.name = name
-      await this.userRepository.updateUser(user)
+      await this.userRepository.updateUser(userId, user)
       const newName = user.name
       return {newName}
     }
@@ -293,7 +346,7 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
     }
     user.password = await bcrypt.hash(password,10)
-    await this.userRepository.updateUser(user)
+    await this.userRepository.updateUser(user.id, user)
     return {user}
   }
 
@@ -305,7 +358,7 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
     }
     // ✅ Mutate the existing Mongoose document directly
     Object.assign(user, userData);
-    await this.userRepository.updateUser(user);
+    await this.userRepository.updateUser(userId, user);
 
     return { userDetails: user };
   }

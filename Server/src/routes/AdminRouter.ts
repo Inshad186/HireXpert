@@ -15,6 +15,9 @@ adminRouter.post("/login", adminController.login.bind(adminController))
 adminRouter.get("/dashboardStats", adminController.getDashboardStats.bind(adminController))
 adminRouter.get("/usersList", adminController.getUsersList.bind(adminController))
 adminRouter.patch("/block-user", adminController.blockUser.bind(adminController))
+adminRouter.get("/getCategories", adminController.getCategories.bind(adminController))
 adminRouter.get("/getSkills", adminController.getSkills.bind(adminController))
+adminRouter.patch("/editSkills", adminController.editSkills.bind(adminController))
+adminRouter.post("/addSkills", adminController.addSkills.bind(adminController))
 
 export default adminRouter

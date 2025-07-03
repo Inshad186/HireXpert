@@ -5,6 +5,8 @@ dotenv.config()
 import express from "express"
 import cors from "cors"
 import userRouter from "./routes/UserRouter";
+import clientRouter from "./routes/ClientRouter";
+import freelancerRouter from "./routes/FreelancerRouter"
 import adminRouter from "./routes/AdminRouter"
 import morgan from "morgan";
 import { connectDB } from "./config/mongo.config";
@@ -32,6 +34,8 @@ connectDB()
 
 app.use(corsMiddleware)
 app.use("/api/auth", userRouter)
+app.use("/api/auth/client", clientRouter)
+app.use("/api/auth/freelancer", freelancerRouter)
 app.use("/api/auth/admin", adminRouter)
 app.use((req, res, next) =>{
   verifyTokenMiddleware(req, res, next)

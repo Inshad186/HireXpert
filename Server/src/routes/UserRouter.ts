@@ -8,9 +8,19 @@ import { loginValidation } from "@/utils/validation.util";
 import { upload } from "@/config/multer.config";
 import { verifyTokenMiddleware } from "@/middlewares/verifyToken.middleware";
 import { allowRoles } from "@/middlewares/roleBase.middleware";
+import { ClientRepository } from "@/repositories/Implementation/ClientRepository";
+import { FreelancerRepository } from "@/repositories/Implementation/FreelancerRepository";
+
 
 const userRepo = new UserRepository();
-const userService = new UserService(userRepo);
+const clientRepo = new ClientRepository(); // ✅
+const freelancerRepo = new FreelancerRepository()
+
+
+// Pass all to the service
+const userService = new UserService(userRepo, clientRepo, freelancerRepo); // ✅ now 3 args
+
+// Create controller
 const userController = new UserController(userService);
 
 const router = express.Router();

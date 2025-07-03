@@ -45,6 +45,16 @@ export const blockUsers = async(userId : string) => {
     }
 }
 
+export const getCategories = async() => {
+    try {
+        const {data} = await Api.get(adminEndpointUrl.GET_CATEGORIES)
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };  
+    }
+}
 
 export const getSkills = async() => {
     try {
@@ -54,6 +64,28 @@ export const getSkills = async() => {
         const err = error as any
         const message = err.respose?.data?.error || "Something went wrong"
         return { success:false, error:message };    
+    }
+}
+
+export const editSkills = async(oldName:string, updatedName: string) => {
+    try {
+        const {data} = await Api.patch(adminEndpointUrl.EDIT_SKILLS, {oldName, name:updatedName})
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message }; 
+    }
+}
+
+export const addSkills = async(name : string) => {
+    try {
+        const {data} = await Api.post(adminEndpointUrl.ADD_SKILLS, {name})
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };   
     }
 }
 

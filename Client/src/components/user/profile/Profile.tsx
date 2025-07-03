@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
-import { changeProfile, getProfileImage, updateUserDetails } from "@/api/user.api";
+import { changeProfile, getProfileImage } from "@/api/user.api";
+import { updateClientProfile } from "@/api/client.api";
 import { setUser } from "@/redux/slices/userSlice";
 import ProfileImageUploader from "./ProfileImageUploader";
 import EditableName from "./EditableName";
 import ProfileForm from "./ProfileForm";
 import { getSkills } from "@/api/admin.api";
+import { updateFreelancerProfile } from "@/api/freelancer.api";
 
 export default function Profile() {
   const user = useSelector((state: RootState) => state.user);
@@ -14,7 +16,7 @@ export default function Profile() {
 
   const [form, setForm] = useState<any>({});
   const [profileImage, setProfileImage] = useState("");
-  const [adminSkills, setAdminSkills] = useState<string[]>([]);
+  const [adminSkills, setAdminSkills] = useState<{ [category: string]: string[] }>({});
 
 const clientFields = [
   { name: "companyName", placeholder: "Company Name" },
@@ -59,7 +61,7 @@ useEffect(() => {
 
       const skillsRes = await getSkills();
       if (skillsRes.success) {
-        setAdminSkills(skillsRes.data.skills || []);
+        setAdminSkills(skillsRes.data.skills || {});
       }
     } catch (e) {
       console.error(e);
@@ -90,18 +92,29 @@ useEffect(() => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSave = async () => {
-    try {
-      const response = await updateUserDetails(form);
-      if (response.success){
-        dispatch(setUser(response.data.userDetails.userDetails));
-      }else{
-        console.error("Failed to update profile", response);
-      }
-    } catch (err) {
-      console.error("Profile update error", err);
+const handleSave = async () => {
+  try {
+    let response;
+
+    if (isClient) {
+      response = await updateClientProfile(form); 
+      console.log("🎃🎃🎃🎃🎃🎃🎃🎃",response.data)
+    }else if(isFreelancer){
+      response = await updateFreelancerProfile(form)
+    } else {
+      console.warn("Unknown role — cannot update profile");
+      return;
     }
-  };
+    if (response.success) {
+      dispatch(setUser(response.data.user)); // update Redux
+    } else {
+      console.error("Failed to update profile", response);
+    }
+  } catch (err) {
+    console.error("Profile update error", err);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">

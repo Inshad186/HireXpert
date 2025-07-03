@@ -1,11 +1,13 @@
 import mongoose, {ObjectId} from "mongoose"
 
+export type UserRole = "freelancer" | "client" | "admin" | "none";
+
 export interface UserSignUpType {
     name : string,
     email : string,
     password : string,
     confirmPassword? : string 
-    role? : "freelancer" | "client" | "admin" | "none" | "",
+    role? : UserRole,
 }
 
 

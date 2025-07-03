@@ -12,9 +12,16 @@ export const endpointUrl = {
   FORGET_PASSWORD : "/auth/forget-password",
   FP_VERIFY_OTP : "/auth/fp-verify-otp",
   RESET_PASSWORD : "/auth/reset-password",
-  UPDATE_USERDETAILS : "/auth/update-userdetails",
   GOOGLE_AUTH : "/auth/google-auth",
   LOGOUT : '/auth/logout',
+}
+
+export const clientEndpointUrl = {
+  UPDATE_CLIENT_PROFILE : "/auth/client/update-clientProfile",
+}
+
+export const freelancerEndpointUrl = {
+    UPDATE_FREELANCER_PROFILE : "/auth/freelancer/update-freelancerProfile",
 }
 
 export const adminEndpointUrl = {
@@ -22,5 +29,8 @@ export const adminEndpointUrl = {
   DASHBOARD_STATS : "/auth/admin/dashboardStats",
   USERS_LIST : "/auth/admin/usersList",
   BLOCK_USER : "/auth/admin/block-user",
-  GET_SKILLS : "/auth/admin/getSkills"
+  GET_CATEGORIES : "/auth/admin/getCategories",
+  GET_SKILLS : "/auth/admin/getSkills",
+  EDIT_SKILLS : "/auth/admin/editSkills",
+  ADD_SKILLS : "/auth/admin/addSkills"
 }

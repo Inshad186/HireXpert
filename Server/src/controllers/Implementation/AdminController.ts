@@ -10,7 +10,8 @@ export class AdminController implements IAdminController {
   async login(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email, password } = req.body;
-      const { accessToken, refreshToken, admin } = await this.adminService.login(email, password);
+      const { accessToken, refreshToken, admin } =
+        await this.adminService.login(email, password);
       res.cookie("refreshToken", refreshToken, {
         httpOnly: true,
         secure: true,
@@ -23,9 +24,10 @@ export class AdminController implements IAdminController {
     }
   }
 
-  async getDashboardStats( req: Request, res: Response, next: NextFunction ): Promise<void> {
+  async getDashboardStats( req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { totalUsers, totalFreelancers, totalClients } = await this.adminService.getDashboardStats();
+      const { totalUsers, totalFreelancers, totalClients } =
+        await this.adminService.getDashboardStats();
       res.status(HttpStatus.OK).json({ success: true, totalUsers, totalFreelancers, totalClients });
     } catch (error) {
       next();
@@ -48,20 +50,59 @@ export class AdminController implements IAdminController {
 
       await this.adminService.blockUser(userId);
 
-      res.status(200).json({ success: true, message: "User block status updated" }); // ✅ return success response
+      res.status(HttpStatus.OK).json({ success: true, message: "User block status updated" }); // ✅ return success response
     } catch (error) {
-      next(error); 
+      next(error);
     }
   }
 
-    async getSkills(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async getCategories(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-        const skills = await this.adminService.getSkills();
-        res.status(200).json({ success: true, skills });
+      const categories = await this.adminService.getCategories()
+      res.status(HttpStatus.OK).json({success : true, categories})
     } catch (error) {
-        console.error(error);
-        next(error);
+      next(error)
     }
-    }
+  }
 
+  async getSkills( req: Request, res: Response, next: NextFunction ): Promise<void> {
+    try {
+      const skills = await this.adminService.getSkills();
+      res.status(200).json({ success: true, skills });
+    } catch (error) {
+      console.error(error);
+      next(error);
+    }
+  }
+
+  async editSkills( req: Request, res: Response, next: NextFunction ): Promise<void> {
+    try {
+      const { oldName, name: newName } = req.body;
+      console.log("Old Name >>>> : ", oldName);
+      console.log("New Name >>>> : ", newName);
+
+      if (!oldName || !newName) {
+        res.status(400).json({ error: "Invalid skill data" });
+        return;
+      }
+
+      await this.adminService.editSkills(oldName, newName);
+      res.status(200).json({ message: "Skill updated successfully" });
+    } catch (error) {
+      next(error);
+    }
+  }
+
+
+  async addSkills(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const{name} = req.body
+      if(!name || !name.trim()){
+        res.status(HttpStatus.NOT_FOUND).json({message : "Skill name is required" })
+      }
+      await this.adminService
+    } catch (error) {
+      
+    }
+  }
 }
