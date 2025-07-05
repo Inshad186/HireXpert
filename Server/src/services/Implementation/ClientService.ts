@@ -8,7 +8,7 @@ import { generateHttpError } from "@/utils/http-error.util";
 export class ClientService implements IClientService {
   constructor(private clientRepository: IClientRepository) {}
 
-  async updateProfile( userId: string, userData: ClientProfileType ): Promise<{ userDetails: ClientProfileType }> {
+  async updateProfile( userId: string, userData: ClientProfileType ): Promise<ClientProfileType> {
     try {
       const user = await this.clientRepository.findById(userId)
       if (!user) {
@@ -17,7 +17,7 @@ export class ClientService implements IClientService {
       // ✅ Mutate the existing Mongoose document directly
       Object.assign(user, userData);
       await this.clientRepository.updateUser(userId, user);
-      return { userDetails: user };
+      return user 
     } catch (error) {
       console.error(error);
       throw error;

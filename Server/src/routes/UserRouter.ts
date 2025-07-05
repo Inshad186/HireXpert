@@ -39,6 +39,8 @@ router.get("/get-freelancer",verifyTokenMiddleware, userController.getFreelancer
 router.post("/forget-password", userController.forgetPassword.bind(userController))
 router.post("/reset-password", userController.resetPassword.bind(userController))
 router.post("/update-userdetails",verifyTokenMiddleware, userController.updateUserDetails.bind(userController))
+router.get("/getClientFullProfile", verifyTokenMiddleware, userController.getClientFullProfile.bind(userController))
+router.get("/getFreelancerFullProfile", verifyTokenMiddleware, userController.getFreelancerFullProfile.bind(userController))
 
 router.delete("/logout",userController.logout.bind(userController))
 

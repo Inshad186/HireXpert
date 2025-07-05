@@ -199,6 +199,26 @@ export class UserController implements IUserController {
     }
   }
 
+  async getClientFullProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
+      const fullProfile = await this.userService.getClientFullProfile(userId)
+      res.status(HttpStatus.OK).json({ success: true, fullProfile });
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async getFreelancerFullProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
+      const fullProfile = await this.userService.getFreelancerFullProfile(userId)
+      res.status(HttpStatus.OK).json({success : true, fullProfile})
+    } catch (error) {
+      next(error)
+    }
+  }
+
   async logout(req: Request, res: Response, next: NextFunction): Promise<void> {
     const refreshToken = req.cookies?.refreshToken;
     console.log("REFRESH TOKEN >>> : ",refreshToken)

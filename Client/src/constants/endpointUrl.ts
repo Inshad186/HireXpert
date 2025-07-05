@@ -13,6 +13,8 @@ export const endpointUrl = {
   FP_VERIFY_OTP : "/auth/fp-verify-otp",
   RESET_PASSWORD : "/auth/reset-password",
   GOOGLE_AUTH : "/auth/google-auth",
+  GET_CLIENT_FULLPROFILE : "/auth/getClientFullProfile",
+  GET_FREELANCER_FULLPROFILE : "/auth/getFreelancerFullProfile",
   LOGOUT : '/auth/logout',
 }
 

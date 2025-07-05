@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
-import { changeProfile, getProfileImage } from "@/api/user.api";
+import { changeProfile, getClientFullProfile, getFreelancerFullProfile, getProfileImage } from "@/api/user.api";
 import { updateClientProfile } from "@/api/client.api";
 import { setUser } from "@/redux/slices/userSlice";
 import ProfileImageUploader from "./ProfileImageUploader";
@@ -16,7 +16,8 @@ export default function Profile() {
 
   const [form, setForm] = useState<any>({});
   const [profileImage, setProfileImage] = useState("");
-  const [adminSkills, setAdminSkills] = useState<{ [category: string]: string[] }>({});
+  const [adminSkills, setAdminSkills] = useState<{ [category: string]: { _id: string; name: string }[] }>({});
+
 
 const clientFields = [
   { name: "companyName", placeholder: "Company Name" },
@@ -50,26 +51,38 @@ const freelancerFields = [
   const isFreelancer = user.role === "freelancer";
   const formFields = isClient ? clientFields : freelancerFields;
 
-useEffect(() => {
-  const load = async () => {
-    try {
-      const response = await getProfileImage();
-      if (response.success) {
-        setProfileImage(response.data.user.profilePicture);
-        setForm({ ...form, ...response.data.user });
-      }
+  useEffect(() => {
+    const load = async () => {
+      try {
+        const response = await getProfileImage();
+        if (response.success) {
+          setProfileImage(response.data.user.profilePicture);
+          setForm(response.data.user);
+          
+        }
 
-      const skillsRes = await getSkills();
-      if (skillsRes.success) {
-        setAdminSkills(skillsRes.data.skills || {});
+        const skillsRes = await getSkills();
+        if (skillsRes.success) {
+          setAdminSkills(skillsRes.data.skills || {});
+        }
+
+        let profileResponce;
+        if (isClient) {
+          profileResponce = await getClientFullProfile();
+        } else if (isFreelancer) {
+          profileResponce = await getFreelancerFullProfile();
+        }
+
+        if (profileResponce?.success) {
+          setForm(profileResponce.data.fullProfile);
+        }
+      } catch (e) {
+        console.error(e);
       }
-    } catch (e) {
-      console.error(e);
-    }
-  };
+    };
 
   load();
-}, []);
+  }, []);
 
 
   const handleImageChange = async (file: File) => {
@@ -98,7 +111,6 @@ const handleSave = async () => {
 
     if (isClient) {
       response = await updateClientProfile(form); 
-      console.log("🎃🎃🎃🎃🎃🎃🎃🎃",response.data)
     }else if(isFreelancer){
       response = await updateFreelancerProfile(form)
     } else {
@@ -106,7 +118,8 @@ const handleSave = async () => {
       return;
     }
     if (response.success) {
-      dispatch(setUser(response.data.user)); // update Redux
+      dispatch(setUser(response.data.userDetails));
+      setForm(response.data.userDetails);
     } else {
       console.error("Failed to update profile", response);
     }

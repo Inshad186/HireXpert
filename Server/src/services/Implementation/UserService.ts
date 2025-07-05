@@ -1,7 +1,7 @@
 import { IUserService } from "../Interface/IUserService"; 
 import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 import bcrypt from "bcrypt"
-import { FileType, GoogleAuthUserType, UserType } from "@/types/Type";
+import { ClientProfileType, FileType, FreelancerProfileType, GoogleAuthUserType, UserType } from "@/types/Type";
 import { HttpResponse } from "@/constants/response.constant";
 import { generateAccessToken, generateRefreshToken, } from "@/utils/jwt.util";
 import { generateHttpError } from "@/utils/http-error.util";
@@ -209,10 +209,8 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
   if (!user) {
     throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND);
   }
-
   await this.userRepository.updateUserRole(user.email, role);
 
-  // Create profile only if it doesn't exist
   if (role === "client") {
     const existingClient = await this.clientRepository.findById(String(user._id));
     console.log("Existing > ",existingClient)
@@ -363,5 +361,20 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
     return { userDetails: user };
   }
 
+  async getClientFullProfile(userId: string): Promise<ClientProfileType> {
+    const user = await this.clientRepository.findById(userId);
+    if (!user){
+      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
+    }
+    return user;
+    }
+
+    async getFreelancerFullProfile(userId: string): Promise<FreelancerProfileType> {
+      const user = await this.freelancerRepository.findById(userId)
+      if(!user){
+        throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
+      }
+      return user;
+    }
 
 }

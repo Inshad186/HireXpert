@@ -1,4 +1,6 @@
 import { UserType, FileType, GoogleAuthUserType } from "@/types/Type";
+import { ClientProfileType } from "@/types/Type";
+import { FreelancerProfileType } from "@/types/Type";
 
 export interface IUserService {
   signup(user: UserType): Promise<string>;
@@ -14,5 +16,7 @@ export interface IUserService {
   resendOtp(email: string) : Promise<void>;
   resetPassword(email: string, password: string) : Promise<{user:UserType}>
   updateUserDetails(userId:string, userData:Partial<UserType>) : Promise<{userDetails:UserType}>
+  getClientFullProfile(userId:string) : Promise<ClientProfileType>
+  getFreelancerFullProfile(userId:string) : Promise<FreelancerProfileType>
   forgetPassword(email:string) : Promise<{user:UserType}>
 }

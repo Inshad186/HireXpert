@@ -149,6 +149,28 @@ export const resetPassword = async (email: string, password: string) => {
     }
 }
 
+export const getClientFullProfile = async() => {
+    try {
+        const {data} = await Api.get(endpointUrl.GET_CLIENT_FULLPROFILE)
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };  
+    }
+}
+
+export const getFreelancerFullProfile = async() => {
+    try {
+        const {data} = await Api.get(endpointUrl.GET_FREELANCER_FULLPROFILE)
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };  
+    }
+}
+
 // export const updateUserDetails = async(data: any) => {
 //     try {
 //         const response = await Api.post(endpointUrl.UPDATE_USERDETAILS, data)

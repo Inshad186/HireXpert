@@ -8,13 +8,12 @@ interface Props {
 
 export default function ProfileForm({ form, onChange, fields }: Props) {
     const [multiSelectOpen, setMultiSelectOpen] = useState<{ [key: string]: boolean }>({});
-
       const toggleSelect = (fieldName: string) => {
-    setMultiSelectOpen((prev) => ({
-      ...prev,
-      [fieldName]: !prev[fieldName]
-    }));
-  };
+      setMultiSelectOpen((prev) => ({
+        ...prev,
+        [fieldName]: !prev[fieldName]
+      }));
+    };
 
   return (
     <div className="space-y-4 text-sm text-gray-700">
@@ -36,48 +35,45 @@ export default function ProfileForm({ form, onChange, fields }: Props) {
                   : `Select ${field.placeholder}`}
               </div>
 
-              {multiSelectOpen[field.name] && (
-                <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-40 overflow-y-auto">
-{Object.entries(field.options).map(([category, skills]) => {
-  return (
-    <div key={category} className="border-t border-gray-300 px-2 py-1">
-      <div className="font-semibold text-gray-800 mb-1">{category}</div>
-      {(skills as { _id: string; name: string }[]).map((opt) => (
-        <label
-          key={opt._id}
-          className="block px-3 py-1 hover:bg-gray-100 cursor-pointer"
-        >
-          <input
-            type="checkbox"
-            value={opt._id}
-            checked={selected.includes(opt._id)}
-            onChange={(e) => {
-              let updated = [...selected];
-              if (e.target.checked) {
-                updated.push(opt._id);
-              } else {
-                updated = updated.filter((v) => v !== opt._id);
-              }
+{multiSelectOpen[field.name] && field.options && typeof field.options === "object" && (
+  <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-40 overflow-y-auto">
+    {Object.entries(field.options).map(([category, skills]) => {
+      const safeSkills = Array.isArray(skills) ? skills : [];
 
-              onChange({
-                target: {
-                  name: field.name,
-                  value: updated,
-                },
-              } as any);
-            }}
-            className="mr-2"
-          />
-          {opt.name}
-        </label>
-      ))}
-    </div>
-  );
-})}
+      return (
+        <div key={category} className="border-t border-gray-300 px-2 py-1">
+          <div className="font-semibold text-gray-800 mb-1">{category}</div>
+          {safeSkills.map((opt) => (
+            <label key={opt._id} className="block px-3 py-1 hover:bg-gray-100 cursor-pointer">
+              <input
+                type="checkbox"
+                value={opt.name}
+                checked={selected.includes(opt.name)}
+                onChange={(e) => {
+                  let updated = [...selected];
+                  if (e.target.checked) {
+                    updated.push(opt.name);
+                  } else {
+                    updated = updated.filter((v) => v !== opt.name);
+                  }
+                  onChange({
+                    target: {
+                      name: field.name,
+                      value: updated,
+                    },
+                  } as any);
+                }}
+                className="mr-2"
+              />
+              {opt.name}
+            </label>
+          ))}
+        </div>
+      );
+    })}
+  </div>
+)}
 
-
-                </div>
-              )}
             </div>
           );
         }
