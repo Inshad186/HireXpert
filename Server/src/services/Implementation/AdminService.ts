@@ -1,4 +1,4 @@
-import { UserType } from "@/types/Type";
+import { CategoryType, SkillType, UserType } from "@/types/Type";
 import { IAdminService } from "../Interface/IAdminService";
 import { generateHttpError } from "@/utils/http-error.util";
 import { HttpStatus } from "@/constants/status.constant";
@@ -97,24 +97,28 @@ export class AdminService implements IAdminService {
     }
   }
 
+  async addCategories(name : string): Promise<CategoryType> {
+    return await this.adminRepository.createCategory(name)
+  }
+
   async getCategories(): Promise<any> {
     return await this.adminRepository.getAllCategories()
   }
 
-async getSkills(): Promise<{ [category: string]: { _id: string; name: string }[] }> {
-  return await this.adminRepository.getAllSkills();
-}
-
-
-  async editSkills(oldName: string, newName: string): Promise<void> {
-    await this.adminRepository.updateAllSkills(oldName, newName);
+  async addSkills(name: string, category: string): Promise<SkillType> {
+    return await this.adminRepository.createSkill(name, category)
   }
 
-  async addSkills(name: string): Promise<void> {
-    try {
-      await this.adminRepository
-    } catch (error) {
-      console.error(error)
-    }
+  async getSkills(): Promise<{ [category: string]: { _id: string; name: string }[] }> {
+    return await this.adminRepository.getAllSkills();
   }
+
+  async editSkills(skillId: string, skillName: string): Promise<void> {
+    await this.adminRepository.updateAllSkills(skillId, skillName);
+  }
+
+  async deleteCategoryAndSkill(categoryId: string): Promise<void> {
+    await this.adminRepository.deleteCategoryAndSkills(categoryId);
+  }
+
 }

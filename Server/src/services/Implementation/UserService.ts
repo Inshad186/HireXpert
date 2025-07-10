@@ -205,7 +205,6 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
 
 async assignRole(role: string, email: string): Promise<{ userRole: string }> {
   const user = await this.userRepository.findByEmail(email);
-  console.log(">>>>>>>***>>>>>>>>>>",user)
   if (!user) {
     throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND);
   }
@@ -213,12 +212,11 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
 
   if (role === "client") {
     const existingClient = await this.clientRepository.findById(String(user._id));
-    console.log("Existing > ",existingClient)
     if (!existingClient) {
       await this.clientRepository.createUser({
         _id: user._id,
         name: user.name,
-        role: user.role,
+        role,
         companyName: "",
         website: "",
         industry: "",
@@ -235,7 +233,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
       await this.freelancerRepository.createUser({
         _id: user._id,
         name: user.name,
-        role: user.role,
+        role,
         profession: "",
         company: "",
         qualification: "",

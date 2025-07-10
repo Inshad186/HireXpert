@@ -56,10 +56,36 @@ export class AdminController implements IAdminController {
     }
   }
 
+  async addCategories(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { name } = req.body;
+      if(!name){
+        res.status(HttpStatus.BAD_REQUEST).json({success : false, error: "Category name is required"})
+      }
+      const newCategory = await this.adminService.addCategories(name)
+      res.status(HttpStatus.OK).json({success : true, category: newCategory})
+    } catch (error) {
+      next(error)
+    }
+  }
+
   async getCategories(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const categories = await this.adminService.getCategories()
       res.status(HttpStatus.OK).json({success : true, categories})
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async addSkills(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const{ name, category } = req.body
+      if(!name || !name.trim()){
+        res.status(HttpStatus.NOT_FOUND).json({message : "Skill name is required" })
+      }
+      const newSkill = await this.adminService.addSkills(name, category)
+      res.status(HttpStatus.OK).json({success : true, skill : newSkill})
     } catch (error) {
       next(error)
     }
@@ -77,32 +103,34 @@ export class AdminController implements IAdminController {
 
   async editSkills( req: Request, res: Response, next: NextFunction ): Promise<void> {
     try {
-      const { oldName, name: newName } = req.body;
-      console.log("Old Name >>>> : ", oldName);
-      console.log("New Name >>>> : ", newName);
+      const { skillId, skillName } = req.body;
+      console.log("Skill Id >>>> : ", skillId);
+      console.log("Skill Name >>>> : ", skillName);
 
-      if (!oldName || !newName) {
+      if (!skillId || !skillName) {
         res.status(400).json({ error: "Invalid skill data" });
         return;
       }
 
-      await this.adminService.editSkills(oldName, newName);
+      await this.adminService.editSkills(skillId, skillName);
       res.status(200).json({ message: "Skill updated successfully" });
     } catch (error) {
       next(error);
     }
   }
 
-
-  async addSkills(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async deleteCategoryAndSkills(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const{name} = req.body
-      if(!name || !name.trim()){
-        res.status(HttpStatus.NOT_FOUND).json({message : "Skill name is required" })
+      const { categoryId } = req.params
+      console.log("Delet Category And Skills >>>>>>>> : ",categoryId)
+      if (!categoryId) {
+      res.status(400).json({ success: false, error: "Category ID is required" });
       }
-      await this.adminService
+      await this.adminService.deleteCategoryAndSkill(categoryId);
+      res.status(200).json({ success: true, message: "Category and skills deleted successfully" });
     } catch (error) {
-      
+      next(error)
     }
   }
+
 }

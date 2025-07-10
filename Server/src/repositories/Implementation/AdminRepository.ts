@@ -75,7 +75,7 @@ export class AdminRepository extends BaseRepository<SkillType> implements IAdmin
 
   async save(user: UserType): Promise<boolean> {
     try {
-      await User.findByIdAndUpdate(user._id, { isBlocked: user.isBlocked }); // ✅ actually update the data
+      await User.findByIdAndUpdate(user._id, { isBlocked: user.isBlocked }); 
       return true;
     } catch (err) {
       console.error(err);
@@ -100,22 +100,44 @@ export class AdminRepository extends BaseRepository<SkillType> implements IAdmin
       }
     }
 
+    async createCategory(name : string) : Promise<CategoryType> {
+      const existing = await Category.findOne({ name })
+      if(existing) {
+        throw new Error("Category already exists");
+      }
+      const category = new Category({ name })
+      return await category.save()
+    }
 
   async getAllCategories(): Promise<CategoryType[]> {
     return await Category.find({});
   }
 
+  async createSkill(name: string, category: string): Promise<SkillType> {
+    const existing = await Skill.findOne({name, category})
+    if(existing){
+      throw new Error("Skill already exists")
+    }
+    const skill = new Skill({ name, category })
+    return await skill.save()
+  }
 
-  async updateAllSkills(oldName: string, newName: string): Promise<void> {
+
+  async updateAllSkills(skillId: string, skillName: string): Promise<void> {
     try {
-      await Freelancer.updateMany(
-        { skills: oldName },
-        { $set: { "skills": newName } }
-      );
+      // Just update the Skill document
+      await Skill.findByIdAndUpdate(skillId, { name: skillName });
     } catch (error) {
-      throw new Error("Failed to update skills in freelancer profiles");
+      throw new Error("Failed to update skill");
     }
   }
+
+
+  async deleteCategoryAndSkills(categoryId: string): Promise<void> {
+    await Skill.deleteMany({ category: categoryId });
+    await Category.findByIdAndDelete(categoryId);
+  }
+
 
   //   async verifyAdmin(Id: string): Promise<boolean> {
   //     try {

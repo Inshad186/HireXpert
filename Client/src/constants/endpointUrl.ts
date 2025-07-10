@@ -31,8 +31,10 @@ export const adminEndpointUrl = {
   DASHBOARD_STATS : "/auth/admin/dashboardStats",
   USERS_LIST : "/auth/admin/usersList",
   BLOCK_USER : "/auth/admin/block-user",
+  ADD_CATEGORIES : "/auth/admin/addCategories",
   GET_CATEGORIES : "/auth/admin/getCategories",
   GET_SKILLS : "/auth/admin/getSkills",
   EDIT_SKILLS : "/auth/admin/editSkills",
-  ADD_SKILLS : "/auth/admin/addSkills"
+  ADD_SKILLS : "/auth/admin/addSkills",
+  DELETE_CATEGORY_AND_SKILL : "/auth/admin/deleteCategory-Skill"
 }

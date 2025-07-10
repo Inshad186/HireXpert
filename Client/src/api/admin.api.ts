@@ -45,6 +45,17 @@ export const blockUsers = async(userId : string) => {
     }
 }
 
+export const addCategories = async(name : string) => {
+    try {
+        const {data} = await Api.post(adminEndpointUrl.ADD_CATEGORIES, {name})
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };
+    }
+}
+
 export const getCategories = async() => {
     try {
         const {data} = await Api.get(adminEndpointUrl.GET_CATEGORIES)
@@ -53,6 +64,17 @@ export const getCategories = async() => {
         const err = error as any
         const message = err.respose?.data?.error || "Something went wrong"
         return { success:false, error:message };  
+    }
+}
+
+export const addSkills = async(name : string, category: string) => {
+    try {
+        const {data} = await Api.post(adminEndpointUrl.ADD_SKILLS, {name, category})
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };   
     }
 }
 
@@ -67,9 +89,9 @@ export const getSkills = async() => {
     }
 }
 
-export const editSkills = async(oldName:string, updatedName: string) => {
+export const editSkills = async(skillId:string, skillName: string) => {
     try {
-        const {data} = await Api.patch(adminEndpointUrl.EDIT_SKILLS, {oldName, name:updatedName})
+        const {data} = await Api.patch(adminEndpointUrl.EDIT_SKILLS, {skillId, skillName})
         return {success : true, data}
     } catch (error) {
         const err = error as any
@@ -78,14 +100,15 @@ export const editSkills = async(oldName:string, updatedName: string) => {
     }
 }
 
-export const addSkills = async(name : string) => {
+export const deleteCategoryAndSkills = async(categoryId: string) => {
     try {
-        const {data} = await Api.post(adminEndpointUrl.ADD_SKILLS, {name})
+        const {data} = await Api.delete(`${adminEndpointUrl.DELETE_CATEGORY_AND_SKILL}/${categoryId}`)
         return {success : true, data}
     } catch (error) {
         const err = error as any
         const message = err.respose?.data?.error || "Something went wrong"
-        return { success:false, error:message };   
+        return { success:false, error:message };  
     }
 }
+
 

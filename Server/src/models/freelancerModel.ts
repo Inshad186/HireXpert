@@ -2,6 +2,9 @@ import mongoose, {Schema, Document} from "mongoose";
 
 export interface IFreelancerProfile extends Document {
   user: mongoose.Types.ObjectId;
+  name?: string;
+  email?: string;
+  role?: string;
   profession?: string;
   company?: string;
   qualification?: string;
@@ -19,6 +22,9 @@ export interface IFreelancerProfile extends Document {
 
 const freelancerProfileSchema = new Schema<IFreelancerProfile>({
   user: { type: Schema.Types.ObjectId, ref: "User", required: false },
+  name: String,
+  email: String,
+  role: String,
   profession: String,
   company: String,
   qualification: String,

@@ -121,7 +121,6 @@ export class UserController implements IUserController {
       console.log("REQUEST BODY FROM UPDATEUSER NAME",req.body)
       const {name} = req.body
       const {userId} = JSON.parse(req.headers["x-user-payload"] as string)
-      console.log("???????????" , userId)
       const newName = await this.userService.updateUserName(userId, name)
       res.status(HttpStatus.OK).json({newName})
     } catch (err) {

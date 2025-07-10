@@ -1,5 +1,6 @@
 import { UserType } from "@/types/Type";
 import { CategoryType } from "@/types/Type";
+import { SkillType } from "@/types/Type";
 
 export interface IAdminRepository {
     findByEmail(email: string) : Promise<UserType | null>;
@@ -7,7 +8,10 @@ export interface IAdminRepository {
     countTotalDashboardStats(): Promise<{totalUsers:number, totalFreelancers: number; totalClients: number;}>
     getAllUsers():Promise<any[]>
     save(user:UserType): Promise<boolean>;
+    createCategory(name: string): Promise<CategoryType>
     getAllCategories() : Promise<CategoryType[]>
+    createSkill(name: string, category: string) : Promise<SkillType>
     getAllSkills(): Promise<{ [category: string]: { _id: string; name: string }[] }>
-    updateAllSkills(oldName: string, newName: string):Promise<void>
+    updateAllSkills(skillId: string, skillName: string):Promise<void>
+    deleteCategoryAndSkills(categoryId : string): Promise<void>
 }

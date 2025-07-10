@@ -5,7 +5,6 @@ export interface ISkill extends Document {
   name: string;
   category: mongoose.Types.ObjectId;
 }
-
 const SkillSchema: Schema = new Schema({
   name: {
     type: String,
@@ -19,5 +18,4 @@ const SkillSchema: Schema = new Schema({
     required: true,
   }
 });
-
 export default mongoose.model<ISkill>("Skill", SkillSchema);
