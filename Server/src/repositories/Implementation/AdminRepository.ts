@@ -63,15 +63,34 @@ export class AdminRepository extends BaseRepository<SkillType> implements IAdmin
     }
   }
 
-  async getAllUsers(): Promise<any[]> {
-    try {
-      const users = await User.find({ role: { $ne: "admin" } });
-      return users;
-    } catch (error) {
-      console.error(error);
-      throw new Error("Error to getting the counts");
+async getAllUsers(page: number, limit: number, role: string, search: string, status?: string): Promise<{ users: any[]; totalUsers: number }> {
+  try {
+    const skip = (page - 1) * limit;
+    const filter: any = { role };
+
+    if (search) {
+      filter.name = { $regex: search, $options: 'i' }; 
     }
+
+    if (status === "active") {
+      filter.isBlocked = false;
+    } else if (status === "blocked") {
+      filter.isBlocked = true;
+    }
+
+    const users = await User.find(filter)
+      .skip(skip)
+      .limit(limit)
+      .exec();
+
+    const totalUsers = await User.countDocuments(filter);
+
+    return { users, totalUsers };
+  } catch (error) {
+    console.error("Error getting users:", error);
+    throw new Error("Error getting users");
   }
+}
 
   async save(user: UserType): Promise<boolean> {
     try {

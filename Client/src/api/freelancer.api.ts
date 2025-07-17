@@ -11,3 +11,15 @@ export const updateFreelancerProfile = async(data: any) => {
         return { success:false, error:message };        
     }
 }
+
+
+export const createGig = async(formData: FormData) => {
+    try {
+        const {data} = await Api.post(freelancerEndpointUrl.CREATE_GIG, formData)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };  
+    }
+}

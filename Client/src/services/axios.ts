@@ -6,15 +6,12 @@ import { endpointUrl } from "@/constants/endpointUrl";
 
 const getUserLevelToken = () : string | null => {
     const state = store.getState()
-    console.log("State  >>>>> : ",state)
     const token = state.user.accessToken
-    console.log("Token >>>>>> : ",token)
     return token
 }
 
 const refreshToken = () => {
     const response = Api.post(endpointUrl.REFRESH_TOKEN, {}, {withCredentials:true}) as any
-    console.log("REFRESH TOKEN RESPONSE >>>>> : ",response)
 }
 
 const Api = axios.create({
@@ -29,7 +26,6 @@ Api.interceptors.request.use(
     (config) => {
         config.headers = config.headers || {}
         const token = getUserLevelToken()
-        console.log("Get User Level Token >> : ",token)
 
         if(token){
             config.headers.Authorization = `Bearer ${token}`
@@ -57,7 +53,6 @@ Api.interceptors.response.use(
 
                 try {
                     const userLevel = originalRequest.headers['X-User-Level'];
-                    console.log("UserLevel from service axios : ",userLevel)
                     const newToken = await refreshToken();
 
                     originalRequest.headers.Authorization = `Bearer ${newToken}`;

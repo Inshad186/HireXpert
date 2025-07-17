@@ -24,6 +24,8 @@ export const clientEndpointUrl = {
 
 export const freelancerEndpointUrl = {
     UPDATE_FREELANCER_PROFILE : "/auth/freelancer/update-freelancerProfile",
+    CREATE_GIG : "/auth/freelancer/create-gig",
+    LISTED_GIG : "/auth/freelancer/listed-gig"
 }
 
 export const adminEndpointUrl = {

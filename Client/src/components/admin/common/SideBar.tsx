@@ -4,7 +4,8 @@ function SideBar() {
       <h1 className="text-2xl font-bold mb-10">HireXpert</h1>
       <nav className="flex flex-col gap-6">
         <a href="/admin/dashboard" className="hover:text-gray-400">Dashboard</a>
-        <a href="/admin/userManagement" className="hover:text-gray-400">User Management</a>
+        <a href="/admin/clientListPage" className="hover:text-gray-400">Client Management</a>
+        <a href="/admin/FreelancerListPage" className="hover:text-gray-400">Freelancer Management</a>
         <a href="/admin/skillManagement" className="hover:text-gray-400">Skill Management</a>
         <a href="/admin/gigs" className="hover:text-gray-400">Gig Management</a>
       </nav>

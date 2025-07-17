@@ -31,7 +31,6 @@ export class UserService implements IUserService {
     const hashedPassword = await bcrypt.hash(user.password!, 10);
   
     const otp = generateOtp();
-    console.log("Generated OTP: ", otp);
   
     const mailOptions = {
       from: env.SENDER_EMAIL,
@@ -46,7 +45,6 @@ export class UserService implements IUserService {
   
     try {
       const info = await transporter.sendMail(mailOptions);
-      console.log("Email sent successfully: ", info.response);
     } catch (err) {
       console.error("Failed to send email:", err);
     }
@@ -57,8 +55,6 @@ export class UserService implements IUserService {
         password: hashedPassword 
       }
     });
-    console.log("TEMPDATA : ",tempData)
-
     await redisClient.setEx(user.email!, 300, tempData);
 
     return user.email!;
@@ -87,8 +83,6 @@ export class UserService implements IUserService {
     let accessToken = await generateAccessToken(user._id as ObjectId, user.role as string)
     let refreshToken = await generateRefreshToken(user._id as ObjectId, user.role as string)
 
-    console.log("ACCESS TOKEN >>>>>>>>  : ",accessToken)
-
     return { accessToken, refreshToken, user}
   }
 
@@ -108,10 +102,10 @@ async googleAuth(user: GoogleAuthUserType): Promise<{ accessToken: string; refre
     const newUser: Partial<UserType> = {
       email: user.email,
       name: user.name,
-      role: "freelancer" // or default role
+      role: "freelancer" 
     };
 
-    const userData = await this.userRepository.createUser(newUser);
+    const userData = await this.userRepository.create(newUser);
 
     if (userData && userData._id) {
       const accessToken = await generateAccessToken(userData._id as ObjectId, userData.role as string);
@@ -124,11 +118,8 @@ async googleAuth(user: GoogleAuthUserType): Promise<{ accessToken: string; refre
 }
 
 
-
 async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessToken?: string, refreshToken?: string, user: UserType}> {
   const storedDataString = await redisClient.get(email);
-
-  console.log("verifyOtp from userSErvice >?> : ",storedDataString)
 
   if (!storedDataString) {
     throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_NOT_FOUND);
@@ -136,13 +127,9 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
 
   const storedData = JSON.parse(storedDataString);
 
-  console.log("storedDAta from userSErvice >?> : ",storedData)
-
   if (storedData.otp !== otp) {
     throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.OTP_INCORRECT);
   }
-
-  console.log("API TYPE ===>", apiType);
 
   if (apiType === "signup") {
     const user = {
@@ -150,12 +137,10 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
       email: storedData.userData.email,
       password: storedData.userData.password
     };
-    const createdUser = await this.userRepository.createUser(user);
+    const createdUser = await this.userRepository.create(user);
     if (!createdUser) {
       throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_CREATION_FAILED);
     }
-    console.log("Create User from userService >?> : ",createdUser)
-
     const accessToken = await generateAccessToken(createdUser._id as ObjectId, createdUser.role as string);
     const refreshToken = await generateRefreshToken(createdUser._id as ObjectId, createdUser.role as string);
 
@@ -213,7 +198,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
   if (role === "client") {
     const existingClient = await this.clientRepository.findById(String(user._id));
     if (!existingClient) {
-      await this.clientRepository.createUser({
+      await this.clientRepository.create({
         _id: user._id,
         name: user.name,
         role,
@@ -230,7 +215,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
   }else if(role === "freelancer"){
     const existingFreelancer = await this.freelancerRepository.findById(String(user._id))
     if(!existingFreelancer){
-      await this.freelancerRepository.createUser({
+      await this.freelancerRepository.create({
         _id: user._id,
         name: user.name,
         role,
@@ -266,7 +251,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
             throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
         }
         user.profilePicture = imageURL;
-        await this.userRepository.updateUser(id, user);
+        await this.userRepository.update(id, user);
         return {user}
     }
 
@@ -291,7 +276,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
         throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
       }
       user.name = name
-      await this.userRepository.updateUser(userId, user)
+      await this.userRepository.update(userId, user)
       const newName = user.name
       return {newName}
     }
@@ -342,19 +327,18 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
     }
     user.password = await bcrypt.hash(password,10)
-    await this.userRepository.updateUser(user.id, user)
+    await this.userRepository.update(user.id, user)
     return {user}
   }
 
   async updateUserDetails(userId: string, userData: UserType): Promise<{ userDetails: UserType }> {
     const user = await this.userRepository.findById(userId);
-    console.log("Update Details from userService > ",user)
     if (!user) {
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
     }
     // ✅ Mutate the existing Mongoose document directly
     Object.assign(user, userData);
-    await this.userRepository.updateUser(userId, user);
+    await this.userRepository.update(userId, user);
 
     return { userDetails: user };
   }

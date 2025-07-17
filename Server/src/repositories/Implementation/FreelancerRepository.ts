@@ -7,7 +7,7 @@ export class FreelancerRepository extends BaseRepository <FreelancerProfileType>
     constructor() {
         super(Freelancer)
     }
-        async create(user: Partial<FreelancerProfileType>): Promise<FreelancerProfileType> {
+        async createUser(user: Partial  <FreelancerProfileType>): Promise<FreelancerProfileType> {
         try {
             const userData = await this.model.create(user)
             return userData
@@ -34,4 +34,5 @@ export class FreelancerRepository extends BaseRepository <FreelancerProfileType>
             throw new Error("Error in updating user")
         }
     }
+
 }

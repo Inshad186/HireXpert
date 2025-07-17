@@ -36,9 +36,14 @@ export class AdminController implements IAdminController {
 
   async getUsersList( req: Request, res: Response, next: NextFunction ): Promise<void> {
     try {
-      console.log("get UsersList from adminController");
-      const users = await this.adminService.getUsersList();
-      res.status(HttpStatus.OK).json({ success: true, users });
+      const page = parseInt(req.query.page as string)
+      const limit = parseInt(req.query.limit as string)
+      const role = req.query.role as string
+      const search = req.query.search as string
+      const status = req.query.status as string
+      const { users, totalUsers } = await this.adminService.getUsersList(page, limit, role, search, status);
+      const totalPages = Math.ceil(totalUsers / limit);
+      res.status(HttpStatus.OK).json({ success: true, users, totalUsers, totalPages, currentPage: page });
     } catch (error) {
       next();
     }

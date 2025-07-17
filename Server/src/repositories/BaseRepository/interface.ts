@@ -1,6 +1,6 @@
 
 export interface IBaseRepository<T> {
-  createUser(user : Partial<T>) : Promise<T | null>
+  create(item: Partial<T>): Promise<T>;
   findById(id: string): Promise<T | null>;
-  updateUser(id : string, user: Partial<T>): Promise<T | null>;
+  update(id: string, item: Partial<T>): Promise<T | null>;
 }

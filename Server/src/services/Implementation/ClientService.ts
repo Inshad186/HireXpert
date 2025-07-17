@@ -16,7 +16,7 @@ export class ClientService implements IClientService {
       }
       // ✅ Mutate the existing Mongoose document directly
       Object.assign(user, userData);
-      await this.clientRepository.updateUser(userId, user);
+      await this.clientRepository.update(userId, user);
       return user 
     } catch (error) {
       console.error(error);

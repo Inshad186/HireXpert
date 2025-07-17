@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-
+import { userRoutes } from "@/constants/routeUrl";
 const skills = [
   { title: "I am a Designer", image: "./src/assets/Designer.jpg" },
   { title: "I am Developer", image: "./src/assets/Developer.jpg" },
@@ -20,7 +20,7 @@ function FreelancerDashboard() {
       </h1>
       <button
         className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded-md mb-10"
-        onClick={() => navigate("/signup")}
+        onClick={() => navigate(userRoutes.Freelancer_Requirements)}
       >
         Become a seller
       </button>
@@ -37,7 +37,7 @@ function FreelancerDashboard() {
         <div className="flex items-center justify-center border border-dashed border-gray-400 rounded-lg h-48 flex-col bg-white">
           <p className="text-sm font-medium mb-2">What is your skill?</p>
           <button
-            onClick={() => navigate("/signup")}
+            onClick={() => navigate(userRoutes.Freelancer_Requirements)}
             className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-1 rounded text-sm"
           >
             Become a seller
@@ -66,7 +66,7 @@ function FreelancerDashboard() {
       <div className="bg-gray-100 py-6">
         <p className="mb-4 font-medium text-lg">Sign up & create your first gig today</p>
         <button
-          onClick={() => navigate("/signup")}
+          onClick={() => navigate(userRoutes.Freelancer_Requirements)}
           className="bg-yellow-500 hover:bg-yellow-600 text-white px-6 py-2 rounded"
         >
           Get Started

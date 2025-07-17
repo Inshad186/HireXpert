@@ -60,8 +60,6 @@ export class UserController implements IUserController {
   async verifyOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { otp, email, apiType } = req.body;
-      console.log("API TYPE ===>", apiType);
-      console.log("REQUEST BODY $$$$$$$$$ >>>>>>> : ", req.body);
       const { accessToken, refreshToken, user } = await this.userService.verifyOtp(otp, email, apiType);
 
       res.cookie("refreshToken", refreshToken, {
@@ -79,7 +77,6 @@ export class UserController implements IUserController {
   async resendOtp(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { email } = req.body;
-      console.log("RESEND OTP ? >> ? : ",email)
       if (!email) {
         res.status(HttpStatus.BAD_REQUEST).json({ message: HttpResponse.INVALID_EMAIL });
         return;
@@ -105,9 +102,6 @@ export class UserController implements IUserController {
     try {
       const userId = req.body.userId;
       const profileImage = req.file;
-
-      console.log("USER ID >>>>>>>>>> : ",userId)
-      console.log("PROFILE IMAGE >>>>>>>> : ",profileImage)
       
       const {user} = await this.userService.updateProfile(userId, profileImage)
       res.status(HttpStatus.OK).json({user})
@@ -118,7 +112,6 @@ export class UserController implements IUserController {
 
   async updateUserName(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      console.log("REQUEST BODY FROM UPDATEUSER NAME",req.body)
       const {name} = req.body
       const {userId} = JSON.parse(req.headers["x-user-payload"] as string)
       const newName = await this.userService.updateUserName(userId, name)
@@ -131,13 +124,11 @@ export class UserController implements IUserController {
   async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const refreshToken = req.cookies.refreshToken
-      console.log("Refresh Token from userController : ",refreshToken)
       if(!refreshToken){
         res.status(HttpStatus.BAD_REQUEST).json({ message: HttpResponse.NO_TOKEN });
         return;
       }
       const accessToken = await this.userService.refreshToken(refreshToken)
-      console.log("Access Token from userController",accessToken)
       res.status(HttpStatus.OK).json({accessToken})
     } catch (err) {
       next(err)
@@ -147,7 +138,6 @@ export class UserController implements IUserController {
   async getProfileImage(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { userId } = JSON.parse(req.headers['x-user-payload'] as string)
-      console.log("update PROFILE >>>>>>> : ",userId)
       const {user} = await this.userService.getProfileImage(userId)
       res.status(HttpStatus.OK).json({user})
     } catch (err) {
@@ -168,7 +158,6 @@ export class UserController implements IUserController {
     try {
       const {email} = req.body
       const response = await this.userService.forgetPassword(email)
-      console.log("Forget Password from userController : ",response)
       res.status(HttpStatus.OK).json({ success: true, user:response });
     } catch (error) {
       next()
@@ -188,10 +177,8 @@ export class UserController implements IUserController {
   async updateUserDetails(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userData = req.body;
-      console.log("userDetails in userController : > ? ",userData)
       const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
       const updatedUser = await this.userService.updateUserDetails(userId, userData);
-      console.log("userDetails in userController : > ??? ",updatedUser)
       res.status(HttpStatus.OK).json({ success: true, userDetails: updatedUser });
     } catch (error) {
       next(error);

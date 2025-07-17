@@ -8,27 +8,18 @@ export class BaseRepository<T> implements IBaseRepository<T> {
     this.model = model;
   }
 
-    async createUser(user: T): Promise<T | null> {
-      const userData = await this.model.create(user)
-      console.log("User Repository User DAta",userData)
-      return userData
-    }
-
-  async findById(id: string): Promise<T | null> {
-    try {
-      return await this.model.findById(id);
-    } catch (error) {
-      console.error(error);
-      throw new Error("Error when finding by ID");
-    }
+  async create(item: Partial<T>): Promise<T> {
+    console.log("🌈🌈🌈🌈🌈 CREATED >> : ")
+    const created = await this.model.create(item);
+    console.log("🌈🌈🌈🌈🌈 CREATED >> : ",created)
+    return created
   }
 
-  async updateUser(userId : string, user: Partial<T>): Promise<T | null> {
-    try {
-      return await this.model.findByIdAndUpdate(userId, user, {new : true})
-    } catch (error) {
-      console.error(error)
-      throw new Error("Error when updating the user")
-    }
+  async findById(id: string): Promise<T | null> {
+    return await this.model.findById(id);
+  }
+
+  async update(id: string, item: Partial<T>): Promise<T | null> {
+    return await this.model.findByIdAndUpdate(id, item, { new: true });
   }
 }

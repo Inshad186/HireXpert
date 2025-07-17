@@ -10,13 +10,31 @@ export class FreelancerController implements IFreelancerController {
     async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const userData = req.body;
-            console.log("😡😡freeleancer😡😡 userDetails in userController : > ? ",userData)
             const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
             const updatedUser = await this.freelancerService.updateProfile(userId, userData);
-            console.log("userDetails in userController : > freelancer ??? ",updatedUser)
             res.status(HttpStatus.OK).json({ success: true, userDetails: updatedUser });
         } catch (error) {
             next()
         }
     }
+
+    async createGig(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+        const gigData = req.body;
+        const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+
+        const fullGigData = {
+        ...gigData,
+        freelancer: userId,
+        price: typeof gigData.price === "string" ? JSON.parse(gigData.price) : gigData.price,
+        skills: gigData.skills.flat()
+        };
+        const gigId = await this.freelancerService.createGig(fullGigData);
+
+        res.status(201).json({ success: true, message: "Gig created successfully", gigId,});
+        } catch (error) {
+            next(error);
+        }
+    }
+
 }

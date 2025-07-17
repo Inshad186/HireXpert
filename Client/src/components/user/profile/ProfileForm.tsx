@@ -30,49 +30,57 @@ export default function ProfileForm({ form, onChange, fields }: Props) {
                 onClick={() => toggleSelect(field.name)}
                 className="border p-2 rounded cursor-pointer bg-white"
               >
+
                 {selected.length > 0
-                  ? selected.join(", ")
+                  ? selected
+                      .map((id: string) => {
+                        const allSkills = Object.values(field.options || {}).flat() as { _id: string; name: string }[];
+                        const match = allSkills.find((s) => s._id === id);
+                        return match?.name || id;
+                      })
+                      .join(", ")
                   : `Select ${field.placeholder}`}
+
               </div>
 
-{multiSelectOpen[field.name] && field.options && typeof field.options === "object" && (
-  <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-40 overflow-y-auto">
-    {Object.entries(field.options).map(([category, skills]) => {
-      const safeSkills = Array.isArray(skills) ? skills : [];
+            {multiSelectOpen[field.name] && field.options && typeof field.options === "object" && (
+              <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-40 overflow-y-auto">
+                {Object.entries(field.options).map(([category, skills]) => {
+                  const safeSkills = Array.isArray(skills) ? skills : [];
 
-      return (
-        <div key={category} className="border-t border-gray-300 px-2 py-1">
-          <div className="font-semibold text-gray-800 mb-1">{category}</div>
-          {safeSkills.map((opt) => (
-            <label key={opt._id} className="block px-3 py-1 hover:bg-gray-100 cursor-pointer">
-              <input
-                type="checkbox"
-                value={opt.name}
-                checked={selected.includes(opt.name)}
-                onChange={(e) => {
-                  let updated = [...selected];
-                  if (e.target.checked) {
-                    updated.push(opt.name);
-                  } else {
-                    updated = updated.filter((v) => v !== opt.name);
-                  }
-                  onChange({
-                    target: {
-                      name: field.name,
-                      value: updated,
-                    },
-                  } as any);
-                }}
-                className="mr-2"
-              />
-              {opt.name}
-            </label>
-          ))}
-        </div>
-      );
-    })}
-  </div>
-)}
+                  return (
+                    <div key={category} className="border-t border-gray-300 px-2 py-1">
+                      <div className="font-semibold text-gray-800 mb-1">{category}</div>
+                      {safeSkills.map((opt) => (
+                        <label key={opt._id} className="block px-3 py-1 hover:bg-gray-100 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            value={opt._id}
+                            checked={selected.includes(opt._id)}
+                            onChange={(e) => {
+                              let updated = [...selected];
+                              if (e.target.checked) {
+                                updated.push(opt._id);
+                              } else {
+                                updated = updated.filter((v) => v !== opt._id);
+                              }
+                              onChange({
+                                target: {
+                                  name: field.name,
+                                  value: updated,
+                                },
+                              } as any);
+                            }}
+                            className="mr-2"
+                          />
+                          {opt.name}
+                        </label>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             </div>
           );

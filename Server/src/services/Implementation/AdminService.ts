@@ -71,9 +71,10 @@ export class AdminService implements IAdminService {
     }
   }
 
-  async getUsersList(): Promise<any[]> {
-    return await this.adminRepository.getAllUsers();
+  async getUsersList(page: number, limit: number, role: string, search: string, status: string): Promise<{ users: any[]; totalUsers: number }> {
+    return await this.adminRepository.getAllUsers(page, limit, role, search, status);
   }
+
 
   async blockUser(userId: string): Promise<void> {
     const user = await this.adminRepository.findById(userId);

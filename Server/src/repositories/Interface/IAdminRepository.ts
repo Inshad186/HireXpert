@@ -6,7 +6,7 @@ export interface IAdminRepository {
     findByEmail(email: string) : Promise<UserType | null>;
     findById(userId: string): Promise<UserType | null>;
     countTotalDashboardStats(): Promise<{totalUsers:number, totalFreelancers: number; totalClients: number;}>
-    getAllUsers():Promise<any[]>
+    getAllUsers(page: number, limit: number, role: string, search: string, status: string): Promise<{ users: any[]; totalUsers: number }>
     save(user:UserType): Promise<boolean>;
     createCategory(name: string): Promise<CategoryType>
     getAllCategories() : Promise<CategoryType[]>

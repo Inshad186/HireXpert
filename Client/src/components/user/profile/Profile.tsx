@@ -9,6 +9,7 @@ import EditableName from "./EditableName";
 import ProfileForm from "./ProfileForm";
 import { getSkills } from "@/api/admin.api";
 import { updateFreelancerProfile } from "@/api/freelancer.api";
+import toast from "react-hot-toast";
 
 export default function Profile() {
   const user = useSelector((state: RootState) => state.user);
@@ -74,7 +75,11 @@ const freelancerFields = [
         }
 
         if (profileResponce?.success) {
-          setForm(profileResponce.data.fullProfile);
+          const freelanceData = profileResponce.data.fullProfile
+          setForm({
+            ...freelanceData,
+            skills: freelanceData.skills.map((s: any) => (typeof s === 'string' ? s : s._id))
+          });
         }
       } catch (e) {
         console.error(e);
@@ -105,29 +110,48 @@ const freelancerFields = [
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-const handleSave = async () => {
-  try {
-    let response;
+  const handleSave = async () => {
+    try {
+      let response;
 
-    if (isClient) {
-      response = await updateClientProfile(form); 
-    }else if(isFreelancer){
-      response = await updateFreelancerProfile(form)
-    } else {
-      console.warn("Unknown role — cannot update profile");
-      return;
-    }
-    if (response.success) {
-      dispatch(setUser(response.data.userDetails));
-      setForm(response.data.userDetails);
-    } else {
-      console.error("Failed to update profile", response);
-    }
-  } catch (err) {
-    console.error("Profile update error", err);
-  }
-};
+      if (isClient) {
+        response = await updateClientProfile(form);
+      } else if (isFreelancer) {
+        response = await updateFreelancerProfile(form);
+      } else {
+        console.warn("Unknown role — cannot update profile");
+        return;
+      }
 
+      if (response.success) {
+        toast.success("Profile Updated");
+
+        dispatch(setUser(response.data.userDetails));
+
+        let profileResponse;
+        if (isClient) {
+          profileResponse = await getClientFullProfile();
+          if (profileResponse.success) {
+            setForm(profileResponse.data.fullProfile);
+          }
+        } else if (isFreelancer) {
+          profileResponse = await getFreelancerFullProfile();
+          if (profileResponse.success) {
+            setForm({
+              ...profileResponse.data.fullProfile,
+              skills: profileResponse.data.fullProfile.skills.map((s: any) =>
+                typeof s === "string" ? s : s._id
+              ),
+            });
+          }
+        }
+      } else {
+        console.error("Failed to update profile", response);
+      }
+    } catch (err) {
+      console.error("Profile update error", err);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 p-4">

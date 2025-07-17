@@ -54,10 +54,24 @@ export interface CategoryType extends Document {
   name : string
 }
 
-export interface SkillType extends Document  {
+export interface SkillType extends Document {
   name : string
 }
 
+export interface GigType extends Document {
+  user: Types.ObjectId;
+  title: string;
+  description: string;
+  category: string;
+  skills: Types.ObjectId[]; 
+  deliveryTime: number;
+  price: {
+    basic?: number;
+    standard?: number;
+    premium?: number;
+  };
+  gallery: string[];
+}
 
 export interface FileType {
     fieldname: string;
@@ -67,7 +81,6 @@ export interface FileType {
     buffer: Buffer;
     size: number;
 }
-
 
 export interface GoogleAuthUserType {
     email: string;
