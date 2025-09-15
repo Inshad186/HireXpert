@@ -40,13 +40,10 @@ export interface FreelancerProfileType extends Document {
   qualification: string;
   bio: string;
   work_experience: string;
+  profileSkills: string[];
   proficient_languages: string[];
-  skills: string[];
   working_days: string;
   active_hours: string;
-  basic_price: number;
-  standard_price: number;
-  premium_price: number;
   portfolio: string;
 }
 
@@ -59,18 +56,19 @@ export interface SkillType extends Document {
 }
 
 export interface GigType extends Document {
-  user: Types.ObjectId;
-  title: string;
-  description: string;
-  category: string;
-  skills: Types.ObjectId[]; 
-  deliveryTime: number;
-  price: {
+  freelancer?: Types.ObjectId;
+  title?: string;
+  description?: string;
+  category?: string;
+  skills?: Types.ObjectId[]; 
+  deliveryTime?: number;
+  price?: {
     basic?: number;
     standard?: number;
     premium?: number;
   };
-  gallery: string[];
+  isActive?:boolean;
+  gallery?: string[];
 }
 
 export interface FileType {

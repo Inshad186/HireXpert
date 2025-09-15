@@ -1,10 +1,11 @@
-import { FreelancerProfileType, GigType } from "@/types/Type";
+import { FileType, FreelancerProfileType, GigType } from "@/types/Type";
 import { IFreelancerService } from "../Interface/IFreelancerService";
 import { IFreelancerRepository } from "@/repositories/Interface/IFreelancerRepository";
 import { HttpStatus } from "@/constants/status.constant";
 import { HttpResponse } from "@/constants/response.constant";
 import { generateHttpError } from "@/utils/http-error.util";
 import { IGigRepository } from "@/repositories/Interface/IGigRepository";
+import { handleProfileImageUpload } from "@/config/cloudinary.config";
 
 export class FreelancerService implements IFreelancerService {
   constructor(
@@ -27,15 +28,37 @@ export class FreelancerService implements IFreelancerService {
     }
   }
 
-  async createGig(gig: GigType): Promise<string> {
+async createGig(gig: GigType, gallery: FileType[]): Promise<string> {
+  try {
+    if (!gallery || gallery.length === 0) {
+      throw generateHttpError(HttpStatus.BAD_REQUEST, "Service images are required");
+    }
+    const imageURLs = await Promise.all(
+      gallery.map((file) => handleProfileImageUpload(file.buffer, "service_images"))
+    );
+    const createdGig = await this.gigRepository.create({ ...gig, gallery: imageURLs });
+    return createdGig?.id;
+  } catch (error) {
+    console.error(error);
+    throw new Error("Error Creating gig");
+  }
+}
+
+  async getGigList(freelancerId: string): Promise<GigType[]> {
     try {
-      console.log("🔴🔴🔴🔴🔴🔴",gig)
-      const createdGig = await this.gigRepository.create(gig)
-      console.log("CREATED GIG >>>??? : ",createdGig)
-      return createdGig?.id
+      return await this.gigRepository.findGigList(freelancerId)
     } catch (error) {
-      console.error(error);
-      throw new Error("Error Creating gig");
+      console.error(error)
+      throw new Error("Error Creating gigList")
+    }
+  }
+
+  async updateGigStatus(id: string, currentStatus: boolean): Promise<void> {
+    try {
+      await this.gigRepository.update(id, {isActive: currentStatus})
+    } catch (error) {
+      console.error(error)
+      throw new Error("Error Creating gigList")
     }
   }
 

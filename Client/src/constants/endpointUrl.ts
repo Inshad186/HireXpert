@@ -20,12 +20,15 @@ export const endpointUrl = {
 
 export const clientEndpointUrl = {
   UPDATE_CLIENT_PROFILE : "/auth/client/update-clientProfile",
+  GET_GIGS: "/auth/client/get-gigs",
+  GET_PROJECTDETAIL : "/auth/client/get-ProjectDetail"
 }
 
 export const freelancerEndpointUrl = {
     UPDATE_FREELANCER_PROFILE : "/auth/freelancer/update-freelancerProfile",
     CREATE_GIG : "/auth/freelancer/create-gig",
-    LISTED_GIG : "/auth/freelancer/listed-gig"
+    LISTED_GIG : "/auth/freelancer/listed-gig",
+    UPDATE_GIG_STATUS : "/auth/freelancer/update-gig-status"
 }
 
 export const adminEndpointUrl = {

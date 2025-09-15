@@ -1,13 +1,21 @@
 import { useNavigate } from "react-router-dom";
 import { userRoutes } from "@/constants/routeUrl";
+import Designer from "@/assets/Designer.jpg"
+import Developer from "@/assets/Developer.jpg"
+import Writer from "@/assets/Writer.jpg"
+import VideoEditor from "@/assets/VideoEditor.jpg"
+import Marketer from "@/assets/Marketer.jpg"
+import VoiceArtist from "@/assets/VoiceArtist.jpg"
+import Animator from "@/assets/Animator.jpg"
+
 const skills = [
-  { title: "I am a Designer", image: "./src/assets/Designer.jpg" },
-  { title: "I am Developer", image: "./src/assets/Developer.jpg" },
-  { title: "I am a Writer", image: "./src/assets/Writer.jpg" },
-  { title: "I am a Video Editor", image: "./src/assets/VideoEditor.jpg" },
-  { title: "I am a Social Media Marketer", image: "./src/assets/Marketer.jpg" },
-  { title: "I am a Voice Artist", image: "./src/assets/VoiceArtist.jpg" },
-  { title: "I am a Animator", image: "./src/assets/Animator.jpg" },
+  { title: "I am a Designer", image: Designer },
+  { title: "I am Developer", image: Developer },
+  { title: "I am a Writer", image: Writer },
+  { title: "I am a Video Editor", image: VideoEditor },
+  { title: "I am a Social Media Marketer", image: Marketer },
+  { title: "I am a Voice Artist", image: VoiceArtist },
+  { title: "I am a Animator", image: Animator},
 ];
 
 function FreelancerDashboard() {

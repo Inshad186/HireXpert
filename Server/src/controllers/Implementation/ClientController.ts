@@ -17,4 +17,25 @@ export class ClientController implements IClientController {
             next()
         }
     }
+
+    async getGigs(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const gigs = await this.clientService.getGigs()
+            res.status(HttpStatus.OK).json({success: true, gigs})
+        } catch (error) {
+            next()
+        }
+    }
+
+    async getProjectDetail(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            const { projectId } = req.params
+            console.log("PROJECT ID : > ",projectId)
+            const projectDetails = await this.clientService.getGigDetails(projectId)
+            console.log("PROJECT DETAILS ::: >",projectDetails)
+            res.status(HttpStatus.OK).json({success:true, projectDetails})
+        } catch (error) {
+            next()
+        }
+    }
 }

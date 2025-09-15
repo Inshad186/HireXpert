@@ -12,6 +12,16 @@ export const updateFreelancerProfile = async(data: any) => {
     }
 }
 
+export const getGigList = async() => {
+    try {
+        const {data} = await Api.get(freelancerEndpointUrl.LISTED_GIG)
+        return {success: true, data}
+    } catch (error : any) {
+        const message = error.response?.data?.error || "Something went wrong"
+        return { success: false, error: message}
+    }
+}
+
 
 export const createGig = async(formData: FormData) => {
     try {
@@ -21,5 +31,16 @@ export const createGig = async(formData: FormData) => {
         const err = error as any
         const message = err.respose?.data?.error || "Something went wrong"
         return { success:false, error:message };  
+    }
+}
+
+export const updateGigStatus = async(id:string, currentStatus:boolean) => {
+    try {
+        const {data} = await Api.put(freelancerEndpointUrl.UPDATE_GIG_STATUS, {id, currentStatus})
+        return {success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };   
     }
 }

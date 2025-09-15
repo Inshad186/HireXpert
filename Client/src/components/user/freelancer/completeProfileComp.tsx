@@ -2,11 +2,11 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
-import { getFreelancerFullProfile, changeProfile } from "@/api/user.api";
+import { getFreelancerFullProfile, changeProfile, getProfileImage } from "@/api/user.api";
 import { updateFreelancerProfile } from "@/api/freelancer.api";
 import { getSkills } from "@/api/admin.api";
 import { setUser } from "@/redux/slices/userSlice";
-import { useNavigate } from "react-router-dom";
+import { data, useNavigate } from "react-router-dom";
 import ProfileImageUploader from "../profile/ProfileImageUploader";
 import EditableName from "../profile/EditableName";
 import ProfileForm from "../profile/ProfileForm";
@@ -32,17 +32,18 @@ export default function CompleteFreelancerProfile() {
     { name: "skills", type: "multiselect", placeholder: "Skills", options: adminSkills },
     { name: "working_days", placeholder: "Working Days" },
     { name: "active_hours", placeholder: "Active Hours" },
-    { name: "basic_price", placeholder: "Basic Price" },
-    { name: "standard_price", placeholder: "Standard Price" },
-    { name: "premium_price", placeholder: "Premium Price" },
     { name: "portfolio", placeholder: "Portfolio URL" }
   ];
 
   useEffect(() => {
     const load = async () => {
       try {
+        const profImageresp = await getProfileImage()
+        if(profImageresp.success){
+          setProfileImage(profImageresp.data.user.profilePicture)
+        }
+
         const response = await getFreelancerFullProfile();
-        console.log("Complete Freelancer Profile >>> : ",response.data)
         if (response.success) {
           setForm(response.data.fullProfile);
         }

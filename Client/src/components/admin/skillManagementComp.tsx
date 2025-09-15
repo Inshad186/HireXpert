@@ -22,8 +22,6 @@ const [editingCategory, setEditingCategory] = useState<string | null>(null);
 const [editingSkills, setEditingSkills] = useState<{ _id: string; name: string }[]>([]);
 
 
-  
-
   useEffect(() => {
     fetchSkills()
     fetchCategories()
@@ -93,28 +91,6 @@ const fetchCategories = async () => {
               <th className='p-3'>Actions</th>
             </tr>
           </thead>
-
-
-            {/* <tbody>
-            {Object.entries(skillsGrouped).map(([category, skills], index) => (
-              <tr key={category} className="border-b border-gray-700">
-                <td className='p-3'>{index + 1}</td>
-                <td className='p-3'>{category}</td>
-                <td className='p-3'>
-                  {skills.map(skill => skill.name).join(', ')}
-                </td>
-                <td className='p-3'>
-                  <button className='bg-gray-300 text-black px-3 py-1 rounded mr-2'>Edit</button>
-                  <button className='bg-red-700 px-3 py-1 rounded'>Delete</button>
-                </td>
-              </tr>
-            ))}
-            {Object.keys(skillsGrouped).length === 0 && (
-              <tr>
-                <td colSpan={4} className="p-4 text-center text-gray-400">No skills found</td>
-              </tr>
-            )}
-          </tbody> */}
           <tbody>
             {categories.map((category, index) => {
               const skills = skillsGrouped[category.name] || [];

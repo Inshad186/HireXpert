@@ -26,8 +26,7 @@ export class AdminController implements IAdminController {
 
   async getDashboardStats( req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { totalUsers, totalFreelancers, totalClients } =
-        await this.adminService.getDashboardStats();
+      const { totalUsers, totalFreelancers, totalClients } = await this.adminService.getDashboardStats();
       res.status(HttpStatus.OK).json({ success: true, totalUsers, totalFreelancers, totalClients });
     } catch (error) {
       next();

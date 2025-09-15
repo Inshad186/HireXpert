@@ -12,8 +12,10 @@ export interface IGig extends Document {
     standard?: number;
     premium?: number;
   };
+  isActive:boolean;
   gallery: string[];
 }
+
 
 const gigSchema = new Schema<IGig>({
   freelancer: { type: Schema.Types.ObjectId, ref: "FreelancerProfile", required: false },
@@ -26,6 +28,10 @@ const gigSchema = new Schema<IGig>({
     basic: { type: Number, required: false },
     standard: Number,
     premium: Number
+  },
+  isActive: {
+    type: Boolean,
+    default: false
   },
   gallery: [String]
 }, { timestamps: false });

@@ -16,5 +16,6 @@ export const userRoutes = {
     COMPLETE_PROFILE : "/complete-profile",
     CREATE_GIG : "/create-gig",
     LISTED_GIG : "/listed-gig",
+    PROJECT_DETAILS : "/project-detail",
     LOGOUT : "/logout",
 }   

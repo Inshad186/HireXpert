@@ -8,4 +8,11 @@ export class GigRepository extends BaseRepository<GigType> implements IGigReposi
     super(Gig);
   }
 
+  async findGigList(freelancerId: string): Promise<GigType[]> {
+    return await Gig.find({freelancer : freelancerId})
+  }
+
+  async findGigs(): Promise<GigType[]> {
+    return await Gig.find({isActive: true})
+  }
 }

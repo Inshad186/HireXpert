@@ -13,7 +13,8 @@ import { PrivateRoute } from "./PrivateRoute";
 import { PublicRoute } from "./PublicRoute";
 import { RoleBasedRoute } from "./RoleBasedRoute";
 import ResetPassword from "@/components/user/resetPassword";
-import Services from "@/pages/user/Services";
+import Projects from "@/pages/user/Projects";
+import ProjectDetail from "@/pages/user/ProjectDetail";
 
 //! Freelancer
 import FreelancerRequirements from "@/pages/user/FreelancerRequirements";
@@ -49,7 +50,8 @@ export const router = createBrowserRouter([
             {path : "home", element : (<PrivateRoute><Home/></PrivateRoute>)},
             {path : "profile" , element : (<PrivateRoute><Profile/></PrivateRoute>)},
             {path : "freelancer-dashboard", element : <FreelancerDashboard/>},
-            {path : "services", element : <Services/>},
+            {path : "services", element : <Projects/>},
+            {path : "project-detail/:projectId", element : <ProjectDetail/>}
         ]
     },
 

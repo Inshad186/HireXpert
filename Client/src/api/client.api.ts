@@ -11,3 +11,25 @@ export const updateClientProfile = async(data: any) => {
         return { success:false, error:message };        
     }
 }
+
+export const getProjects = async() => {
+    try {
+        const {data} = await Api.get(clientEndpointUrl.GET_GIGS)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };      
+    }
+}
+
+export const getProjectDetails = async(projectId : string) => {
+    try {
+        const {data} = await Api.get(`${clientEndpointUrl.GET_PROJECTDETAIL}/${projectId}`)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message }; 
+    }
+}

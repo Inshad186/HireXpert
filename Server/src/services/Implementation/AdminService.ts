@@ -12,36 +12,23 @@ import { env } from "@/config/env.config";
 export class AdminService implements IAdminService {
   constructor(private adminRepository: IAdminRepository) {}
 
-  async login(
-    email: string,
-    password: string
-  ): Promise<{ accessToken: string; refreshToken: string; admin: UserType }> {
+  async login( email: string, password: string ): Promise<{ accessToken: string; refreshToken: string; admin: UserType }> {
     if (!email || !password) {
       throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.INVALID_EMAIL);
     }
-
     const admin = await this.adminRepository.findByEmail(email);
 
     if (!admin) {
-      throw generateHttpError(
-        HttpStatus.BAD_REQUEST,
-        HttpResponse.INVALID_CREDENTIALS
-      );
+      throw generateHttpError( HttpStatus.BAD_REQUEST, HttpResponse.INVALID_CREDENTIALS );
     }
 
     if (admin.email !== env.ADMIN_EMAIL || admin.role !== "admin") {
-      throw generateHttpError(
-        HttpStatus.UNAUTHORIZED,
-        "Access denied. Not an admin."
-      );
+      throw generateHttpError( HttpStatus.UNAUTHORIZED, "Access denied. Not an admin.");
     }
 
     const isPasswordValid = await bcrypt.compare(password, admin.password!);
     if (!isPasswordValid) {
-      throw generateHttpError(
-        HttpStatus.BAD_REQUEST,
-        HttpResponse.INVALID_CREDENTIALS
-      );
+      throw generateHttpError( HttpStatus.BAD_REQUEST, HttpResponse.INVALID_CREDENTIALS );
     }
 
     const accessToken = await generateAccessToken(
@@ -80,12 +67,8 @@ export class AdminService implements IAdminService {
     const user = await this.adminRepository.findById(userId);
 
     if (!user) {
-      throw generateHttpError(
-        HttpStatus.BAD_REQUEST,
-        HttpResponse.INVALID_CREDENTIALS
-      );
+      throw generateHttpError( HttpStatus.BAD_REQUEST, HttpResponse.INVALID_CREDENTIALS);
     }
-
     user.isBlocked = !user.isBlocked;
 
     const saved = await this.adminRepository.save(user);

@@ -1,4 +1,4 @@
-import { adminEndpointUrl } from "@/constants/endpointUrl";
+import { adminEndpointUrl, freelancerEndpointUrl } from "@/constants/endpointUrl";
 import Api from "@/services/axios";
 
 export const login = async (email: string, password: string) => {
@@ -99,6 +99,7 @@ export const editSkills = async(skillId:string, skillName: string) => {
         return { success:false, error:message }; 
     }
 }
+
 
 export const deleteCategoryAndSkills = async(categoryId: string) => {
     try {

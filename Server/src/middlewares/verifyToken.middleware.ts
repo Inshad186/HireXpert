@@ -7,7 +7,6 @@ import jwt from 'jsonwebtoken';
 export async function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction):Promise<void>{
     try {
       const authHeader = req.headers.authorization;
-
       if (!authHeader || !authHeader.startsWith("Bearer")) {
         res.status(HttpStatus.UNAUTHORIZED).json({ error: HttpResponse.NO_TOKEN });
         return

@@ -46,18 +46,47 @@ export interface UserStoreType {
 }
 
 export interface FreelancerDetail {
-    user_id: mongoose.Schema.Types.ObjectId;
-    profession: string;
-    company: string;
-    qualification: string;
-    bio: string;
-    work_experience: string;
-    proficient_languages: string[];
-    skills: string[];
-    working_days: string;
-    active_hours: string;
-    basic_price: number;
-    standard_price: number;
-    premium_price: number;
-    portfolio: string;
+  _id: string
+  name: string
+  role: string
+  profession: string
+  company: string
+  qualification: string
+  bio: string
+  work_experience: string
+  profileSkills: string[]
+  proficient_languages: string[]
+  working_days: string
+  active_hours: string
+  portfolio: string
+}
+
+
+export interface InitialProjectDetail {
+    _id:string;
+    title?: string;
+    category?: string;
+    description?:string;
+    deliveryTime?:number;
+    price :{
+        basic:number
+    };
+    gallery:string[]
+}
+
+export interface ProjectDetail {
+  _id: string
+  title: string
+  description: string
+  category: string
+  deliveryTime: number
+  freelancer: string
+  gallery: string[]
+  isActive: boolean
+  price: {
+    basic: number
+    standard: number
+    premium: number
+  }
+  skills: string[]
 }

@@ -17,7 +17,7 @@ import { IClientRepository } from "@/repositories/Interface/IClientRepository";
 import { IFreelancerRepository } from "@/repositories/Interface/IFreelancerRepository";
 
 export class UserService implements IUserService {
-  constructor(  
+  constructor(
     private userRepository: IUserRepository,
     private clientRepository: IClientRepository,
     private freelancerRepository: IFreelancerRepository,
@@ -225,12 +225,9 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
         bio: "",
         work_experience:"",
         proficient_languages: [],
-        skills: [],
+        profileSkills: [],
         working_days: "",
         active_hours: "",
-        basic_price: 0,
-        standard_price: 0,
-        premium_price: 0,
         portfolio: "",
       })
     }
@@ -243,7 +240,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
         if (!profileImage) {            
             throw generateHttpError(HttpStatus.BAD_REQUEST, "Profile image is required")
         }
-        const imageURL = await handleProfileImageUpload(profileImage.buffer)
+        const imageURL = await handleProfileImageUpload(profileImage.buffer,"profile_image")
         
         const user = await this.userRepository.findById(id)
 

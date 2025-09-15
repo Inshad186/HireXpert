@@ -7,7 +7,6 @@ import { userRoutes } from "@/constants/routeUrl";
 function GigComp() {
 
   const navigate = useNavigate()
-
     const [form, setForm] = useState<any>({
         title: "",
         description: "",
@@ -19,11 +18,10 @@ function GigComp() {
         standard: "",
         premium: ""
         },
-        gallery: []
+        gallery:[]
     });
 
     const [adminSkills, setAdminSkills] = useState<{ [category: string]: { _id: string; name: string }[] }>({});
-    const [images, setImages] = useState<File[]>([]);
 
     useEffect(() => {
       const fetchSkills = async() => {
@@ -39,53 +37,52 @@ function GigComp() {
       const {name, value} = e.target
       
       if(["basic", "standard", "premium"].includes(name)){
-        setForm({...form, price: {...form.price,[name]: value}})
+        setForm({...form, price: {...form.price,[name]: value === ""? "" : Number(value) }})
       }else{
         setForm({...form,[name]: value})
       }
     }
 
-    const handleSkillToggle = (skillName: string) => {
+    const handleSkillToggle = (skillId: string) => {
       setForm((prev: any) => {
-        const exists = prev.skills.includes(skillName);
-        const updatedSkills = exists
-          ? prev.skills.filter((s: string) => s !== skillName)
-          : [...prev.skills, skillName];
+        const exists = prev.skills.includes(skillId);
+        const updatedSkills = exists ? prev.skills.filter((s: string) => s !== skillId): [...prev.skills, skillId];
         return { ...prev, skills: updatedSkills };
       });
     };
 
 
-    const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-      if (e.target.files) {
-        setImages([...images, ...Array.from(e.target.files)]);
-      }
-    };
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files) {
+      setForm((prev: any) => ({
+        ...prev, 
+        gallery: [...prev.gallery, ...Array.from(e.target.files || [])],
+      }));
+    }
+  };
 
   const handleSubmit = async () => {
     const gigForm = new FormData();
     gigForm.append("title", form.title);
     gigForm.append("description", form.description);
     gigForm.append("category", form.category);
-    gigForm.append("deliveryTime", Number(form.deliveryTime).toString());
-
-    form.skills.forEach((skillId: string) => {
-      gigForm.append("skills", skillId);
+    gigForm.append("deliveryTime",form.deliveryTime);
+    gigForm.append("skills", JSON.stringify(form.skills))
+    form.gallery.forEach((file:File) => {
+      gigForm.append("gallery", file);
+      console.log("GALLERY : ",file)
     });
 
+
     const priceObj = {
-      basic: Number(form.price.basic),
-      standard: form.price.standard ? Number(form.price.standard) : undefined,
-      premium: form.price.premium ? Number(form.price.premium) : undefined,
+      basic: form.price.basic,
+      standard: form.price.standard ? form.price.standard : undefined,
+      premium: form.price.premium ? form.price.premium : undefined,
     };
     gigForm.append("price", JSON.stringify(priceObj));
 
-
-    images.forEach((img) => {
-      gigForm.append("gallery", img);
-    });
-
     const res = await createGig(gigForm);
+    console.log("Create Gig !!",res)
     if (res.success) {
       alert("Gig Created Successfully!");
       setForm({
@@ -95,9 +92,8 @@ function GigComp() {
         skills: [],
         deliveryTime: "",
         price: { basic: "", standard: "", premium: "" },
-        gallery: [],
+        gallery:[],
       });
-      setImages([]);
       navigate(userRoutes.LISTED_GIG)
     } else {
       console.error("Gig creation failed:", res);
@@ -170,7 +166,7 @@ function GigComp() {
             name={level}
             value={form.price[level]}
             onChange={handleChange}
-            placeholder={`${level[0].toUpperCase() + level.slice(1)} Price`}
+            placeholder={level}
             className="border p-2 rounded"
           />
         ))}

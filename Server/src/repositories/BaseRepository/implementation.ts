@@ -9,9 +9,7 @@ export class BaseRepository<T> implements IBaseRepository<T> {
   }
 
   async create(item: Partial<T>): Promise<T> {
-    console.log("🌈🌈🌈🌈🌈 CREATED >> : ")
     const created = await this.model.create(item);
-    console.log("🌈🌈🌈🌈🌈 CREATED >> : ",created)
     return created
   }
 

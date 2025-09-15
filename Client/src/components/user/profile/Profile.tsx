@@ -19,7 +19,6 @@ export default function Profile() {
   const [profileImage, setProfileImage] = useState("");
   const [adminSkills, setAdminSkills] = useState<{ [category: string]: { _id: string; name: string }[] }>({});
 
-
 const clientFields = [
   { name: "companyName", placeholder: "Company Name" },
   { name: "website", placeholder: "Website" },
@@ -41,9 +40,6 @@ const freelancerFields = [
   { name: "skills", type: "multiselect", placeholder:"Skills", options: adminSkills },
   { name: "working_days", placeholder: "Working Days" },
   { name: "active_hours", placeholder: "Active Hours" },
-  { name: "basic_price", placeholder: "Basic Price" },
-  { name: "standard_price", placeholder: "Standard Price" },
-  { name: "premium_price", placeholder: "Premium Price" },
   { name: "portfolio", placeholder: "Portfolio URL" }
 ];
 
@@ -59,7 +55,6 @@ const freelancerFields = [
         if (response.success) {
           setProfileImage(response.data.user.profilePicture);
           setForm(response.data.user);
-          
         }
 
         const skillsRes = await getSkills();
@@ -74,12 +69,8 @@ const freelancerFields = [
           profileResponce = await getFreelancerFullProfile();
         }
 
-        if (profileResponce?.success) {
-          const freelanceData = profileResponce.data.fullProfile
-          setForm({
-            ...freelanceData,
-            skills: freelanceData.skills.map((s: any) => (typeof s === 'string' ? s : s._id))
-          });
+        if(profileResponce?.success){
+          setForm(profileResponce.data.fullProfile)
         }
       } catch (e) {
         console.error(e);
@@ -88,7 +79,6 @@ const freelancerFields = [
 
   load();
   }, []);
-
 
   const handleImageChange = async (file: File) => {
     const formData = new FormData();
@@ -104,7 +94,7 @@ const freelancerFields = [
     } catch (err) {
       console.error("Image Upload Failed",err)
     }
-  };
+  }
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -125,7 +115,6 @@ const freelancerFields = [
 
       if (response.success) {
         toast.success("Profile Updated");
-
         dispatch(setUser(response.data.userDetails));
 
         let profileResponse;

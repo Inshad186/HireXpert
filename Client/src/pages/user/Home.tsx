@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { RootState } from "@/redux/store";
 import { assignRole, getFreelancer } from "@/api/user.api";
+import { getProjects } from "@/api/client.api";
+import { InitialProjectDetail } from "@/types/user.type";
 import { setUser } from "@/redux/slices/userSlice";
 import Footer from "@/components/user/common/Footer";
+import { userRoutes } from "@/constants/routeUrl";
 
 function Home() {
   const [role, setRole] = useState("");
@@ -12,8 +15,7 @@ function Home() {
   const [leftClick, setLeftClick] = useState(false);
   const [rightClick, setRightClick] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [freelancers, setFreelancers] = useState<{ name: string; email: string; profession: string; work_experience: string; working_days: string; active_hours: string; profilePicture: string }[]>([]);
-
+  const [gigs, setGigs] = useState<InitialProjectDetail[]>([])
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -45,9 +47,9 @@ function Home() {
   useEffect(() => {
     const fetchFreelancers = async () => {
       try {
-        const response = await getFreelancer();
+        const response = await getProjects();
         if(response.success){
-          setFreelancers(response.data.data);
+          setGigs(response.data.gigs);
         }
       } catch (err) {
         console.error("Failed to fetch freelancers", err);
@@ -102,31 +104,43 @@ return (
       </section>
       
       <section className="px-6 md:px-24 py-16 bg-white">
+        {gigs.length > 0 ?
         <h2 className="text-3xl font-extrabold text-gray-800 tracking-wide text-center md:text-left mb-10">
-          <span className="border-b-4 border-indigo-500 pb-1">TOP FREELANCERS</span>
-        </h2>
-
+          <span className="border-b-4 border-indigo-500 pb-1">TOP FREELANCE SERVICES</span>
+        </h2> : ""
+        }
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-screen-xl mx-auto">
-          {freelancers.slice(0,6).map((freelancer, index) => (
-            <div
-              key={index}
+          {gigs.slice(0,6).map((gig) => (
+            <Link to={`${userRoutes.PROJECT_DETAILS}/${gig._id}`} key={gig._id}>
+              <div
               className="bg-white rounded-2xl shadow-lg overflow-hidden"
             >
               <img
-                src={freelancer.profilePicture}
-                alt={freelancer.name}
+                src={gig.gallery && gig.gallery.length > 0 ? gig.gallery[0] : "/placeholder.jpg"}
+                alt={gig.title}
                 className="w-full h-40 object-cover"
               />
-              <div className="p-4">
-                <h3 className="text-lg font-bold">{freelancer.name}</h3>
-                <p className="text-gray-600">{freelancer.profession}</p>
-                <div className="mt-2 text-sm text-gray-700 space-y-1">
-                  <p><strong>Experience:</strong> {freelancer.work_experience}</p>
-                  <p><strong>Working Days:</strong> {freelancer.working_days}</p>
-                  <p><strong>Active Hours:</strong> {freelancer.active_hours}</p>
+                <div className="p-6">
+                {/* Title */}
+                <h3 className="text-lg font-semibold text-gray-900 truncate">
+                  {gig.title}
+                </h3>
+
+                {/* Short Description */}
+                <p className="text-sm text-gray-600 mt-2 line-clamp-2">
+                  {gig.description}
+                </p>
+
+                {/* Price */}
+                <div className="mt-4">
+                  <span className="text-xl font-bold text-indigo-600">
+                    ${gig.price?.basic ?? 0}
+                  </span>
+                  <span className="text-gray-500 text-sm ml-1">starting</span>
                 </div>
               </div>
             </div>
+            </Link>
           ))}
         </div>
       </section>

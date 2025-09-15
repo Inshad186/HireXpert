@@ -63,7 +63,7 @@ export class AdminRepository extends BaseRepository<SkillType> implements IAdmin
     }
   }
 
-async getAllUsers(page: number, limit: number, role: string, search: string, status?: string): Promise<{ users: any[]; totalUsers: number }> {
+async getAllUsers(page: number, limit: number, role: string, search: string, status?: string, rollNum?: string): Promise<{ users: any[]; totalUsers: number }> {
   try {
     const skip = (page - 1) * limit;
     const filter: any = { role };

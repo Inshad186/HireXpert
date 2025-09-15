@@ -18,6 +18,8 @@ const freelancerController = new FreelancerController(freelancerService);
 const router = express.Router();
 
 router.post("/update-freelancerProfile",verifyTokenMiddleware, freelancerController.updateProfile.bind(freelancerController))
-router.post("/create-gig", verifyTokenMiddleware, freelancerController.createGig.bind(freelancerController))
+router.post("/create-gig", verifyTokenMiddleware, upload.array("gallery",3), freelancerController.createGig.bind(freelancerController))
+router.get("/listed-gig", verifyTokenMiddleware, freelancerController.getGigList.bind(freelancerController))
+router.put("/update-gig-status", verifyTokenMiddleware, freelancerController.updateGigStatus.bind(freelancerController))
 
 export default router

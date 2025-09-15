@@ -6,5 +6,5 @@ import { ReactNode } from "react";
 
 export const PublicRoute = ({ children }: { children: ReactNode }) => {
   const user = useSelector((state: RootState) => state.user);
-  return user?.accessToken ? <Navigate to="/" /> : <>{children}</>;
+  return user?.accessToken ? <Navigate to="/home" /> : <>{children}</>;
 };
