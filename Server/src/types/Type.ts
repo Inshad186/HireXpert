@@ -1,7 +1,6 @@
 import { Document, Types } from "mongoose";
 
 export interface UserType extends Document {
-//   _id: Types.ObjectId;
   name: string;
   email: string;
   password?: string;
@@ -84,4 +83,14 @@ export interface GoogleAuthUserType {
     email: string;
     name: string;
     profilePicture?: string;
+}
+
+export interface OrderType {
+  client?: Types.ObjectId;
+  freelancer?: Types.ObjectId;
+  gig?: Types.ObjectId;
+  requirements?: string;
+  plan?: string;
+  status?: string;
+  createdAt?: Date;
 }

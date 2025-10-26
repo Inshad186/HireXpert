@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
-import { changeProfile, getClientFullProfile, getFreelancerFullProfile, getProfileImage } from "@/api/user.api";
+import { changeProfileImg, getClientFullProfile, getFreelancerFullProfile, getProfileImage } from "@/api/user.api";
 import { updateClientProfile } from "@/api/client.api";
 import { setUser } from "@/redux/slices/userSlice";
 import ProfileImageUploader from "./ProfileImageUploader";
@@ -85,7 +85,7 @@ const freelancerFields = [
     formData.append("profileImage", file);
     formData.append("userId", user._id);
     try {
-      const response = await changeProfile(formData);
+      const response = await changeProfileImg(formData);
       if (response.success){
         setProfileImage(response.data.user.profilePicture);
       }else{

@@ -8,7 +8,7 @@ export interface IUserService {
   googleAuth(user:GoogleAuthUserType) : Promise<{accessToken: string, refreshToken: string, user:UserType}>;
   verifyOtp(otp: string, email: string, apiType: string) : Promise<{accessToken?:string, refreshToken?:string, user: UserType}>;
   assignRole(role:string, email:string) : Promise<{userRole:string}>
-  updateProfile(id: string, profileImage: FileType | undefined): Promise<{user: UserType}>;
+  updateProfileImage(id: string, profileImage: FileType | undefined): Promise<{user: UserType}>;
   updateUserName(userId: string, name: string) : Promise<{newName:string}>;
   getFreelancer() : Promise<{name:string, email:string}[]>;
   refreshToken(token:string) : Promise<string>;

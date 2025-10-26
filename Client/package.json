@@ -17,6 +17,7 @@
     "@react-oauth/google": "^0.12.2",
     "@reduxjs/toolkit": "^2.7.0",
     "axios": "^1.8.4",
+    "caniuse-lite": "^1.0.30001746",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "input-otp": "^1.4.2",

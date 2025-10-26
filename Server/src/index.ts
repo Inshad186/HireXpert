@@ -1,4 +1,4 @@
-
+import "reflect-metadata"
 import dotenv from "dotenv"               
 dotenv.config()
 
@@ -12,7 +12,7 @@ import morgan from "morgan";
 import { connectDB } from "./config/mongo.config";
 import { verifyTokenMiddleware } from "./middlewares/verifyToken.middleware";
 import { corsMiddleware } from "./middlewares/cors.middleware";
-
+import { gigMapper } from "./mappings/gig.mapper";
 
 
 const app = express()
@@ -31,6 +31,7 @@ app.use(express.json())
 app.use(express.urlencoded({ extended : true }))
 app.use(morgan("dev"))
 connectDB()
+gigMapper()
 
 app.use(corsMiddleware)
 app.use("/api/auth", userRouter)

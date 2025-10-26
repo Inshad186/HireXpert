@@ -2,7 +2,7 @@
 import { useEffect, useState } from "react";
 import { useSelector, useDispatch } from "react-redux";
 import { RootState } from "@/redux/store";
-import { getFreelancerFullProfile, changeProfile, getProfileImage } from "@/api/user.api";
+import { getFreelancerFullProfile, changeProfileImg, getProfileImage } from "@/api/user.api";
 import { updateFreelancerProfile } from "@/api/freelancer.api";
 import { getSkills } from "@/api/admin.api";
 import { setUser } from "@/redux/slices/userSlice";
@@ -48,7 +48,7 @@ export default function CompleteFreelancerProfile() {
           setForm(response.data.fullProfile);
         }
 
-        const imageRes = await changeProfile(new FormData());
+        const imageRes = await changeProfileImg(new FormData());
         console.log("Image Respond >>>>> : ",imageRes)
         if (imageRes.success) {
           setProfileImage(imageRes.data.user.profilePicture);
@@ -71,7 +71,7 @@ export default function CompleteFreelancerProfile() {
     formData.append("profileImage", file);
     formData.append("userId", user._id);
 
-    const res = await changeProfile(formData);
+    const res = await changeProfileImg(formData);
     if (res.success) {
       setProfileImage(res.data.user.profilePicture);
     }

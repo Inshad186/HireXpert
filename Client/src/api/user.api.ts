@@ -57,7 +57,7 @@ export const assignRole = async(role:string, email:string) => {
     }
 }
 
-export const changeProfile = async (formData: FormData) => {
+export const changeProfileImg = async (formData: FormData) => {
     try {
         const { data } = await Api.post(endpointUrl.CHANGE_PROFILE, formData, {
             headers: {

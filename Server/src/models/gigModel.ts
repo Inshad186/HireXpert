@@ -7,7 +7,7 @@ export interface IGig extends Document {
   category: string;
   skills: mongoose.Types.ObjectId[];
   deliveryTime: number;
-  price: {
+  pricing: {
     basic: number;
     standard?: number;
     premium?: number;
@@ -20,14 +20,24 @@ export interface IGig extends Document {
 const gigSchema = new Schema<IGig>({
   freelancer: { type: Schema.Types.ObjectId, ref: "FreelancerProfile", required: false },
   title: { type: String, required: false },
-  description: { type: String, required: false },
   category: { type: String, required: false },
   skills: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
-  deliveryTime: { type: Number, required: false },
-  price: {
-    basic: { type: Number, required: false },
-    standard: Number,
-    premium: Number
+  pricing: {
+    basic: { 
+      price: Number,
+      description: String,
+      deliveryTime: Number
+     },
+    standard: {
+      price: Number,
+      description: String,
+      deliveryTime: Number
+    },
+    premium: {
+      price: Number,
+      description: String,
+      deliveryTime: Number
+    }
   },
   isActive: {
     type: Boolean,

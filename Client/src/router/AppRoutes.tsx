@@ -15,6 +15,9 @@ import { RoleBasedRoute } from "./RoleBasedRoute";
 import ResetPassword from "@/components/user/resetPassword";
 import Projects from "@/pages/user/Projects";
 import ProjectDetail from "@/pages/user/ProjectDetail";
+import OrderCheckoutPage from "@/pages/user/OrderCheckout";
+import TestingPage from "@/pages/user/TestingPage";
+
 
 //! Freelancer
 import FreelancerRequirements from "@/pages/user/FreelancerRequirements";
@@ -31,6 +34,7 @@ import Dashboard from "@/pages/admin/Dashboard";
 import ClientListPage from "@/pages/admin/ClientManagement";
 import FreelancerListPage from "@/pages/admin/FreelancerManagement";
 import SkillManagement from "@/pages/admin/SkillManagement";
+import OrderSuccessPage from "@/pages/user/OrderSuccess";
 
 
 
@@ -50,8 +54,11 @@ export const router = createBrowserRouter([
             {path : "home", element : (<PrivateRoute><Home/></PrivateRoute>)},
             {path : "profile" , element : (<PrivateRoute><Profile/></PrivateRoute>)},
             {path : "freelancer-dashboard", element : <FreelancerDashboard/>},
-            {path : "services", element : <Projects/>},
-            {path : "project-detail/:projectId", element : <ProjectDetail/>}
+            {path : "projects", element : <Projects/>},
+            {path : "project-detail/:projectId", element : <ProjectDetail/>},
+            {path : "orderCheckout/:projectId", element : <OrderCheckoutPage/>},
+            {path : "orderSuccess/:projectId", element : <OrderSuccessPage/>},
+            {path : "testingRoute/:projectId", element : <TestingPage/>}
         ]
     },
 

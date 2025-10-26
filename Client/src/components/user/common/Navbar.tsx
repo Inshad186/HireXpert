@@ -16,7 +16,7 @@ function Navbar() {
   };
 
   const clientRoutes = {
-    "projects" : userRoutes.SERVICES,
+    "projects" : userRoutes.PROJECTS,
     "orders" : "",
     "profile" : userRoutes.PROFILE
   }

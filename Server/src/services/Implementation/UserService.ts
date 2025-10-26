@@ -236,7 +236,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
 }
 
 
-    async updateProfile(id: string, profileImage: FileType | undefined): Promise<{user: UserType}> {        
+    async updateProfileImage(id: string, profileImage: FileType | undefined): Promise<{user: UserType}> {        
         if (!profileImage) {            
             throw generateHttpError(HttpStatus.BAD_REQUEST, "Profile image is required")
         }

@@ -66,27 +66,37 @@ export interface InitialProjectDetail {
     _id:string;
     title?: string;
     category?: string;
-    description?:string;
-    deliveryTime?:number;
-    price :{
-        basic:number
-    };
+    pricing: {
+        basic: { price: number, description: string, deliveryTime: number },
+        standard: { price: number, description: string, deliveryTime: number },
+        premium: { price: number, description: string, deliveryTime: number }
+        };
     gallery:string[]
 }
 
 export interface ProjectDetail {
-  _id: string
+  _id?: string
   title: string
-  description: string
   category: string
-  deliveryTime: number
-  freelancer: string
+  freelancer?: string
   gallery: string[]
-  isActive: boolean
-  price: {
-    basic: number
-    standard: number
-    premium: number
+  isActive?: boolean
+  pricing: {
+    basic: {
+      price: number,
+      description: string,
+      deliveryTime: number
+    },
+    standard: {
+      price: number,
+      description: string,
+      deliveryTime: number
+    },
+    premium: {
+      price: number,
+      description: string,
+      deliveryTime: number
+    }
   }
   skills: string[]
 }

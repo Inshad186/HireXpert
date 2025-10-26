@@ -33,3 +33,14 @@ export const getProjectDetails = async(projectId : string) => {
         return { success:false, error:message }; 
     }
 }
+
+export const createOrder = async(gigId:string, freelancerId:string ,requirements:string, selectedPlan:string) => {
+    try {
+        const {data} = await Api.post(clientEndpointUrl.CREATE_ORDER, {gigId, freelancerId, requirements, selectedPlan})
+        return {success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };   
+    }
+}

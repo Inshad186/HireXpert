@@ -98,12 +98,12 @@ export class UserController implements IUserController {
     }
   }
 
-  async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateProfileImage(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userId = req.body.userId;
       const profileImage = req.file;
       
-      const {user} = await this.userService.updateProfile(userId, profileImage)
+      const {user} = await this.userService.updateProfileImage(userId, profileImage)
       res.status(HttpStatus.OK).json({user})
     } catch (err) {
       next(err)
@@ -138,6 +138,7 @@ export class UserController implements IUserController {
   async getProfileImage(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { userId } = JSON.parse(req.headers['x-user-payload'] as string)
+      console.log("USER ID FROM USERCONTROLLER : ",userId)
       const {user} = await this.userService.getProfileImage(userId)
       res.status(HttpStatus.OK).json({user})
     } catch (err) {

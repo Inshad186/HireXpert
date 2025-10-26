@@ -56,13 +56,13 @@ function ProjectComponent() {
 
                 {/* Short Description */}
                 <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                  {gig.description}
+                  {gig.pricing?.basic.description}
                 </p>
 
                 {/* Price */}
                 <div className="mt-4">
                   <span className="text-xl font-bold text-indigo-600">
-                    ${gig.price?.basic ?? 0}
+                    ${gig.pricing?.basic.price}
                   </span>
                   <span className="text-gray-500 text-sm ml-1">starting</span>
                 </div>

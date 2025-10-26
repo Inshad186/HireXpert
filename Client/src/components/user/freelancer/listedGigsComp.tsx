@@ -17,6 +17,7 @@ function ListedGigsComp() {
   useEffect(() => {
     const gigList = async () => {
       const response = await getGigList()
+      console.log("Gig List Response : ",response)
       if (response.success) {
         setList(response.data.gigDetails)
       }

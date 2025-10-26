@@ -3,20 +3,19 @@ import { getSkills } from "@/api/admin.api";
 import { createGig } from "@/api/freelancer.api";
 import { useNavigate } from "react-router-dom";
 import { userRoutes } from "@/constants/routeUrl";
+import { ProjectDetail } from "@/types/user.type";
 
 function GigComp() {
 
   const navigate = useNavigate()
     const [form, setForm] = useState<any>({
         title: "",
-        description: "",
         category: "",
         skills: [],
-        deliveryTime: "",
-        price: {
-        basic: "",
-        standard: "",
-        premium: ""
+        pricing: {
+          basic: { price: 0, description: "", deliveryTime: 0 },
+          standard: { price: 0, description: "", deliveryTime: 0 },
+          premium: { price: 0, description: "", deliveryTime: 0 }
         },
         gallery:[]
     });
@@ -35,12 +34,20 @@ function GigComp() {
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
       const {name, value} = e.target
-      
-      if(["basic", "standard", "premium"].includes(name)){
-        setForm({...form, price: {...form.price,[name]: value === ""? "" : Number(value) }})
-      }else{
         setForm({...form,[name]: value})
-      }
+    }
+
+    const handlePricingChange = (level: "basic" | "standard" | "premium", field: "price" | "description" | "deliveryTime", value: string) => {
+      setForm((prev: any) => ({
+        ...prev,
+        pricing: {
+          ...prev.pricing,
+          [level]: {
+            ...prev.pricing[level],
+            [field]: field === "price" || field === "deliveryTime" ? Number(value) : value
+          }
+        }
+      }))
     }
 
     const handleSkillToggle = (skillId: string) => {
@@ -64,9 +71,7 @@ function GigComp() {
   const handleSubmit = async () => {
     const gigForm = new FormData();
     gigForm.append("title", form.title);
-    gigForm.append("description", form.description);
     gigForm.append("category", form.category);
-    gigForm.append("deliveryTime",form.deliveryTime);
     gigForm.append("skills", JSON.stringify(form.skills))
     form.gallery.forEach((file:File) => {
       gigForm.append("gallery", file);
@@ -74,12 +79,24 @@ function GigComp() {
     });
 
 
-    const priceObj = {
-      basic: form.price.basic,
-      standard: form.price.standard ? form.price.standard : undefined,
-      premium: form.price.premium ? form.price.premium : undefined,
+    const pricingObj = {
+      basic: {
+        price: form.pricing.basic.price,
+        description: form.pricing.basic.description,
+        deliveryTime: form.pricing.basic.deliveryTime
+      },
+      standard: {
+        price: form.pricing.standard.price,
+        description: form.pricing.standard.description,
+        deliveryTime: form.pricing.standard.deliveryTime,
+      },
+      premium: {
+        price: form.pricing.premium.price,
+        description: form.pricing.premium.description,
+        deliveryTime: form.pricing.premium.deliveryTime,
+      }
     };
-    gigForm.append("price", JSON.stringify(priceObj));
+    gigForm.append("pricing", JSON.stringify(pricingObj));
 
     const res = await createGig(gigForm);
     console.log("Create Gig !!",res)
@@ -87,12 +104,14 @@ function GigComp() {
       alert("Gig Created Successfully!");
       setForm({
         title: "",
-        description: "",
         category: "",
         skills: [],
-        deliveryTime: "",
-        price: { basic: "", standard: "", premium: "" },
-        gallery:[],
+        pricing: {
+          basic: { price: 0, description: "", deliveryTime: 0 },
+          standard: { price: 0, description: "", deliveryTime: 0 },
+          premium: { price: 0, description: "", deliveryTime: 0 }
+        },
+        gallery:[]
       });
       navigate(userRoutes.LISTED_GIG)
     } else {
@@ -113,12 +132,10 @@ function GigComp() {
        placeholder="Gig Title" 
        className="w-full border p-2 rounded" />
 
-      <textarea name="description" 
-      value={form.description}
-      onChange={handleChange}
-      placeholder="Gig Description" 
-      className="w-full border p-2 rounded" />
-      <select name="category" value={form.category} onChange={handleChange}  className="w-full border p-2 rounded">
+      <select name="category" 
+      value={form.category} 
+      onChange={handleChange}  
+      className="w-full border p-2 rounded">
         <option value="">Select Category</option>
         {Object.keys(adminSkills).map((cat) => (
           <option key={cat} value={cat}>{cat}</option>
@@ -150,25 +167,34 @@ function GigComp() {
         </div>
       </div>
 
-      <input 
-      type="number" 
-      name="deliveryTime" 
-      value={form.deliveryTime} 
-      onChange={handleChange}
-      placeholder="Delivery Time (days)" 
-      className="w-full border p-2 rounded" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        {(["basic", "standard", "premium"]as const).map((level) => (
+          <div key={level} className="border rounded p-4 space-y-3">
+            <h3 className="text-lg font-semibold capitalize">{level} Package</h3>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {["basic", "standard", "premium"].map((level) => (
-          <input
-            key={level}
-            type="number"
-            name={level}
-            value={form.price[level]}
-            onChange={handleChange}
-            placeholder={level}
-            className="border p-2 rounded"
-          />
+            <input
+              type="number"
+              value={form.pricing[level].price === 0? "" : form.pricing[level].price}
+              onChange={(e) => handlePricingChange(level, "price", e.target.value)}
+              placeholder="Price"
+              className="w-full border p-2 rounded"
+            />
+
+            <textarea
+              value={form.pricing[level].description}
+              onChange={(e) => handlePricingChange(level, "description", e.target.value)}
+              placeholder="Description"
+              className="w-full border p-2 rounded"
+            />
+
+            <input
+              type="number"
+              value={form.pricing[level].deliveryTime === 0?"" : form.pricing[level].deliveryTime}
+              onChange={(e) => handlePricingChange(level, "deliveryTime", e.target.value)}
+              placeholder="Delivery Time (days)"
+              className="w-full border p-2 rounded"
+            />
+          </div>
         ))}
       </div>
 

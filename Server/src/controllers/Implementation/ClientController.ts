@@ -30,10 +30,23 @@ export class ClientController implements IClientController {
     async getProjectDetail(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { projectId } = req.params
-            console.log("PROJECT ID : > ",projectId)
+            console.log("ProjectId From Client Controller",projectId)
             const projectDetails = await this.clientService.getGigDetails(projectId)
-            console.log("PROJECT DETAILS ::: >",projectDetails)
+            console.log("Project Details From Client Controllers : ", projectDetails)
             res.status(HttpStatus.OK).json({success:true, projectDetails})
+        } catch (error) {
+            next()
+        }
+    }
+
+    async createOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+        try {
+            console.log("Request Body from Client Controller",req.body)
+            const {gigId, freelancerId, requirements, selectedPlan:plan} = req.body
+            const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
+            const order = await this.clientService.createOrder(userId, freelancerId, gigId, requirements, plan)
+            console.log("Order from Client Controller : ",order)
+            res.status(HttpStatus.OK).json({ success: true, order})
         } catch (error) {
             next()
         }
