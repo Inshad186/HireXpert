@@ -23,19 +23,24 @@ export const clientEndpointUrl = {
   GET_GIGS: "/auth/client/get-gigs",
   GET_PROJECTDETAIL : "/auth/client/get-ProjectDetail",
   CREATE_ORDER : "/auth/client/create-order",
+  GET_MYORDERS : "/auth/client/my-orders"
 }
 
 export const freelancerEndpointUrl = {
     UPDATE_FREELANCER_PROFILE : "/auth/freelancer/update-freelancerProfile",
     CREATE_GIG : "/auth/freelancer/create-gig",
     LISTED_GIG : "/auth/freelancer/listed-gig",
-    UPDATE_GIG_STATUS : "/auth/freelancer/update-gig-status"
+    UPDATE_GIG_STATUS : "/auth/freelancer/update-gig-status",
+    UPDATE_ISSELLER : "/auth/freelancer/update-isSeller",
+    GET_FREELANCER_DASHSTATS : "/auth/freelancer/freelancer-dashStats",
+    GET_ORDERLIST : "/auth/freelancer/order-list",
 }
 
 export const adminEndpointUrl = {
   LOGIN : "/auth/admin/login",
   DASHBOARD_STATS : "/auth/admin/dashboardStats",
   USERS_LIST : "/auth/admin/usersList",
+  ORDER_LIST : "/auth/admin/ordersList",
   BLOCK_USER : "/auth/admin/block-user",
   ADD_CATEGORIES : "/auth/admin/addCategories",
   GET_CATEGORIES : "/auth/admin/getCategories",

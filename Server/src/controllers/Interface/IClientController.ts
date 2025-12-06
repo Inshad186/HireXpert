@@ -5,4 +5,5 @@ export interface IClientController {
     getGigs(req: Request, res: Response, next: NextFunction) : Promise<void>
     getProjectDetail(req: Request, res: Response, next: NextFunction): Promise<void>
     createOrder(req: Request, res: Response, next: NextFunction): Promise<void>
+    getMyOrders(req: Request, res: Response, next: NextFunction): Promise<void>
 }

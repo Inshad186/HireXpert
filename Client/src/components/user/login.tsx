@@ -1,12 +1,12 @@
 import { useNavigate } from "react-router-dom";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { emailRegex } from "@/utils/validation/regex.util";
 import { useGoogleLogin } from "@react-oauth/google";
 import { decodeToken } from "@/utils/googleAuthToken.util";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
 import { ErrorState } from "@/types/user.type";
-import { login, googleAuth } from "@/api/user.api";
+import { login, googleAuth, getFreelancerFullProfile } from "@/api/user.api";
 import { userRoutes } from "@/constants/routeUrl";
 import toast from "react-hot-toast";
 
@@ -54,20 +54,24 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
           })
         );
 
-        console.log("RESPONSE >>>>>>>> : ", response.data);
-        setTimeout(() => {
+        setTimeout(async() => {
           switch (userRole) {
             case "none":
             case "client":
-              navigate(userRoutes.HOME);
+              navigate(userRoutes.HOME, {replace: true});
               break;            
             case "freelancer":
-              navigate(userRoutes.FREELANCER_DASH);
+              const profileRes = await getFreelancerFullProfile()
+              if(profileRes.data.fullProfile.isSeller){
+                navigate(userRoutes.FREELANCER_DASH, {replace: true});
+              }else{
+                navigate(userRoutes.FREELANCER_ONBOARDING, {replace: true})
+              }
               break;
             default:
-              navigate(userRoutes.LOGIN);
+              navigate(userRoutes.LOGIN, {replace: true});
           }
-        }, 1500);
+        }, 1000);
       } else {
         setLoading(false);
         toast.error("Something went wrong")
@@ -84,14 +88,12 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
     onSuccess: async (tokenResponse) => {
       try {
         const decoded = await decodeToken(tokenResponse.access_token);
-        console.log("DECODED >> ? >>>>> : ",decoded)
 
         const response = await googleAuth({
           email: decoded.email,
           name: decoded.given_name,
           profilePicture: decoded.picture
         });
-        console.log("Response ?? : ",response);
 
         if (response.success) {
           const {accessToken , user} = response.data
@@ -108,12 +110,12 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
             switch(user.role){
               case "none" : 
               case "client" :
-              navigate(userRoutes.HOME)
+              navigate(userRoutes.HOME, {replace: true})
               break;
-              case "freelacer" : 
-              navigate(userRoutes.FREELANCER_DASH)
+              case "freelancer" : 
+              navigate(userRoutes.FREELANCER_DASH, {replace: true})
               break;
-              default : navigate(userRoutes.SIGNUP)
+              default : navigate(userRoutes.SIGNUP, {replace: true})
             }
           },2000)
         } else {

@@ -4,12 +4,14 @@ import { createGig } from "@/api/freelancer.api";
 import { useNavigate } from "react-router-dom";
 import { userRoutes } from "@/constants/routeUrl";
 import { ProjectDetail } from "@/types/user.type";
+import toast from "react-hot-toast";
 
 function GigComp() {
 
   const navigate = useNavigate()
     const [form, setForm] = useState<any>({
         title: "",
+        description: "",
         category: "",
         skills: [],
         pricing: {
@@ -21,6 +23,26 @@ function GigComp() {
     });
 
     const [adminSkills, setAdminSkills] = useState<{ [category: string]: { _id: string; name: string }[] }>({});
+    const [loading, setLoading] = useState(false)
+
+
+    const validateForm = (): string | null => {
+      if(!form.title.trim()) return "Title is required";
+      if(!form.description.trim()) return "Description is required";
+      if(!form.category) return "Category is required";
+      if(form.skills.length === 0) return "Select atleast one skill";
+      if(form.gallery.length === 0) return "Uploaad atleast one Image"
+
+      const {basic, standard, premium} = form.pricing
+      if(basic.price <= 0) return "Basic package is required"
+      if (!basic.description.trim()) return "Basic package description is required";
+      if (basic.deliveryTime <= 0) return "Basic package delivery time is required";
+
+      if(standard.price > 0 && standard.pricing.deliveryTime > 0) {
+        
+      }
+      return null
+    }
 
     useEffect(() => {
       const fetchSkills = async() => {
@@ -68,42 +90,67 @@ function GigComp() {
     }
   };
 
-  const handleSubmit = async () => {
+const handleSubmit = async () => {
+  const validationError = validateForm();
+  if (validationError) {
+    toast.error(validationError);
+    return;
+  }
+
+  setLoading(true);
+  try {
     const gigForm = new FormData();
     gigForm.append("title", form.title);
+    gigForm.append("description", form.description);
     gigForm.append("category", form.category);
-    gigForm.append("skills", JSON.stringify(form.skills))
-    form.gallery.forEach((file:File) => {
+    gigForm.append("skills", JSON.stringify(form.skills));
+    
+    form.gallery.forEach((file: File) => {
       gigForm.append("gallery", file);
-      console.log("GALLERY : ",file)
     });
 
-
-    const pricingObj = {
+    const pricingObj: any = {
       basic: {
         price: form.pricing.basic.price,
         description: form.pricing.basic.description,
         deliveryTime: form.pricing.basic.deliveryTime
-      },
-      standard: {
-        price: form.pricing.standard.price,
-        description: form.pricing.standard.description,
-        deliveryTime: form.pricing.standard.deliveryTime,
-      },
-      premium: {
-        price: form.pricing.premium.price,
-        description: form.pricing.premium.description,
-        deliveryTime: form.pricing.premium.deliveryTime,
       }
     };
+
+    if (
+      form.pricing.standard.price > 0 &&
+      form.pricing.standard.deliveryTime > 0 &&
+      form.pricing.standard.description.trim()
+    ) {
+      pricingObj.standard = {
+        price: form.pricing.standard.price,
+        description: form.pricing.standard.description,
+        deliveryTime: form.pricing.standard.deliveryTime
+      };
+    }
+
+    if (
+      form.pricing.premium.price > 0 &&
+      form.pricing.premium.deliveryTime > 0 &&
+      form.pricing.premium.description.trim()
+    ) {
+      pricingObj.premium = {
+        price: form.pricing.premium.price,
+        description: form.pricing.premium.description,
+        deliveryTime: form.pricing.premium.deliveryTime
+      };
+    }
+
     gigForm.append("pricing", JSON.stringify(pricingObj));
 
     const res = await createGig(gigForm);
-    console.log("Create Gig !!",res)
+    console.log("Create Gig !!", res);
+    
     if (res.success) {
-      alert("Gig Created Successfully!");
+      toast.success("Gig Created Successfully!");
       setForm({
         title: "",
+        description: "",
         category: "",
         skills: [],
         pricing: {
@@ -111,14 +158,19 @@ function GigComp() {
           standard: { price: 0, description: "", deliveryTime: 0 },
           premium: { price: 0, description: "", deliveryTime: 0 }
         },
-        gallery:[]
+        gallery: []
       });
-      navigate(userRoutes.LISTED_GIG)
+      navigate(userRoutes.LISTED_GIG);
     } else {
-      console.error("Gig creation failed:", res);
+      toast.error("Gig creation failed");
     }
-  };
-
+  } catch (error) {
+    console.error("Error creating gig:", error);
+    toast.error("An error occurred while creating the gig");
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow rounded-lg space-y-6 mt-7">
@@ -131,6 +183,14 @@ function GigComp() {
        onChange={handleChange}
        placeholder="Gig Title" 
        className="w-full border p-2 rounded" />
+
+       <textarea 
+       name="description"
+       value={form.description}
+       onChange={handleChange}
+       placeholder="Gig description"
+       className="w-full border p-2 rounded"
+       ></textarea>
 
       <select name="category" 
       value={form.category} 
@@ -189,6 +249,7 @@ function GigComp() {
 
             <input
               type="number"
+              min={0}
               value={form.pricing[level].deliveryTime === 0?"" : form.pricing[level].deliveryTime}
               onChange={(e) => handlePricingChange(level, "deliveryTime", e.target.value)}
               placeholder="Delivery Time (days)"
@@ -206,8 +267,9 @@ function GigComp() {
 
       <button
       onClick={handleSubmit} 
-      className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700">
-        Submit
+      className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+      disabled={loading}>
+        {loading? "Submitting.." : "Submit"}
       </button>
     </div>
   );

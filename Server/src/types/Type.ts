@@ -44,6 +44,7 @@ export interface FreelancerProfileType extends Document {
   working_days: string;
   active_hours: string;
   portfolio: string;
+  isSeller: boolean;
 }
 
 export interface CategoryType extends Document {
@@ -86,11 +87,11 @@ export interface GoogleAuthUserType {
 }
 
 export interface OrderType {
-  client?: Types.ObjectId;
-  freelancer?: Types.ObjectId;
-  gig?: Types.ObjectId;
-  requirements?: string;
-  plan?: string;
-  status?: string;
+  client: Types.ObjectId;
+  freelancer: Types.ObjectId;
+  gig: Types.ObjectId;
+  requirements: string;
+  plan: string;
+  status: string;
   createdAt?: Date;
 }

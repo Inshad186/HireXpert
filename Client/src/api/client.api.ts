@@ -44,3 +44,14 @@ export const createOrder = async(gigId:string, freelancerId:string ,requirements
         return { success:false, error:message };   
     }
 }
+
+export const getMyOrders = async() => {
+    try {
+        const {data} = await Api.get(clientEndpointUrl.GET_MYORDERS)
+        return {success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return {success: false, error: message}
+    }
+}

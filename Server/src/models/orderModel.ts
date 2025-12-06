@@ -4,6 +4,9 @@ interface OrderDocument extends Document {
   client: mongoose.Types.ObjectId;
   freelancer: mongoose.Types.ObjectId;
   gig: mongoose.Types.ObjectId;
+  price: number;
+  deliveryTime: number;
+  deliveryDate: Date;
   plan: "basic" | "standard" | "premium";
   requirements: string;
   status: "pending" | "accepted" | "inprogress" | "completed" | "cancelled";
@@ -15,13 +18,17 @@ const orderSchema = new Schema<OrderDocument>({
   freelancer: { type: Schema.Types.ObjectId, ref: "FreelancerProfile"},
   gig: { type: Schema.Types.ObjectId, ref: "Gig" },
   plan: { type: String, enum: ["basic", "standard", "premium"] },
+  price: { type: Number},
+  deliveryTime : {type: Number},
   requirements: { type: String},
   status: {
     type: String,
     enum: ["pending", "accepted", "inprogress", "completed", "cancelled"],
     default: "pending",
-  },
-  createdAt: { type: Date },
+  }
+},
+{
+  timestamps:true
 });
 
 export default mongoose.model<OrderDocument>("Order", orderSchema);

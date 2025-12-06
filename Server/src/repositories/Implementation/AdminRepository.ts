@@ -1,12 +1,14 @@
 import { IAdminRepository } from "../Interface/IAdminRepository";
 import Skill from "@/models/skillModel"
-import { UserType } from "@/types/Type";
+import { OrderType, UserType } from "@/types/Type";
 import User from "@/models/userBaseModel";
 import Freelancer from "@/models/freelancerModel";
+import Gig from "@/models/gigModel";
 import { BaseRepository } from "../BaseRepository/implementation";
 import { SkillType } from "@/types/Type";
 import Category from "@/models/categoryModel"
 import { CategoryType } from "@/types/Type";
+import Order from "@/models/orderModel";
 
 export class AdminRepository extends BaseRepository<SkillType> implements IAdminRepository {
   constructor(){
@@ -41,22 +43,13 @@ export class AdminRepository extends BaseRepository<SkillType> implements IAdmin
     }
   }
 
-  async countTotalDashboardStats(): Promise<{
-    totalUsers: number;
-    totalFreelancers: number;
-    totalClients: number;
-  }> {
+  async countTotalDashboardStats(): Promise<{totalUsers: number; totalFreelancers: number; totalClients: number; totalGigs: number}> {
     try {
       const totalUsers = await User.countDocuments({ role: { $ne: "admin" } });
-      const totalFreelancers = await User.countDocuments({
-        role: "freelancer",
-      });
+      const totalFreelancers = await User.countDocuments({ role: "freelancer"});
       const totalClients = await User.countDocuments({ role: "client" });
-      return {
-        totalUsers,
-        totalFreelancers,
-        totalClients,
-      };
+      const totalGigs = await Gig.countDocuments()
+      return { totalUsers, totalFreelancers, totalClients, totalGigs };
     } catch (error) {
       console.error(error);
       throw new Error("Error to getting the counts");
@@ -148,6 +141,18 @@ async getAllUsers(page: number, limit: number, role: string, search: string, sta
       await Skill.findByIdAndUpdate(skillId, { name: skillName });
     } catch (error) {
       throw new Error("Failed to update skill");
+    }
+  }
+
+  async getAllOrders(): Promise<OrderType[]> {
+    try {
+      const orders = await Order.find()
+      .populate("client", "name")
+      .populate("freelancer", "name")
+      .populate("gig", "title pricing.basic.price")
+      return orders
+    } catch (error) {
+      throw new Error("Failed to get orders list")
     }
   }
 

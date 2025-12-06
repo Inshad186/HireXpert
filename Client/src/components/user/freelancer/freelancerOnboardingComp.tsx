@@ -7,6 +7,8 @@ import VideoEditor from "@/assets/VideoEditor.jpg"
 import Marketer from "@/assets/Marketer.jpg"
 import VoiceArtist from "@/assets/VoiceArtist.jpg"
 import Animator from "@/assets/Animator.jpg"
+import { completeOnboarding } from "@/api/freelancer.api";
+import toast from "react-hot-toast";
 
 const skills = [
   { title: "I am a Designer", image: Designer },
@@ -18,7 +20,7 @@ const skills = [
   { title: "I am a Animator", image: Animator},
 ];
 
-function FreelancerDashboard() {
+function FreelancerOnboarding() {
   const navigate = useNavigate();
 
   return (
@@ -84,4 +86,4 @@ function FreelancerDashboard() {
   );
 }
 
-export default FreelancerDashboard;
+export default FreelancerOnboarding;

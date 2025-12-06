@@ -10,34 +10,30 @@ export interface IFreelancerProfile extends Document {
   qualification?: string;
   bio?: string;
   work_experience?: string;
-  profileSkills: [{
-    type: Schema.Types.ObjectId,
-    ref: "Skill"
-  }];
+  profileSkills: [{ type: Schema.Types.ObjectId, ref: "Skill"}];
   proficient_languages?: string[];
   working_days?: string;
   active_hours?: string;
   portfolio?: string;
+  isSeller?: string;
 }
 
 const freelancerProfileSchema = new Schema<IFreelancerProfile>({
   user: { type: Schema.Types.ObjectId, ref: "User", required: false },
-  name: String,
-  email: String,
-  role: String,
-  profession: String,
-  company: String,
-  qualification: String,
-  bio: String,
-  work_experience: String,
-  profileSkills: [{
-    type: Schema.Types.ObjectId,
-    ref: "Skill"
-  }],
+  name: {type: String},
+  email: {type: String},
+  role: {type: String},
+  profession: {type: String},
+  company: {type: String},
+  qualification: {type: String},
+  bio: {type: String},
+  work_experience: {type: String},
+  profileSkills: [{type: Schema.Types.ObjectId, ref: "Skill"}],
   proficient_languages: [String],
-  working_days: String,
-  active_hours: String,
-  portfolio: String,
+  working_days: {type: String},
+  active_hours: {type: String},
+  portfolio: {type: String},
+  isSeller: {type: Boolean, default: false},
 }, { timestamps: true });
 
 export default mongoose.model<IFreelancerProfile>("FreelancerProfile", freelancerProfileSchema);

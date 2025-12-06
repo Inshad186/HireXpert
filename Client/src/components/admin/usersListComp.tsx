@@ -1,11 +1,10 @@
 import { getUsersList } from '@/api/admin.api';
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { blockUsers } from '@/api/admin.api';
 import toast from 'react-hot-toast';
 import {
   Pagination,
   PaginationContent,
-  PaginationEllipsis,
   PaginationItem,
   PaginationLink,
   PaginationNext,
@@ -91,16 +90,16 @@ const handleToggleBlock = async (userId: string) => {
           placeholder="Search"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="p-2 border border-gray-300 rounded-l-md w-1/3 text-black"
+          className="p-2 rounded-l-md w-1/3 bg-white text-black"
         />
         <button
         onClick={handleSearch}
-        className="bg-black text-white px-4 py-2 rounded-r-md">Search</button>
+        className="bg-gray-900 text-white px-4 py-2 rounded-r-md">Search</button>
         <div className="flex items-center gap-2 ml-auto">
           <label className="font-semibold text-lg text-white mr-2">Filter by:</label>
           <select
           onChange={(e) => setStatusFilter(e.target.value)}
-            className="p-2 border-gray-300 rounded-md text-white bg-black"
+            className="p-2 border-gray-300 rounded-md text-white bg-gray-900"
           >
             <option value="">All</option>
             <option value="active">Active</option>
@@ -110,10 +109,10 @@ const handleToggleBlock = async (userId: string) => {
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto min-h-[450px]">
+      <div className="bg-gray-900  rounded-lg overflow-x-auto min-h-[450px]">
         <table className="w-full table-auto border-collapse">
           <thead>
-            <tr className="bg-black text-white text-left">
+            <tr className="bg-black border-b text-white text-left">
               <th className="p-3">Id</th>
               <th className="p-3">Name</th>
               <th className="p-3">Email</th>
@@ -125,7 +124,7 @@ const handleToggleBlock = async (userId: string) => {
           <tbody>
             {users.length > 0 ? (
               users.map((user, index) => (
-                <tr key={user._id} className="border-b border-gray-300">
+                <tr key={user._id} className="border-gray-300">
                   <td className="p-3">{(currentPage-1) * USERS_PER_PAGE + index + 1}</td>
                   <td className="p-3">{user.name}</td>
                   <td className="p-3">{user.email}</td>

@@ -9,10 +9,12 @@ import { upload } from "@/config/multer.config";
 import { verifyTokenMiddleware } from "@/middlewares/verifyToken.middleware";
 import { allowRoles } from "@/middlewares/roleBase.middleware";
 import { GigRepository } from "@/repositories/Implementation/GigRepository";
+import { OrderRepository } from "@/repositories/Implementation/OrderRepository";
 
 const gigRepo = new GigRepository
 const freelancerRepo = new FreelancerRepository();
-const freelancerService = new FreelancerService(freelancerRepo, gigRepo);
+const OrderRepo = new OrderRepository
+const freelancerService = new FreelancerService(freelancerRepo, gigRepo, OrderRepo);
 const freelancerController = new FreelancerController(freelancerService);
 
 const router = express.Router();
@@ -21,5 +23,7 @@ router.post("/update-freelancerProfile",verifyTokenMiddleware, freelancerControl
 router.post("/create-gig", verifyTokenMiddleware, upload.array("gallery",3), freelancerController.createGig.bind(freelancerController))
 router.get("/listed-gig", verifyTokenMiddleware, freelancerController.getGigList.bind(freelancerController))
 router.put("/update-gig-status", verifyTokenMiddleware, freelancerController.updateGigStatus.bind(freelancerController))
+router.get("/freelancer-dashStats", verifyTokenMiddleware, freelancerController.getFreelancerDashStats.bind(freelancerController))
+router.get("/order-list", verifyTokenMiddleware, freelancerController.getOrderList.bind(freelancerController))
 
 export default router

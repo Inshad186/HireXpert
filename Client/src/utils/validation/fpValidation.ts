@@ -1,5 +1,5 @@
-import { passwordRegex } from "./regex.util"; 
 
+import { passwordRegex } from "./regex.util"; 
 
 export const validatePassword = (name: string, value: string, passwords: { password: string }) => {
     let errors = [];

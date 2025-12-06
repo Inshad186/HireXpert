@@ -1,4 +1,4 @@
-import { CategoryType, SkillType, UserType } from "@/types/Type";
+import { CategoryType, OrderType, SkillType, UserType } from "@/types/Type";
 import { IAdminService } from "../Interface/IAdminService";
 import { generateHttpError } from "@/utils/http-error.util";
 import { HttpStatus } from "@/constants/status.constant";
@@ -43,15 +43,10 @@ export class AdminService implements IAdminService {
     return { accessToken, refreshToken, admin };
   }
 
-  async getDashboardStats(): Promise<{
-    totalUsers: number;
-    totalFreelancers: number;
-    totalClients: number;
-  }> {
+  async getDashboardStats(): Promise<{totalUsers: number; totalFreelancers: number; totalClients: number; totalGigs: number }> {
     try {
-      const { totalUsers, totalFreelancers, totalClients } =
-        await this.adminRepository.countTotalDashboardStats();
-      return { totalUsers, totalFreelancers, totalClients };
+      const { totalUsers, totalFreelancers, totalClients, totalGigs } = await this.adminRepository.countTotalDashboardStats();
+      return { totalUsers, totalFreelancers, totalClients, totalGigs };
     } catch (err) {
       console.error("Failed to get dashboard stats:", err);
       throw err;
@@ -101,8 +96,11 @@ export class AdminService implements IAdminService {
     await this.adminRepository.updateAllSkills(skillId, skillName);
   }
 
+  async getOrdersList(): Promise<OrderType[]> {
+    return await this.adminRepository.getAllOrders()
+  }
+
   async deleteCategoryAndSkill(categoryId: string): Promise<void> {
     await this.adminRepository.deleteCategoryAndSkills(categoryId);
   }
-
 }

@@ -248,7 +248,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
             throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
         }
         user.profilePicture = imageURL;
-        await this.userRepository.update(id, user);
+        await this.userRepository.findByIdAndUpdate(id, user);
         return {user}
     }
 
@@ -273,7 +273,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
         throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
       }
       user.name = name
-      await this.userRepository.update(userId, user)
+      await this.userRepository.findByIdAndUpdate(userId, user)
       const newName = user.name
       return {newName}
     }
@@ -324,7 +324,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
       throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
     }
     user.password = await bcrypt.hash(password,10)
-    await this.userRepository.update(user.id, user)
+    await this.userRepository.findByIdAndUpdate(user.id, user)
     return {user}
   }
 
@@ -335,7 +335,7 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
     }
     // ✅ Mutate the existing Mongoose document directly
     Object.assign(user, userData);
-    await this.userRepository.update(userId, user);
+    await this.userRepository.findByIdAndUpdate(userId, user);
 
     return { userDetails: user };
   }

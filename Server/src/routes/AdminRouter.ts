@@ -21,5 +21,6 @@ adminRouter.post("/addSkills", adminController.addSkills.bind(adminController))
 adminRouter.get("/getSkills", adminController.getSkills.bind(adminController))
 adminRouter.patch("/editSkills", adminController.editSkills.bind(adminController))
 adminRouter.delete("/deleteCategory-Skill/:categoryId", adminController.deleteCategoryAndSkills.bind(adminController))
+adminRouter.get("/ordersList", adminController.getOrdersList.bind(adminController))
 
 export default adminRouter

@@ -23,6 +23,9 @@ export class GigEntity {
   title!: string;
 
   @AutoMap()
+  description!: string;
+
+  @AutoMap()
   category!: string;
 
   @AutoMap(() => [String])

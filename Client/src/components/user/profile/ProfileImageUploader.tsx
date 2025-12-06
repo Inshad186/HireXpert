@@ -12,8 +12,7 @@ export default function ProfileImageUploader({ image, onChange }: { image: strin
       }} />
       <button
         className="absolute bottom-0 right-0 bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700"
-        onClick={() => inputRef.current?.click()}
-      >
+        onClick={() => inputRef.current?.click()}>
         Update
       </button>
     </div>

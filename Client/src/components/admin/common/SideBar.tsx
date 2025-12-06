@@ -1,15 +1,37 @@
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 function SideBar() {
+
+  const [activeTab, setActiveTab] = useState("dashboard")
+  const navigate = useNavigate()
+
   return (
-    <aside className="w-56 bg-black text-white flex flex-col p-4">
-      <h1 className="text-2xl font-bold mb-10">HireXpert</h1>
-      <nav className="flex flex-col gap-6">
-        <a href="/admin/dashboard" className="hover:text-gray-400">Dashboard</a>
-        <a href="/admin/clientListPage" className="hover:text-gray-400">Client Management</a>
-        <a href="/admin/FreelancerListPage" className="hover:text-gray-400">Freelancer Management</a>
-        <a href="/admin/skillManagement" className="hover:text-gray-400">Skill Management</a>
-        <a href="/admin/gigs" className="hover:text-gray-400">Gig Management</a>
-      </nav>
-    </aside>
+    <div className="flex h-screen bg-gray-100">
+      <div className="w-60 bg-gray-900 text-white p-6">
+        <h1 className="text-2xl font-bold mb-8">Admin Panel</h1>
+        <nav className="space-y-4">
+          {[
+            {id:"dashboard", label: "Dashboard", icon: "📊" },
+            {id:"freelancers", label: "Freelancers", icon: "👨‍💻" },
+            {id:"clients", label: "Clients", icon: "🧑‍🤝‍🧑" },
+            {id:"orders", label: "Orders", icon: "📦" },
+            {id:"payments", label: "Payments", icon: "💳" },
+          ].map(item => (
+            <button
+            key={item.id}
+            onClick={() => {
+              setActiveTab(item.id)
+              navigate(`/admin/${item.id}`)
+            }
+            }
+            className={`w-full text-left px-4 py-3 text-white rounded-lg 
+            ${item.id === activeTab? "bg-blue-600" : 'hover:bg-gray-800'}`}>
+              <span className="mr-2">{item.icon}</span> {item.label}
+            </button>
+          ))}
+        </nav>
+      </div>
+    </div>
   );
 }
 

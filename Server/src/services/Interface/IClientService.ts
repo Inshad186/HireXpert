@@ -11,4 +11,5 @@ export interface IClientService {
     getGigs(): Promise<GigType[]>
     getGigDetails(gigId: string) : Promise<GigWithFreelancer>
     createOrder(userId:string, freelancerId:string, gigId:string, requirements:string, plan:string): Promise<OrderType>
+    getMyOrders(userId: string): Promise<OrderType[]>
 }

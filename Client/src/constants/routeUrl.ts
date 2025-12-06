@@ -17,8 +17,10 @@ export const userRoutes = {
     CREATE_GIG : "/create-gig",
     LISTED_GIG : "/listed-gig",
     PROJECT_DETAILS : "/project-detail",
-    ORDER_CHECKOUT : "/orderCheckout",
-    ORDER_SUCCESS : "/orderSuccess",
+    ORDER_CHECKOUT : "/order-checkout",
+    ORDER_SUCCESS : "/order-success",
+    FREELANCER_ONBOARDING : "/freelancer-Onboarding",
+    MY_ORDERS : "/my-orders",
     TESTING_ROUTE : "/testingRoute",
     LOGOUT : "/logout",
 }   

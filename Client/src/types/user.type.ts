@@ -1,4 +1,4 @@
-import mongoose, {ObjectId} from "mongoose"
+import mongoose, {ObjectId, Types} from "mongoose"
 
 export type UserRole = "freelancer" | "client" | "admin" | "none";
 
@@ -10,13 +10,11 @@ export interface UserSignUpType {
     role? : UserRole,
 }
 
-
 export type UserSignupAction =
     | { type: "SET_NAME"; payload: string }
     | { type: "SET_EMAIL"; payload: string }
     | { type: "SET_PASSWORD"; payload: string }
     | { type: "SET_CONFIRM_PASSWORD"; payload: string }
-
 
 export interface ErrorState {
     field?: string;
@@ -59,8 +57,8 @@ export interface FreelancerDetail {
   working_days: string
   active_hours: string
   portfolio: string
+  isSeller:string
 }
-
 
 export interface InitialProjectDetail {
     _id:string;
@@ -75,28 +73,39 @@ export interface InitialProjectDetail {
 }
 
 export interface ProjectDetail {
-  _id?: string
-  title: string
-  category: string
-  freelancer?: string
+  _id?: string;
+  title: string;
+  description: string;
+  category: string;
+  freelancer?: Types.ObjectId;
   gallery: string[]
   isActive?: boolean
   pricing: {
-    basic: {
-      price: number,
-      description: string,
-      deliveryTime: number
-    },
-    standard: {
-      price: number,
-      description: string,
-      deliveryTime: number
-    },
-    premium: {
-      price: number,
-      description: string,
-      deliveryTime: number
-    }
+    basic: { price: number, description: string, deliveryTime: number },
+    standard?: { price: number, description: string, deliveryTime: number },
+    premium?: { price: number, description: string, deliveryTime: number }
   }
   skills: string[]
+}
+
+export interface OrderDetail {
+  _id?: string;
+  client?: {
+    name: string
+  }
+  freelancer?:{
+    name: string
+  }
+  gig?:{
+    title: string
+    pricing:{
+      basic?:{
+        price: number;
+        deliveryTime: number
+      }
+    }
+  }
+  requirements: string;
+  plan?: string;
+  status?: 'pending' | 'in-progress' | 'completed' | 'cancelled';
 }

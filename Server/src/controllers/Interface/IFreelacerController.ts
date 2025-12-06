@@ -5,4 +5,6 @@ export interface IFreelancerController {
     createGig(req:Request, res:Response, next:NextFunction) : Promise<void>
     getGigList(req:Request, res:Response, next:NextFunction) : Promise<void>
     updateGigStatus(req:Request, res:Response, next:NextFunction) : Promise<void>
+    getFreelancerDashStats(req:Request, res:Response, next:NextFunction) : Promise<void>
+    getOrderList(req:Request, res:Response, next:NextFunction) : Promise<void>
 }

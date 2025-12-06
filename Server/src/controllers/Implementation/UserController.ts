@@ -210,10 +210,7 @@ export class UserController implements IUserController {
     const refreshToken = req.cookies?.refreshToken;
     console.log("REFRESH TOKEN >>> : ",refreshToken)
     if (refreshToken) {
-      const decoded = jwt.verify(
-        refreshToken,
-        env.JWT_REFRESH_SECRET as string
-      ) as { userId: string };
+      const decoded = jwt.verify(refreshToken, env.JWT_REFRESH_SECRET as string) as { userId: string };
       if (decoded?.userId) {
         await redisClient.del(decoded.userId);
       }

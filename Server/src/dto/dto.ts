@@ -17,6 +17,9 @@ export class CreateGigDTO {
   title!: string;
 
   @AutoMap()
+  description! : string;
+
+  @AutoMap()
   freelancer!: Types.ObjectId;
 
   @AutoMap()

@@ -8,6 +8,7 @@ import { IGigRepository } from "@/repositories/Interface/IGigRepository";
 import { IFreelancerRepository } from "@/repositories/Interface/IFreelancerRepository";
 import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 import { IOrderRepository } from "@/repositories/Interface/IOrderRepository";
+import { Types } from "mongoose";
 
 
 export class ClientService implements IClientService {
@@ -26,7 +27,7 @@ export class ClientService implements IClientService {
         throw generateHttpError( HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND );
       }
       Object.assign(user, userData);
-      await this.clientRepository.update(userId, user);
+      await this.clientRepository.findByIdAndUpdate(userId, user);
       return user 
     } catch (error) {
       console.error(error);
@@ -69,18 +70,38 @@ export class ClientService implements IClientService {
   }
 
 
-  async createOrder(userId: any, freelancerId: any, gigId: any, requirements: string, selectedPlan: string): Promise<OrderType> {
+  async createOrder(userId: string, freelancerId: string, gigId: string, requirements: string, selectedPlan: string): Promise<OrderType> {
     try {
-      const details: Partial<OrderType> = {
-        client:userId,
-        freelancer: freelancerId,
-        gig: gigId,
-        requirements,
-        plan: selectedPlan
+      if(!Types.ObjectId.isValid(userId) ||
+         !Types.ObjectId.isValid(freelancerId) ||
+         !Types.ObjectId.isValid(gigId)){
+          throw new Error("Invalid ID format")
+         }
 
+         if(!requirements.trim()){
+          throw new Error("Requirements cannot be empty")
+         }
+      const details: Partial<OrderType> = {
+        client: new Types.ObjectId(userId),
+        freelancer: new Types.ObjectId(freelancerId),
+        gig: new Types.ObjectId(gigId),
+        requirements: requirements.trim(),
+        plan: selectedPlan,
+        status: "pending"
       }
       const order = await this.orderRepository.create(details)
       return order
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async getMyOrders(userId: string): Promise<OrderType[]> {
+    try {
+      const OrderDetail = await this.clientRepository.findd(userId)
+      console.log("ORDER DETAIL FROM CLIENT SERVICE : ",OrderDetail)
+      return OrderDetail
     } catch (error) {
       console.error(error)
       throw error

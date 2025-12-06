@@ -27,5 +27,6 @@ router.post("/update-clientProfile",verifyTokenMiddleware, clientController.upda
 router.get("/get-gigs", verifyTokenMiddleware, clientController.getGigs.bind(clientController))
 router.get("/get-ProjectDetail/:projectId", verifyTokenMiddleware, clientController.getProjectDetail.bind(clientController))
 router.post("/create-order", verifyTokenMiddleware, clientController.createOrder.bind(clientController))
+router.get("/my-orders", verifyTokenMiddleware, clientController.getMyOrders.bind(clientController))
 
 export default router

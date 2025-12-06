@@ -26,8 +26,8 @@ export class AdminController implements IAdminController {
 
   async getDashboardStats( req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { totalUsers, totalFreelancers, totalClients } = await this.adminService.getDashboardStats();
-      res.status(HttpStatus.OK).json({ success: true, totalUsers, totalFreelancers, totalClients });
+      const { totalUsers, totalFreelancers, totalClients, totalGigs } = await this.adminService.getDashboardStats();
+      res.status(HttpStatus.OK).json({ success: true, totalUsers, totalFreelancers, totalClients, totalGigs });
     } catch (error) {
       next();
     }
@@ -123,10 +123,19 @@ export class AdminController implements IAdminController {
     }
   }
 
+  async getOrdersList(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const orderDetails = await this.adminService.getOrdersList()
+      res.status(200).json({ success: true, orderDetails})
+    } catch (error) {
+      next(error)
+    }
+  }
+
   async deleteCategoryAndSkills(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { categoryId } = req.params
-      console.log("Delet Category And Skills >>>>>>>> : ",categoryId)
+      console.log("Delete Category And Skills >>>>>>>> : ",categoryId)
       if (!categoryId) {
       res.status(400).json({ success: false, error: "Category ID is required" });
       }

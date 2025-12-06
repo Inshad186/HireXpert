@@ -34,6 +34,17 @@ export const createGig = async(formData: FormData) => {
     }
 }
 
+export const completeOnboarding = async() =>{
+    try {
+        const {data} = await Api.put(freelancerEndpointUrl.UPDATE_ISSELLER)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message }; 
+    }
+}
+
 export const updateGigStatus = async(id:string, currentStatus:boolean) => {
     try {
         const {data} = await Api.put(freelancerEndpointUrl.UPDATE_GIG_STATUS, {id, currentStatus})
@@ -42,5 +53,27 @@ export const updateGigStatus = async(id:string, currentStatus:boolean) => {
         const err = error as any
         const message = err.respose?.data?.error || "Something went wrong"
         return { success:false, error:message };   
+    }
+}
+
+export const freelancerDashStats = async() => {
+    try {
+        const {data} = await Api.get(freelancerEndpointUrl.GET_FREELANCER_DASHSTATS)
+        return {success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };   
+    }
+}
+
+export const getOrderList = async() => {
+    try {
+        const {data} = await Api.get(freelancerEndpointUrl.GET_ORDERLIST)
+        return {success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return {success: false, error: message}
     }
 }

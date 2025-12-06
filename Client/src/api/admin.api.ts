@@ -23,6 +23,17 @@ export const getDashboardStats = async() => {
     }
 }
 
+export const getOrdersList = async() => {
+    try {
+        const {data} = await Api.get(adminEndpointUrl.ORDER_LIST)
+        return {success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message }; 
+    }
+}
+
 export const getUsersList = async(page:number, limit:number, role:string, search: string, status: string) => {
     try {
         const {data} = await Api.get(`${adminEndpointUrl.USERS_LIST}?page=${page}&limit=${limit}&role=${role}&search=${search}&status=${status}`)

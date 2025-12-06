@@ -10,7 +10,6 @@ export class FreelancerController implements IFreelancerController {
   async updateProfile( req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const userData = req.body;
-      console.log("USER DATA >>>> ? > : ", userData);
       const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
       const updatedUser = await this.freelancerService.updateProfile(userId, userData);
       res.status(HttpStatus.OK).json({ success: true, userDetails: updatedUser });
@@ -23,8 +22,7 @@ export class FreelancerController implements IFreelancerController {
     try {
       const gigData = req.body;
       const gallery = req.files as Express.Multer.File[];
-      console.log("Gig DATA", gigData)
-
+      console.log("GigDAta from freelancer Controller : ",gigData)
       const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
 
       const fullGigData = { ...gigData, 
@@ -32,7 +30,6 @@ export class FreelancerController implements IFreelancerController {
         pricing: typeof gigData.pricing === "string"? JSON.parse(gigData.pricing): gigData.pricing,
         skills: JSON.parse(gigData.skills),
       };
-      console.log("Full Gig DATA :",fullGigData)
       const gigId = await this.freelancerService.createGig( fullGigData, gallery);
 
       res.status(201).json({ success: true, message: "Gig created successfully", gigId });
@@ -58,6 +55,30 @@ export class FreelancerController implements IFreelancerController {
       res.status(HttpStatus.OK).json({ success: true, message: "Gig Status Updated", gigStatus });
     } catch (error) {
       next(error);
+    }
+  }
+
+  async getFreelancerDashStats(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+      const {totalOrders, myGigs, activeOrders} = await this.freelancerService.getFreelancerDashStats(userId)
+      console.log("FREELANCER ID : ",userId)
+      console.log("TOTAL ORDERS : ",totalOrders)
+      console.log("MY GIGS : ",myGigs)
+      console.log("ACTIVE ORDERS : ",activeOrders)
+      res.status(HttpStatus.OK).json({ success: true, message: "Gig Status Updated", totalOrders, myGigs, activeOrders});
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async getOrderList(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string)
+      const orderDetails = await this.freelancerService.getOrderList(userId)
+      res.status(HttpStatus.OK).json({ success: true, message: "Order Listed Successfully", orderDetails})
+    } catch (error) {
+      next(error)
     }
   }
 }

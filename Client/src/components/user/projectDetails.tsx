@@ -76,9 +76,9 @@ function ProjectDetails() {
         {/* Right - Gig Info */}
         <div className="bg-white rounded-xl shadow-md p-6">
           <h2 className="text-xl font-semibold mb-4">Project Information</h2>
-          <p><span className="font-medium">Category:</span> {project.category}</p>
-          <p><span className="font-medium">Delivery Time:</span> {project.pricing[selectedPlan].deliveryTime} days</p>
-          <p><span className="font-medium">Active:</span> {project.isActive ? "Yes ✅" : "No ❌"}</p>
+          <p><span className="font-medium">Category:</span> {project?.category}</p>
+          <p><span className="font-medium">Delivery Time:</span> {project.pricing[selectedPlan]?.deliveryTime} days</p>
+          <p><span className="font-medium">Active:</span> {project?.isActive ? "Yes ✅" : "No ❌"}</p>
 
           {/* Pricing Plans */}
           <div className="mt-6">
@@ -87,17 +87,21 @@ function ProjectDetails() {
             {/* Plan Selection Buttons */}
             <div className="flex gap-4 mb-4">
               {["basic", "standard", "premium"].map((plan) => (
-                <button
-                  key={plan}
-                  onClick={() => handlePlanSelect(plan as "basic" | "standard" | "premium")}
-                  className={`px-4 py-2 rounded-lg border font-semibold capitalize transition ${
-                    selectedPlan === plan
-                      ? "bg-blue-600 text-white border-blue-600"
-                      : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
-                  }`}
-                >
-                  {plan}
-                </button>
+              <button
+                key={plan}
+                onClick={() => handlePlanSelect(plan as "basic" | "standard" | "premium")}
+                disabled={!project?.pricing[plan]}
+                className={`px-4 py-2 rounded-lg border font-semibold capitalize transition ${
+                  !project?.pricing[plan]
+                    ? "bg-gray-200 text-gray-400 border-gray-300 cursor-not-allowed"
+                    : selectedPlan === plan
+                    ? "bg-blue-600 text-white border-blue-600"
+                    : "bg-white text-gray-700 border-gray-300 hover:bg-gray-100"
+                }`}
+              >
+                {plan}
+                {!project?.pricing[plan] && <span className="text-xs ml-1">(Coming soon)</span>}
+              </button>
               ))}
             </div>
 
@@ -105,13 +109,13 @@ function ProjectDetails() {
             <div className="bg-gray-100 p-6 rounded-lg shadow-inner">
               <p className="text-xl font-semibold capitalize mb-2">{selectedPlan} Plan</p>
               <p className="text-green-600 text-lg font-medium">
-                ₹{project.pricing[selectedPlan].price}
+                ₹{project?.pricing[selectedPlan]?.price}
               </p>
               <p className="text-gray-700 mt-2">
-                {project.pricing[selectedPlan].description}
+                {project?.pricing[selectedPlan]?.description}
               </p>
               <p className="text-gray-700 mt-2">
-                Delivery Time: {project.pricing[selectedPlan].deliveryTime} days
+                Delivery Time: {project?.pricing[selectedPlan]?.deliveryTime} days
               </p>
             </div>
           </div>
@@ -119,7 +123,7 @@ function ProjectDetails() {
           <button 
           onClick={handleNavigate}
           className="mt-6 w-full bg-blue-600 text-white py-2 px-4 rounded-lg shadow hover:bg-blue-700 transition">
-            Continue ({project.pricing[selectedPlan].deliveryTime} days delivery)
+            Continue ({project?.pricing[selectedPlan]?.deliveryTime} days delivery)
           </button>
         </div>
       </div>
