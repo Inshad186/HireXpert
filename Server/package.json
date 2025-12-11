@@ -30,6 +30,7 @@
     "nodemailer": "^6.10.1",
     "redis": "^4.7.0",
     "reflect-metadata": "^0.1.14",
+    "socket.io": "^4.8.1",
     "tsconfig-paths": "^4.2.0",
     "zod": "^3.24.3"
   },

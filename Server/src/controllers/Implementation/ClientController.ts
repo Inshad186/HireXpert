@@ -45,21 +45,13 @@ export class ClientController implements IClientController {
         try {
             const {gigId, freelancerId, requirements, selectedPlan:plan} = req.body
             if(!gigId || !freelancerId || !requirements || !plan){
-                res.status(HttpStatus.BAD_REQUEST).json({
-                    success: false,
-                    message: "Missing required fields"
-                })
+                res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Missing required fields"})
                 return;
             }
-
             const validPlans = ["basic", "standard", "premium"]
             if(!validPlans.includes(plan)){
-                res.status(HttpStatus.BAD_REQUEST).json({
-                    success: false,
-                    message: "Invalid plan selected"
-                })
+                res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Invalid plan selected"})
             }
-
             const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
             const order = await this.clientService.createOrder(userId, freelancerId, gigId, requirements, plan)
             res.status(HttpStatus.CREATED).json({ success: true, order})

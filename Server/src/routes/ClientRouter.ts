@@ -12,13 +12,18 @@ import { GigRepository } from "@/repositories/Implementation/GigRepository";
 import { FreelancerRepository } from "@/repositories/Implementation/FreelancerRepository";
 import { UserRepository } from "@/repositories/Implementation/UserRepository";
 import { OrderRepository } from "@/repositories/Implementation/OrderRepository";
+import { NotificationRepository } from "@/repositories/Implementation/NotificationRepository";
+import { NotificationService } from "@/services/Implementation/NotificationService";
 
 const gigRepo = new GigRepository
 const clientRepo = new ClientRepository();
 const freelancerRepo = new FreelancerRepository
 const userRepo = new UserRepository
 const orderRepo = new OrderRepository
-const clientService = new ClientService(clientRepo, gigRepo, freelancerRepo, userRepo, orderRepo);
+const notificationRepo = new NotificationRepository
+
+const notificationService = new NotificationService(notificationRepo)
+const clientService = new ClientService(clientRepo, gigRepo, freelancerRepo, userRepo, orderRepo, notificationService);
 const clientController = new ClientController(clientService);
 
 const router = express.Router();

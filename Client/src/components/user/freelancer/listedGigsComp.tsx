@@ -44,10 +44,10 @@ function ListedGigsComp({ list, loading, error, onToggle }: ListedGigsCompProps)
         <div className="flex justify-between items-center mb-8">
           <h1 className="text-3xl font-bold text-gray-800">My Gigs</h1>
           <button
-            onClick={() => navigate(userRoutes.FREELANCER_DASH)}
+            onClick={() => navigate(userRoutes.CREATE_GIG)}
             className="bg-gray-800 hover:bg-gray-900 transition-colors text-white font-medium px-4 py-2 rounded-lg shadow"
           >
-            Back to Dashboard
+            Create Gig
           </button>
         </div>
 
@@ -107,8 +107,8 @@ function ListedGigsComp({ list, loading, error, onToggle }: ListedGigsCompProps)
         <div className="flex justify-center mt-6">
           <button 
           className="text-white bg-gray-900 px-4 py-2 rounded-md font-medium"
-          onClick={() => navigate(userRoutes.CREATE_GIG)}> 
-            Create Gig
+          onClick={() => navigate(userRoutes.FREELANCER_DASH)}>
+            Back to dashboard
           </button>
         </div>
       </div>

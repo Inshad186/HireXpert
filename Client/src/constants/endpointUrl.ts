@@ -27,13 +27,17 @@ export const clientEndpointUrl = {
 }
 
 export const freelancerEndpointUrl = {
-    UPDATE_FREELANCER_PROFILE : "/auth/freelancer/update-freelancerProfile",
-    CREATE_GIG : "/auth/freelancer/create-gig",
-    LISTED_GIG : "/auth/freelancer/listed-gig",
-    UPDATE_GIG_STATUS : "/auth/freelancer/update-gig-status",
-    UPDATE_ISSELLER : "/auth/freelancer/update-isSeller",
-    GET_FREELANCER_DASHSTATS : "/auth/freelancer/freelancer-dashStats",
-    GET_ORDERLIST : "/auth/freelancer/order-list",
+  UPDATE_FREELANCER_PROFILE : "/auth/freelancer/update-freelancerProfile",
+  CREATE_GIG : "/auth/freelancer/create-gig",
+  LISTED_GIG : "/auth/freelancer/listed-gig",
+  UPDATE_GIG_STATUS : "/auth/freelancer/update-gig-status",
+  UPDATE_ISSELLER : "/auth/freelancer/update-isSeller",
+  GET_FREELANCER_DASHSTATS : "/auth/freelancer/freelancer-dashStats",
+  GET_ORDERLIST : "/auth/freelancer/order-list",
+}
+
+export const notificationEndpointUrl = {
+  GET_NOTIFICATION : "/auth/notification/get-notify"
 }
 
 export const adminEndpointUrl = {

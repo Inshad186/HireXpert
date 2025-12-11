@@ -9,6 +9,8 @@ import { IFreelancerRepository } from "@/repositories/Interface/IFreelancerRepos
 import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 import { IOrderRepository } from "@/repositories/Interface/IOrderRepository";
 import { Types } from "mongoose";
+import { io } from "@/socket/socket";
+import { NotificationService } from "./NotificationService";
 
 
 export class ClientService implements IClientService {
@@ -17,7 +19,8 @@ export class ClientService implements IClientService {
     private gigRepository: IGigRepository,
     private freelancerRepository: IFreelancerRepository,
     private userRepository: IUserRepository,
-    private orderRepository: IOrderRepository
+    private orderRepository: IOrderRepository,
+    private notificationService: NotificationService
   ) {}
 
   async updateProfile( userId: string, userData: ClientProfileType ): Promise<ClientProfileType> {
@@ -72,28 +75,65 @@ export class ClientService implements IClientService {
 
   async createOrder(userId: string, freelancerId: string, gigId: string, requirements: string, selectedPlan: string): Promise<OrderType> {
     try {
-      if(!Types.ObjectId.isValid(userId) ||
-         !Types.ObjectId.isValid(freelancerId) ||
-         !Types.ObjectId.isValid(gigId)){
-          throw new Error("Invalid ID format")
-         }
+      if (
+        !Types.ObjectId.isValid(userId) ||
+        !Types.ObjectId.isValid(freelancerId) ||
+        !Types.ObjectId.isValid(gigId)
+      ) {
+        throw new Error("Invalid ID format");
+      }
 
-         if(!requirements.trim()){
-          throw new Error("Requirements cannot be empty")
-         }
+      if (!requirements.trim()) {
+        throw new Error("Requirements cannot be empty");
+      }
+
+      // Create order
       const details: Partial<OrderType> = {
         client: new Types.ObjectId(userId),
         freelancer: new Types.ObjectId(freelancerId),
         gig: new Types.ObjectId(gigId),
         requirements: requirements.trim(),
         plan: selectedPlan,
-        status: "pending"
-      }
-      const order = await this.orderRepository.create(details)
-      return order
+        status: "pending",
+      };
+
+      const order = await this.orderRepository.create(details);
+
+      // Fetch gig and client details
+      const gigData = await this.gigRepository.findById(gigId);
+      const clientData = await this.userRepository.findById(userId);
+
+      // Create notification using service
+      const notificationData = {
+        freelancer: new Types.ObjectId(freelancerId),
+        type: "new_order" as const,
+        title: "New Order Received! 🎉",
+        message: `${clientData?.name || "A client"} ordered ${gigData?.title || "your gig"}`,
+        gigTitle: gigData?.title,
+        clientName: clientData?.name,
+        isRead: false,
+      };
+
+      const notification = await this.notificationService.createNotification(notificationData);
+
+      // Emit real-time notification via Socket.io
+      io.to(`user_${freelancerId}`).emit("notification", {
+        _id: notification.id,
+        type: "new_order",
+        title: "New Order Received! 🎉",
+        message: `${clientData?.name || "A client"} ordered "${gigData?.title || "your gig"}"`,
+        gigTitle: gigData?.title,
+        clientName: clientData?.name,
+        timestamp: new Date(),
+        isRead: false,
+      });
+
+      console.log(`Notification sent to freelancer ${freelancerId}`);
+
+      return order;
     } catch (error) {
-      console.error(error)
-      throw error
+      console.error("Error creating order:", error);
+      throw error;
     }
   }
 

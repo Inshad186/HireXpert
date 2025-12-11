@@ -6,6 +6,7 @@ import { useLocation } from "react-router-dom";
 import { CheckCircle} from "lucide-react";
 import { userRoutes } from "@/constants/routeUrl";
 import toast from "react-hot-toast";
+import { io } from "socket.io-client";
 
 function OrderCheckout() {
   const { projectId } = useParams();
@@ -41,16 +42,30 @@ function OrderCheckout() {
       toast.error("Please enter requirements for the freelancer")
       return
     }
-    try {
-      setLoading(true)
-      setError(null)
-      const res = await createOrder(freelancerId, gigId, requirements, selectedPlan)
-    } catch (error) {
-      console.error("Order failed: ",error)
-      setError("Failed to place order. Please try again.");
-    } finally {
-      setLoading(false);
+  try {
+    setLoading(true);
+    setError(null);
+    const res = await createOrder(freelancerId, gigId, requirements, selectedPlan);
+
+    if (res.success) {
+      // Notify freelancer via Socket.io (optional - backend handles this)
+      const socket = io(
+        import.meta.env.VITE_API_URL || "http://localhost:5000"
+      );
+      socket.emit("new_order_placed", {
+        freelancerId: freelancerId,
+        clientName: "Client Name", // Get from auth context
+        gigTitle: project?.title || "Your Gig",
+      });
+
+      setViewModal(true);
     }
+  } catch (error) {
+    console.error("Order failed: ", error);
+    setError("Failed to place order. Please try again.");
+  } finally {
+    setLoading(false);
+  }
   }
 
   if (!project) return <p className="text-center mt-10">Loading gig details...</p>;
@@ -76,9 +91,11 @@ function OrderCheckout() {
 
   return (
     <div className="max-w-6xl mx-auto p-6 mt-8">
-      <h2 className="text-3xl font-semibold text-gray-800 mb-4 bg-gray-100 text-center">
+      <div className="flex justify-center items-center h-20 bg-gray-100">
+        <h2 className="text-3xl font-semibold text-gray-800 mb-4">
         Confirm Your Order
-      </h2>
+       </h2>
+      </div>
 
       {/* Gig Info Section */}
       <div className="flex gap-6 border-b pb-4 mt-8 mb-4">
@@ -165,6 +182,11 @@ function OrderCheckout() {
       {viewModal && (
       <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div className="bg-white rounded-lg shadow-xl max-w-md w-full p-8 text-center">
+          <div className="flex items-center justify-end mb-4">
+            <button
+            className="font-light hover:text-red-500 text-3xl"
+            onClick={() => setViewModal(false)}>×</button>
+          </div>
           <div className="mb-6 flex justify-center">
             <div className="bg-green-100 p-4 rounded-full animate-bounce">
               <CheckCircle className="w-16 h-16 text-green-600" />

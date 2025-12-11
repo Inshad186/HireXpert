@@ -95,3 +95,14 @@ export interface OrderType {
   status: string;
   createdAt?: Date;
 }
+
+export interface NotificationType {
+  id?: Types.ObjectId;
+  client: Types.ObjectId;
+  freelancer: Types.ObjectId;
+  gig: Types.ObjectId;
+  type: "new_order" | "order_completed" | "message" | "review"
+  message: string;
+  plan: string;
+  isRead: boolean;
+}

@@ -4,19 +4,27 @@ dotenv.config()
 
 import express from "express"
 import cors from "cors"
+import morgan from "morgan";
+import http from "http";
+
 import userRouter from "./routes/UserRouter";
 import clientRouter from "./routes/ClientRouter";
 import freelancerRouter from "./routes/FreelancerRouter"
 import adminRouter from "./routes/AdminRouter"
-import morgan from "morgan";
+import notificationRouter from "./routes/NotificationRouter"
+
 import { connectDB } from "./config/mongo.config";
 import { verifyTokenMiddleware } from "./middlewares/verifyToken.middleware";
 import { corsMiddleware } from "./middlewares/cors.middleware";
 import { gigMapper } from "./mappings/gig.mapper";
 
+import { initSocket } from "./socket/socket"
 
 const app = express()
 const PORT = process.env.PORT
+
+const server = http.createServer(app)
+initSocket(server)
 
 app.use(
   cors({
@@ -38,11 +46,12 @@ app.use("/api/auth", userRouter)
 app.use("/api/auth/client", clientRouter)
 app.use("/api/auth/freelancer", freelancerRouter)
 app.use("/api/auth/admin", adminRouter)
+app.use("/api/auth/notification", notificationRouter)
+
 app.use((req, res, next) =>{
   verifyTokenMiddleware(req, res, next)
 })
 
-
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 })

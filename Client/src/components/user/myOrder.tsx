@@ -8,7 +8,7 @@ function MyOrders() {
   const [orders, setOrders] = useState<OrderDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewModal, setViewModal] = useState(false)
+  const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null)
 
   const getStatusColor = (status: string = '') => {
     switch(status) {
@@ -144,7 +144,7 @@ function MyOrders() {
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
                 <button 
-                onClick={() => setViewModal(true)}
+                onClick={() => setSelectedOrder(order)}
                 className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded transition">
                   <Eye size={18} />
                   <span className="text-sm font-medium">View Details</span>
@@ -162,13 +162,13 @@ function MyOrders() {
               </div>
 
               {/* Modal */}
-              {viewModal && (
+              {selectedOrder && (
                 <div className="fixed inset-0 bg-black bg-opacity-15 flex items-center justify-center p-4 z-50">
                 <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto">
                     <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-3xl font-bold text-gray-800">{order.gig?.title}</h2>
+                    <h2 className="text-3xl font-bold text-gray-800">{selectedOrder.gig?.title}</h2>
                     <button 
-                        onClick={() => setViewModal(false)}
+                        onClick={() => setSelectedOrder(null)}
                         className="text-gray-500 hover:text-gray-700 text-3xl font-light"
                     >
                         ×
@@ -178,28 +178,28 @@ function MyOrders() {
                     <div className="grid grid-cols-2 gap-6 mb-6 pb-6 border-b">
                     <div>
                         <p className="text-gray-600 text-sm">Order ID</p>
-                        <p className="text-lg font-semibold">{order._id}</p>
+                        <p className="text-lg font-semibold">{selectedOrder._id}</p>
                     </div>
                     <div>
                         <p className="text-gray-600 text-sm">Freelancer</p>
-                        <p className="text-lg font-semibold">{order.freelancer?.name}</p>
+                        <p className="text-lg font-semibold">{selectedOrder.freelancer?.name}</p>
                     </div>
                     <div>
                         <p className="text-gray-600 text-sm">Amount</p>
-                        <p className="text-xl font-bold text-green-600">₹{order.gig?.pricing.basic?.price}</p>
+                        <p className="text-xl font-bold text-green-600">₹{selectedOrder.gig?.pricing.basic?.price}</p>
                     </div>
                     <div>
                         <p className="text-gray-600 text-sm">Status</p>
                         <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
-                        {getStatusIcon(order.status)}
-                        {order.status}
+                        {getStatusIcon(selectedOrder.status)}
+                        {selectedOrder.status}
                         </span>
                     </div>
                     </div>
 
                     <div className="mb-6">
                     <p className="text-gray-600 text-sm mb-2">Requirements</p>
-                    <p className="text-gray-800 bg-gray-50 p-4 rounded-lg">{order.requirements}</p>
+                    <p className="text-gray-800 bg-gray-50 p-4 rounded-lg">{selectedOrder.requirements}</p>
                     </div>
 
                     <div className="flex gap-4">
@@ -208,7 +208,7 @@ function MyOrders() {
                         Message Freelancer
                     </button>
                     <button 
-                        onClick={() => setViewModal(false)}
+                        onClick={() => setSelectedOrder(null)}
                         className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
                     >
                         Close

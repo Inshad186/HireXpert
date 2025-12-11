@@ -1,5 +1,5 @@
 import { useNavigate } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { emailRegex } from "@/utils/validation/regex.util";
 import { useGoogleLogin } from "@react-oauth/google";
 import { decodeToken } from "@/utils/googleAuthToken.util";
@@ -133,6 +133,7 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
       }
     },
   });
+
 
   return (
     <>

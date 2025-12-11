@@ -13,9 +13,8 @@ import { FreelancerRepository } from "@/repositories/Implementation/FreelancerRe
 
 
 const userRepo = new UserRepository();
-const clientRepo = new ClientRepository(); // ✅
-const freelancerRepo = new FreelancerRepository()
-
+const clientRepo = new ClientRepository();
+const freelancerRepo = new FreelancerRepository();
 
 // Pass all to the service
 const userService = new UserService(userRepo, clientRepo, freelancerRepo); // ✅ now 3 args

@@ -14,6 +14,7 @@ import { OrderRepository } from "@/repositories/Implementation/OrderRepository";
 const gigRepo = new GigRepository
 const freelancerRepo = new FreelancerRepository();
 const OrderRepo = new OrderRepository
+
 const freelancerService = new FreelancerService(freelancerRepo, gigRepo, OrderRepo);
 const freelancerController = new FreelancerController(freelancerService);
 
