@@ -2,8 +2,9 @@ import mongoose, { Schema, Document } from "mongoose"
 
 interface INotification extends Document {
     freelancer: mongoose.Types.ObjectId;
-    client: mongoose.Types.ObjectId;
-    gig: mongoose.Types.ObjectId;
+    orderId: mongoose.Types.ObjectId;
+    clientName: string;
+    gigTitle: string;
     type: "new_order" | "order_completed" | "message" | "review";
     message: string;
     plan: string;
@@ -15,8 +16,9 @@ interface INotification extends Document {
 const notificationSchema = new Schema<INotification>({
 
     freelancer: {type: Schema.Types.ObjectId, ref: "FreelancerProfile"},
-    client: {type: Schema.Types.ObjectId, ref: "ClientProfile"},
-    gig: {type: Schema.Types.ObjectId, ref: "Gig"},
+    orderId: {type: Schema.Types.ObjectId, ref: "Order"},
+    clientName: {type: String},
+    gigTitle: {type: String},
     type: {type: String, enum: ["new_order", "order_completed", "message", "review"]},
     message: {type: String},
     plan: {type: String},
@@ -24,8 +26,5 @@ const notificationSchema = new Schema<INotification>({
 },{
     timestamps: true
 });
-
-
-
 
 export default mongoose.model<INotification>("Notification", notificationSchema);

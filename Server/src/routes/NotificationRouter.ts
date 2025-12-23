@@ -17,5 +17,8 @@ const notificationController = new NotificationController(notificationService)
 
 const router = express.Router();
 router.get("/get-notify", verifyTokenMiddleware, notificationController.getNotifications.bind(notificationController))
+router.put("/mark-as-read/:notificationId", verifyTokenMiddleware, notificationController.markAsRead.bind(notificationController))
+router.delete("/delete-notification/:notificationId", verifyTokenMiddleware, notificationController.deleteNotify.bind(notificationController))
+
 
 export default router;

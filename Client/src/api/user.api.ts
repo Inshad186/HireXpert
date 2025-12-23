@@ -94,7 +94,7 @@ export const editUserName = async(name:string) => {
     }
 }
 
-export const getFreelancerDetail = async(userId:string) =>{
+export const getFreelancerDetail = async() =>{
     try {
         const {data} = await Api.get(endpointUrl.GET_FREELANCER, )
         return {success : true, data}

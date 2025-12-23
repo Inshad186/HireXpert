@@ -26,4 +26,22 @@ export class NotificationService implements INotificationService {
             throw error
         }
     }
+
+    async markAsRead(notificationId: string): Promise<NotificationType | null> {
+        try {
+            return await this.notificationRepository.findByIdAndUpdate(notificationId, {isRead: true})
+        } catch (error) {
+            console.error("Error updating notifications:", error);
+            throw error
+        }
+    }
+
+    async deleteNotify(notificationId: string): Promise<void> {
+        try {
+            return await this.notificationRepository.deleteNotify(notificationId)
+        } catch (error) {
+            console.error("Error deleting notification:", error);
+            throw error   
+        }
+    }
 }

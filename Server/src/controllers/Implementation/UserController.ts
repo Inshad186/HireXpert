@@ -138,7 +138,6 @@ export class UserController implements IUserController {
   async getProfileImage(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { userId } = JSON.parse(req.headers['x-user-payload'] as string)
-      console.log("USER ID FROM USERCONTROLLER : ",userId)
       const {user} = await this.userService.getProfileImage(userId)
       res.status(HttpStatus.OK).json({user})
     } catch (err) {

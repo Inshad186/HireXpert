@@ -77,3 +77,36 @@ export const getOrderList = async() => {
         return {success: false, error: message}
     }
 }
+
+export const getOrders = async(orderId: string) => {
+    try {
+        const { data } = await Api.get(`${freelancerEndpointUrl.GET_ORDERS}/${orderId}`)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return { success: false, error: message}
+    }
+}
+
+export const acceptOrder = async(orderId: string) => {
+    try {
+        const { data } = await Api.patch(`${freelancerEndpointUrl.ACCEPT_ORDER}/${orderId}`)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return { success: false, error: message}
+    }
+}
+
+export const rejectOrder = async(orderId: string, reason: string) => {
+    try {
+        const { data } = await Api.patch(`${freelancerEndpointUrl.REJECT_ORDER}/${orderId}/${reason}`)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error
+        return { success: false, error: message}
+    }
+}

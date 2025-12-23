@@ -34,10 +34,15 @@ export const freelancerEndpointUrl = {
   UPDATE_ISSELLER : "/auth/freelancer/update-isSeller",
   GET_FREELANCER_DASHSTATS : "/auth/freelancer/freelancer-dashStats",
   GET_ORDERLIST : "/auth/freelancer/order-list",
+  GET_ORDERS : "/auth/freelancer/orders",
+  ACCEPT_ORDER : "/auth/freelancer/accept-order",
+  REJECT_ORDER : "/auth/freelancer/reject-order",
 }
 
 export const notificationEndpointUrl = {
-  GET_NOTIFICATION : "/auth/notification/get-notify"
+  GET_NOTIFICATION : "/auth/notification/get-notify",
+  MARK_AS_READ : "/auth/notification/mark-as-read",
+  DELETE_NOTIFICATION : "/auth/notification/delete-notification",
 }
 
 export const adminEndpointUrl = {

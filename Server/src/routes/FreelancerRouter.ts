@@ -10,12 +10,14 @@ import { verifyTokenMiddleware } from "@/middlewares/verifyToken.middleware";
 import { allowRoles } from "@/middlewares/roleBase.middleware";
 import { GigRepository } from "@/repositories/Implementation/GigRepository";
 import { OrderRepository } from "@/repositories/Implementation/OrderRepository";
+import { UserRepository } from "@/repositories/Implementation/UserRepository";
 
 const gigRepo = new GigRepository
 const freelancerRepo = new FreelancerRepository();
 const OrderRepo = new OrderRepository
+const userRepo = new UserRepository
 
-const freelancerService = new FreelancerService(freelancerRepo, gigRepo, OrderRepo);
+const freelancerService = new FreelancerService(freelancerRepo, gigRepo, OrderRepo, userRepo);
 const freelancerController = new FreelancerController(freelancerService);
 
 const router = express.Router();
@@ -26,5 +28,8 @@ router.get("/listed-gig", verifyTokenMiddleware, freelancerController.getGigList
 router.put("/update-gig-status", verifyTokenMiddleware, freelancerController.updateGigStatus.bind(freelancerController))
 router.get("/freelancer-dashStats", verifyTokenMiddleware, freelancerController.getFreelancerDashStats.bind(freelancerController))
 router.get("/order-list", verifyTokenMiddleware, freelancerController.getOrderList.bind(freelancerController))
+router.get("/orders/:orderId", verifyTokenMiddleware, freelancerController.getOrders.bind(freelancerController))
+router.patch("/accept-order/:orderId", verifyTokenMiddleware, freelancerController.acceptOrder.bind(freelancerController))
+router.patch("/reject-order/:orderId/:reason", verifyTokenMiddleware, freelancerController.rejectOrder.bind(freelancerController))
 
 export default router

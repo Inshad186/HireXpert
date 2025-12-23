@@ -13,18 +13,15 @@ export class BaseRepository<T> implements IBaseRepository<T> {
     return created
   }
 
+  async find(filter: Record<string, any>): Promise<T[]> {
+    return await this.model.find(filter).sort({ createdAt: -1})
+  }
+
   async findById(id: string): Promise<T | null> {
     return await this.model.findById(id);
   }
 
   async findByIdAndUpdate(id: string, item: Partial<T>): Promise<T | null> {
     return await this.model.findByIdAndUpdate(id, item, { new: true });
-  }
-
-  async find(filter: Record<string, any>): Promise<T[]> {
-    return await this.model.find(filter)
-    .populate("client", "name")
-    .populate("gig", "title")
-    .sort({ createdAt: -1 });
   }
 }

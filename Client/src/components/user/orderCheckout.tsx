@@ -46,7 +46,7 @@ function OrderCheckout() {
     setLoading(true);
     setError(null);
     const res = await createOrder(freelancerId, gigId, requirements, selectedPlan);
-
+    console.log("🏐🏐🏐🏐🏐 : ",res)
     if (res.success) {
       // Notify freelancer via Socket.io (optional - backend handles this)
       const socket = io(

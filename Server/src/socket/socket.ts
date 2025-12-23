@@ -27,23 +27,6 @@ export const initSocket = (server: HttpServer) => {
       console.log(`User ${userId} joined room user_${userId}`);
     });
 
-    // Listen for new orders and emit notification to freelancer
-    socket.on("new_order_placed", (data) => {
-      const { freelancerId, orderId, clientName, gigTitle } = data;
-      
-      // Emit to specific freelancer's room
-      io.to(`user_${freelancerId}`).emit("notification", {
-        id: orderId,
-        type: "new_order",
-        title: "New Order Received! 🎉",
-        message: `${clientName} ordered "${gigTitle}"`,
-        orderId: orderId,
-        clientName: clientName,
-        gigTitle: gigTitle,
-        timestamp: new Date(),
-      });
-    });
-
     socket.on("disconnect", () => {
       console.log("Socket disconnected:", socket.id);
 

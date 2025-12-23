@@ -21,6 +21,5 @@ export const userRoutes = {
     ORDER_SUCCESS : "/order-success",
     FREELANCER_ONBOARDING : "/freelancer-Onboarding",
     MY_ORDERS : "/my-orders",
-    TESTING_ROUTE : "/testingRoute",
     LOGOUT : "/logout",
 }   

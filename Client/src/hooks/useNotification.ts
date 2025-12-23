@@ -1,23 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { io, Socket } from "socket.io-client";
-import { getNotification } from "@/api/notification.api";
-
-export interface NotificationType {
-  _id: string;
-  type: "new_order" | "order_completed" | "message" | "review";
-  title: string;
-  message: string;
-  orderId?: string;
-  gigTitle?: string;
-  clientName?: string;
-  createdAt: string;
-  isRead: boolean;
-}
+import { getNotification, markAsRead, deleteNotification} from "@/api/notification.api";
+import { NotificationType } from "@/types/user.type";
 
 export const useNotifications = (userId: string | undefined) => {
   const [notifications, setNotifications] = useState<NotificationType[]>([]);
   const [socket, setSocket] = useState<Socket | null>(null);
   const [loading, setLoading] = useState(true);
+  const [unreadCount, setUnreadCount] = useState(0)
 
   // Fetch existing notifications from database
   const fetchNotifications = useCallback(async () => {
@@ -27,6 +17,8 @@ export const useNotifications = (userId: string | undefined) => {
       console.log("Notification Hook:", res);
       if (res.success) {
         setNotifications(res.data.notifications);
+        const unread = res.data.notifications.filter((x:NotificationType) => !x.isRead).length
+        setUnreadCount(unread)
       }
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
@@ -35,7 +27,6 @@ export const useNotifications = (userId: string | undefined) => {
     }
   }, []);
 
-  // Initialize Socket.io connection
   useEffect(() => {
     if (!userId) return;
 
@@ -76,16 +67,8 @@ export const useNotifications = (userId: string | undefined) => {
         isRead: false,
       };
 
-      // Add to beginning of notifications array
       setNotifications((prev) => [newNotification, ...prev]);
-
-      // Show browser notification
-      if (Notification.permission === "granted") {
-        new Notification(data.title, {
-          body: data.message,
-          icon: "/logo.png",
-        });
-      }
+      setUnreadCount((prev) => prev + 1);
     });
 
     newSocket.on("disconnect", () => {
@@ -96,16 +79,84 @@ export const useNotifications = (userId: string | undefined) => {
       console.error("Socket connection error:", error);
     });
 
-    // Cleanup on unmount
     return () => {
       newSocket.close();
     };
   }, [userId, fetchNotifications]);
 
+  // FIXED: Added proper console.log and error handling
+  const markasRead = useCallback(async (notificationId: string) => {
+    console.log("Marking as read - Notification ID:", notificationId); // ← FIXED
+    
+    if (!notificationId) {
+      console.warn("Invalid notification ID");
+      return;
+    }
+
+    try {
+      const res = await markAsRead(notificationId);
+      console.log("Mark as read response:", res);
+      
+      if (res.success) {
+        setNotifications((prev) =>
+          prev.map((notify) =>
+            notify._id === notificationId ? { ...notify, isRead: true } : notify
+          )
+        );
+        setUnreadCount((prev) => Math.max(0, prev - 1));
+      }
+    } catch (error) {
+      console.error("Failed to mark notification as read:", error);
+    }
+  }, []);
+
+  const deletenotification = useCallback(
+    async (notificationId: string) => {
+      console.log("Deleting notification - ID:", notificationId);
+      
+      if (!notificationId) {
+        console.warn("Invalid notification ID for deletion");
+        return;
+      }
+
+      try {
+        await deleteNotification(notificationId);
+        setNotifications((prev) => prev.filter((notify) => notify._id !== notificationId));
+        
+        // Update unread count if deleted notification was unread
+        setUnreadCount((prev) => {
+          const deletedNotify = notifications.find(n => n._id === notificationId);
+          return deletedNotify && !deletedNotify.isRead ? Math.max(0, prev - 1) : prev;
+        });
+      } catch (error) {
+        console.error("Failed to delete notification:", error);
+      }
+    },
+    [notifications]
+  );
+
+  // Clear all notifications
+  const clearAll = useCallback(async () => {
+    try {
+      // Delete all notifications
+      for (const notify of notifications) {
+        await deleteNotification(notify._id);
+      }
+      setNotifications([]);
+      setUnreadCount(0);
+    } catch (error) {
+      console.error("Failed to clear all notifications:", error);
+    }
+  }, [notifications]);
+
   return {
     notifications,
     socket,
     loading,
+    unreadCount,
+    markasRead,
+    deletenotification,
+    clearAll,
     refetch: fetchNotifications,
   };
 };

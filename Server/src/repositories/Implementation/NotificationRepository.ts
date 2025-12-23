@@ -14,6 +14,10 @@ export class NotificationRepository extends BaseRepository<NotificationType> imp
     }
 
     async findNotify(freelancerId: string): Promise<NotificationType[]> {
-        return await Notification.find({freelancer: freelancerId})
+        return await Notification.find({freelancer: freelancerId}).sort({ createdAt: -1 })
+    }
+
+    async deleteNotify(notificationId: string): Promise<void> {
+        await Notification.findByIdAndDelete(notificationId)
     }
 }

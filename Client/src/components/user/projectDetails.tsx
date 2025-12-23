@@ -39,10 +39,6 @@ function ProjectDetails() {
   setSelectedPlan(plan);
 };
 
-  const hello = () => {
-    navigate(`${userRoutes.TESTING_ROUTE}/${projectId}`)
-  }
-
 
   return (
     <div className="max-w-6xl mx-auto p-6 space-y-10">
@@ -128,17 +124,11 @@ function ProjectDetails() {
         </div>
       </div>
 
-      <div>
-        <button 
-        onClick={hello}
-        className="text-center bg-blue-600 text-white p-2 rounded w-full">Click Me</button>
-      </div>
-
       {/* Freelancer Profile Section */}
       <div className="bg-white rounded-xl shadow-md p-6">
         <h2 className="text-2xl font-bold mb-4">About the Freelancer</h2>
         <img src={profileImg} alt={freelancer.name} className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md mx-auto" />
-        <p className="text-lg font-semibold text-gray-800">{freelancer.name}</p>
+        <p className="text-lg font-semibold capitalize text-gray-800">{freelancer.name}</p>
         <p className="text-gray-600 mb-2">{freelancer.profession} @ {freelancer.company}</p>
         <p className="text-gray-700 mb-4">{freelancer.bio}</p>
 

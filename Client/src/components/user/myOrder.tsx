@@ -4,7 +4,7 @@ import { getMyOrders } from '@/api/client.api';
 import { OrderDetail } from '@/types/user.type';
 
 function MyOrders() {
-  const [activeTab, setActiveTab] = useState('all');
+  const [activeTab, setActiveTab] = useState('ALL');
   const [orders, setOrders] = useState<OrderDetail[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -12,25 +12,25 @@ function MyOrders() {
 
   const getStatusColor = (status: string = '') => {
     switch(status) {
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      case 'in-progress': return 'bg-blue-100 text-blue-800';
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'cancelled': return 'bg-red-100 text-red-800';
+      case 'PENDING': return 'bg-yellow-100 text-yellow-800';
+      case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800';
+      case 'COMPLETED': return 'bg-green-100 text-green-800';
+      case 'CANCELLED': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getStatusIcon = (status: string = '') => {
     switch(status) {
-      case 'pending': return <Clock size={18} />;
-      case 'in-progress': return <Clock size={18} />;
-      case 'completed': return <CheckCircle size={18} />;
-      case 'cancelled': return <XCircle size={18} />;
+      case 'PENDING': return <Clock size={18} />;
+      case 'IN_PROGRESS': return <Clock size={18} />;
+      case 'COMPLETED': return <CheckCircle size={18} />;
+      case 'CANCELLED': return <XCircle size={18} />;
       default: return null;
     }
   };
 
-  const filteredOrders = activeTab === "all" 
+  const filteredOrders = activeTab === "ALL"
     ? orders 
     : orders.filter((order) => order.status === activeTab);
 
@@ -65,7 +65,7 @@ function MyOrders() {
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-6 border-b border-gray-200 bg-white rounded-t-lg">
-        {['all', 'pending', 'in-progress', 'completed', 'cancelled'].map(tab => (
+        {['ALL', 'PENDING', 'IN-PROGRESS', 'COMPLETED', 'CANCELLED'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -75,7 +75,7 @@ function MyOrders() {
                 : 'border-transparent text-gray-600 hover:text-gray-800'
             }`}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab.charAt(0) + tab.slice(1).toLowerCase()}
           </button>
         ))}
       </div>
@@ -92,14 +92,16 @@ function MyOrders() {
 
       {/* Error State */}
       {error && !loading && (
-        <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
+        <div className="text-center bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
           <p className="text-red-800">{error}</p>
-          <button 
+          <div className='flex justify-center items-center mt-6'>
+            <button 
             onClick={() => window.location.reload()}
             className="mt-3 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
           >
             Try Again
           </button>
+          </div>
         </div>
       )}
 

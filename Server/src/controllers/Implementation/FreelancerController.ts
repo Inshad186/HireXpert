@@ -22,7 +22,6 @@ export class FreelancerController implements IFreelancerController {
     try {
       const gigData = req.body;
       const gallery = req.files as Express.Multer.File[];
-      console.log("GigDAta from freelancer Controller : ",gigData)
       const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
 
       const fullGigData = { ...gigData, 
@@ -77,6 +76,39 @@ export class FreelancerController implements IFreelancerController {
       const { userId } = JSON.parse(req.headers["x-user-payload"] as string)
       const orderDetails = await this.freelancerService.getOrderList(userId)
       res.status(HttpStatus.OK).json({ success: true, message: "Order Listed Successfully", orderDetails})
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async getOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { orderId } = req.params;
+      console.log("getOrders from Freelancer Controller: ",orderId)
+      const orders = await this.freelancerService.getOrders(orderId)
+      console.log("🔴🔴🔴🔴🔴🔴🔴 ",orders)
+      res.status(HttpStatus.OK).json({ success: true, message: "Get orders Successfully", orders})
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async acceptOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const {orderId} = req.params;
+      console.log("accept orders from Freelancer Controller: ",orderId)
+      const orderAccepted = await this.freelancerService.acceptOrder(orderId)
+      res.status(HttpStatus.OK).json({ success: true, orderAccepted})
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async rejectOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { orderId, reason } = req.params;
+      await this.freelancerService.rejectOrder(orderId, reason)
+      res.status(HttpStatus.OK).json({ success: true})
     } catch (error) {
       next(error)
     }

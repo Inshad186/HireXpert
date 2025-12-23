@@ -10,12 +10,15 @@ import { mapper } from "@/config/mapper.config";
 import { CreateGigDTO } from "@/dto/dto";
 import { GigEntity } from "@/dto/entity";
 import { IOrderRepository } from "@/repositories/Interface/IOrderRepository";
+import { OrderStatus } from "@/models/orderModel";
+import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 
 export class FreelancerService implements IFreelancerService {
   constructor(
     private freelanceRepository: IFreelancerRepository,
     private gigRepository: IGigRepository,
-    private OrderRepository: IOrderRepository
+    private OrderRepository: IOrderRepository,
+    private userRepository: IUserRepository
   ) {}
 
   async updateProfile( userId: string, userData: FreelancerProfileType ): Promise<{ userDetails: FreelancerProfileType }> {
@@ -93,11 +96,47 @@ async createGig(gigData: any, gallery: FileType[]): Promise<string> {
 
   async getOrderList(freelancer: string): Promise<OrderType[]> {
     try {
-      const orderList = await this.OrderRepository.find({freelancer})
+      const orderList = await this.OrderRepository.findByFreelancer(freelancer)
       return orderList
     } catch (error) {
       console.error(error)
       throw new Error("Error fetching OrderList")
+    }
+  }
+
+  async getOrders(orderId: string): Promise<OrderType | null> {
+    try {
+      const order = await this.OrderRepository.getOrders(orderId)
+      console.log("💀💀💀💀",order)
+      return order
+    } catch (error) {
+      console.error(error)
+      throw new Error("Error fetching in orders")
+    }
+  }
+
+  async acceptOrder(id: string): Promise<OrderType | null> {
+    try {
+      const order = await this.OrderRepository.findById(id)
+      if(!order){
+        throw new Error("Failed to get order")
+      }
+      if(order.status !== OrderStatus.PENDING){
+        throw new Error("Failed")
+      }
+      return await this.OrderRepository.findByIdAndUpdate(id, {status: OrderStatus.ACCEPTED })
+    } catch (error) {
+      console.error(error)
+      throw new Error("Error in accept Order")
+    }
+  }
+
+  async rejectOrder(orderId: string, reason: string): Promise<void> {
+    try {
+      await this.OrderRepository.findByIdAndUpdate(orderId,{cancellationReason: reason})
+    } catch (error) {
+      console.error(error)
+      throw error
     }
   }
 }

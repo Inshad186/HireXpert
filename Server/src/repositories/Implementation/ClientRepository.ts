@@ -8,16 +8,4 @@ export class ClientRepository extends BaseRepository <ClientProfileType> impleme
     constructor() {
         super(Client)
     }
-    async findd(client: string): Promise<OrderType[] > {
-        try {
-            const order = await Order.find({client})
-            .populate("client", "name")
-            .populate("freelancer", "name")
-            .populate("gig", "title pricing.basic.price")
-            return order
-        } catch (error) {
-            console.error(error)
-            throw error
-        }
-    }
 }

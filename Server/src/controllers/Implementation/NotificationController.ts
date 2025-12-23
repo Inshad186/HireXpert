@@ -21,4 +21,25 @@ export class NotificationController implements INotificationController {
       next(error);
     }
   }
+
+  async markAsRead(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { notificationId } = req.params;
+      const notification = await this.notificationService.markAsRead(notificationId)
+      res.status(HttpStatus.OK).json({ success: true, notification})
+    } catch (error) {
+      next(error)
+    }
+  }
+
+  async deleteNotify(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { notificationId } = req.params;
+      await this.notificationService.deleteNotify(notificationId)
+      res.status(HttpStatus.OK).json({ success: true})
+    } catch (error) {
+      next(error)
+    }
+  }
+
 }

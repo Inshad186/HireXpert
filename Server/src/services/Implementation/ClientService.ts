@@ -50,7 +50,6 @@ export class ClientService implements IClientService {
   async getGigDetails(gigId: string): Promise<GigWithFreelancer> {
     try {
       const gigDetails = await this.gigRepository.findById(gigId)
-      console.log("Gig Details From client SErvices : ",gigDetails)
       if(!gigDetails){
         throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.INVALID_CREDENTIALS)
       }
@@ -94,7 +93,7 @@ export class ClientService implements IClientService {
         gig: new Types.ObjectId(gigId),
         requirements: requirements.trim(),
         plan: selectedPlan,
-        status: "pending",
+        status: "PENDING",
       };
 
       const order = await this.orderRepository.create(details);
@@ -106,6 +105,7 @@ export class ClientService implements IClientService {
       // Create notification using service
       const notificationData = {
         freelancer: new Types.ObjectId(freelancerId),
+        orderId: order._id,
         type: "new_order" as const,
         title: "New Order Received! 🎉",
         message: `${clientData?.name || "A client"} ordered ${gigData?.title || "your gig"}`,
@@ -128,7 +128,7 @@ export class ClientService implements IClientService {
         isRead: false,
       });
 
-      console.log(`Notification sent to freelancer ${freelancerId}`);
+      console.log(`FreelancerID from Client Service: ${freelancerId}`);
 
       return order;
     } catch (error) {
@@ -139,8 +139,7 @@ export class ClientService implements IClientService {
 
   async getMyOrders(userId: string): Promise<OrderType[]> {
     try {
-      const OrderDetail = await this.clientRepository.findd(userId)
-      console.log("ORDER DETAIL FROM CLIENT SERVICE : ",OrderDetail)
+      const OrderDetail = await this.orderRepository.findByClient(userId)
       return OrderDetail
     } catch (error) {
       console.error(error)

@@ -86,23 +86,67 @@ export interface GoogleAuthUserType {
     profilePicture?: string;
 }
 
-export interface OrderType {
-  client: Types.ObjectId;
-  freelancer: Types.ObjectId;
-  gig: Types.ObjectId;
-  requirements: string;
-  plan: string;
-  status: string;
-  createdAt?: Date;
-}
+// export interface OrderType {
+//   _id: Types.ObjectId; 
+//   client: Types.ObjectId;
+//   freelancer: Types.ObjectId;
+//   gig: Types.ObjectId;
+//   requirements: string;
+//   plan: string;
+//   status: string;
+//   createdAt?: Date;
+//   updatedAt?: Date;
+// } 
 
 export interface NotificationType {
   id?: Types.ObjectId;
-  client: Types.ObjectId;
+  orderId: Types.ObjectId;
+  clientName: string;
   freelancer: Types.ObjectId;
-  gig: Types.ObjectId;
+  gigTitle: string;
   type: "new_order" | "order_completed" | "message" | "review"
   message: string;
   plan: string;
   isRead: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+interface StatusHistory {
+  status: "PENDING" | "ACCEPTED" | "IN_PROGRESS" | "DELIVERED" | "COMPLETED" | "REVISION" | "REJECTED" | "CANCELLED"
+  timestamp: Date;
+  changedBy: 'freelancer' | 'client';
+  reason?: string; // for revisions
+}
+
+interface ClientFeedback {
+  rating: number;
+  comment: string;
+  givenAt: Date;
+}
+
+export interface OrderType {
+  _id: Types.ObjectId;
+  client: Types.ObjectId;
+  freelancer: Types.ObjectId;
+  gig: Types.ObjectId;
+  price?: number;
+  deliveryTime?: number;
+  plan: string
+  requirements: string;
+  status: "PENDING" | "ACCEPTED" | "IN_PROGRESS" | "DELIVERED" | "COMPLETED" | "REVISION" | "REJECTED" | "CANCELLED"
+  revisionsRequested?: number;
+  revisionReason?: string;
+  statusHistory?: StatusHistory[];
+  clientFeedback?: ClientFeedback;
+  cancellationReason?: string;
+  cancelledAt?: Date;
+  cancelledBy?: string;
+  acceptedAt?: Date;
+  startedAt?: Date;
+  deliveredAt?: Date;
+  completedAt?: Date;
+  deliveryFiles?: string[];
+  createdAt?: Date;
+  updatedAt?: Date;
 }

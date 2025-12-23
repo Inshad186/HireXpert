@@ -109,3 +109,16 @@ export interface OrderDetail {
   plan?: string;
   status?: 'pending' | 'in-progress' | 'completed' | 'cancelled';
 }
+
+
+export interface NotificationType {
+  _id: string;
+  type: "new_order" | "order_completed" | "message" | "review";
+  title: string;
+  message: string;
+  orderId?: string;
+  gigTitle?: string;
+  clientName?: string;
+  createdAt: string;
+  isRead: boolean;
+}

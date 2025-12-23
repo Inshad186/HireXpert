@@ -18,18 +18,7 @@ function FreelancerDashboard() {
   status: string
 }
 
-interface PersistUser {
-  _id: string
-  name: string
-  email: string
-  role: string
-}
-
-  const [dashboardStats, setDashboardStats] = useState({
-    totalOrders: 0,
-    myGigs:0,
-    activeOrders:0
-  })
+  const [dashboardStats, setDashboardStats] = useState({ totalOrders: 0, myGigs:0, activeOrders:0 })
   const [profile, setProfile] = useState("")
   const [orderList, setOrderList] = useState<Order[]>([])
   const [userId, setUserId] = useState<string | null>(null)
@@ -39,7 +28,7 @@ interface PersistUser {
     try {
       const persistuser = localStorage.getItem("persist:user")
       if (persistuser) {
-        const user: PersistUser = JSON.parse(persistuser)
+        const user = JSON.parse(persistuser)
         setUserId(user._id)
         console.log("User ID from localStorage:", user._id)
       }
@@ -68,6 +57,17 @@ interface PersistUser {
     }
     freelancerStats()
   },[])
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'PENDING': return 'bg-yellow-100 text-yellow-700';
+      case 'ACCEPTED': return 'bg-blue-100 text-blue-700';
+      case 'IN_PROGRESS': return 'bg-purple-100 text-purple-700';
+      case 'DELIVERED': return 'bg-green-100 text-green-700';
+      case 'COMPLETED': return 'bg-emerald-100 text-emerald-700';
+      default: return 'bg-gray-200 text-gray-700';
+    }
+  };
 
   return (
     <div className="flex h-[85vh] mt-16 bg-gradient-to-br from-gray-50 to-gray-100 shadow-xl max-w-7xl mx-auto rounded-2xl overflow-hidden">
@@ -107,7 +107,6 @@ interface PersistUser {
               <p className="text-3xl font-semibold text-gray-800 mt-2">{item.value}</p>
             </div>
           ))}
-
         </div>
 
         {/* Orders Table */}
@@ -136,7 +135,7 @@ interface PersistUser {
                       <td className="p-4 text-gray-600">{list?.gig?.title}</td>
                       <td className="p-4 text-gray-600">{list?.plan}</td>
                       <td className="p-4">
-                        <span className="px-3 py-1 text-xs font-semibold rounded-full bg-yellow-200 text-yellow-700">
+                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(list.status)}`}>
                           {list?.status}
                         </span>
                       </td>

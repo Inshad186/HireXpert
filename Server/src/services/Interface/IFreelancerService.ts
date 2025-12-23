@@ -8,4 +8,7 @@ export interface IFreelancerService {
     updateGigStatus(id:string, currentStatus:boolean) : Promise<void>
     getFreelancerDashStats(freelancer: string) : Promise<{totalOrders:number, myGigs:number, activeOrders:number}>
     getOrderList(freelancer: string): Promise<OrderType[]>
+    getOrders(orderId: string): Promise<OrderType | null>
+    acceptOrder(id: string): Promise<OrderType | null>
+    rejectOrder(orderId: string, reason: string): Promise<void>
 }
