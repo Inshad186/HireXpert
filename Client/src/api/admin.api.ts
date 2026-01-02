@@ -23,9 +23,9 @@ export const getDashboardStats = async() => {
     }
 }
 
-export const getOrdersList = async() => {
+export const getOrdersList = async(page: number, limit: number) => {
     try {
-        const {data} = await Api.get(adminEndpointUrl.ORDER_LIST)
+        const {data} = await Api.get(`${adminEndpointUrl.ORDER_LIST}?page=${page}&limit=${limit}`)
         return {success: true, data}
     } catch (error) {
         const err = error as any

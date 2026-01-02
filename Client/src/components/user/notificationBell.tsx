@@ -1,8 +1,9 @@
 import { useState } from "react";
 import { Bell, X } from "lucide-react";
 import { useNotifications } from "@/hooks/useNotification";
-import { OrderActionModal } from "./orderActionModal";
 import { useOrderTracking, Order } from "@/hooks/useOrderTracking";
+import { OrderActionModal } from "./orderActionModal";
+import { WorkDeliveryModal } from "./workDeliveryModal";
 import { getOrders, rejectOrder } from "@/api/freelancer.api";
 
 interface NotificationBellProps {
@@ -11,11 +12,10 @@ interface NotificationBellProps {
 
 export function NotificationBell({ userId }: NotificationBellProps) {
   const { notifications, loading, markasRead, unreadCount, deletenotification, clearAll } = useNotifications(userId);
-  const { acceptOrders, actionLoading } = useOrderTracking(userId as string);
-  
+  const { acceptOrders, actionLoading, startWork, submitDelivery  } = useOrderTracking(userId as string);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [modalType, setModalType] = useState<"action" | "delivery" | null>(null)
 
   const handleNotificationClick = (notificationId: string, read: boolean, orderId?: string) => {
     console.log("Notification clicked - ID:", notificationId, "Read:", read);
@@ -23,8 +23,6 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     if (!read) {
       markasRead(notificationId);
     }
-
-    // Open modal if order ID exists
     if (orderId) {
       handleOpenOrderModal(orderId);
     }
@@ -33,11 +31,16 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   const handleOpenOrderModal = async (orderId: string) => {
     try {
       const response = await getOrders(orderId)
-      console.log("NOtify Response ?:",response)
       if (response.success) {
         setSelectedOrder(response.data.orders);
-        setIsModalOpen(true);
-        setIsOpen(false); // Close notification dropdown
+        if(response.data.orders.status === "PENDING"){
+          setModalType("action")
+        }else if(response.data.orders.status === "ACCEPTED" || response.data.orders.status === "IN_PROGRESS"){
+          setModalType("delivery")
+        }else{
+          setModalType("action")
+        }
+        setIsOpen(false);
       }
     } catch (error) {
       console.error('Error fetching order details:', error);
@@ -58,6 +61,16 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       return { success: false, message: 'Failed to reject order' };
     }
   };
+
+  const statusColor = (type: string) => {
+    switch(type){
+      case "new_order": return "bg-yellow-100 text-700"
+      case "message": return "bg-blue-100 blue-700"
+      case "order_completed": return "bg-green-100 green-700"
+      case "review": return "bg-red-100 red-700"
+      default : return ""
+    }
+  }
 
   return (
     <>
@@ -108,17 +121,17 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                     onClick={() => handleNotificationClick(notify._id, notify.isRead, notify.orderId)}
                     className={`p-3 rounded-lg cursor-pointer transition-all duration-200 ${
                       notify.isRead
-                        ? "bg-gray-400 border-l-4 border-gray-800"
+                        ? "bg-red-200 border-l-4 border-red-800"
                         : "bg-blue-100 hover:bg-blue-200 border-l-4 border-blue-500"
                     }`}
                   >
                     <div className="flex justify-between items-start">
                       <div className="flex-1">
-                        <p className="font-semibold text-gray-800 text-sm">{notify.type}</p>
-                        <p className="text-xs text-gray-600 mt-1">{notify.message}</p>
+                        <p className="font-semibold text-gray-800 text-sm">{notify.gigTitle}</p>
+                        <p className="text-xs text-gray-600 mt-1">Client: {notify.clientName}</p>
                         {notify.gigTitle && (
-                          <p className="text-xs text-blue-600 mt-1">
-                            👨‍💻 {notify.gigTitle}
+                          <p className={`inline px-3 py-1 text-xs font-semibold rounded-full ${statusColor(notify.type)}`}>
+                            {notify.type}
                           </p>
                         )}
                       </div>
@@ -127,7 +140,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
                           e.stopPropagation();
                           deletenotification(notify._id);
                         }}
-                        className="text-white hover:text-red-500 ml-2 flex-shrink-0"
+                        className="text-black hover:text-red-500 ml-2 flex-shrink-0"
                       >
                         <X size={16} />
                       </button>
@@ -151,17 +164,31 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       </div>
 
       {/* Order Action Modal */}
-      <OrderActionModal
+      {modalType === "action" && (
+        <OrderActionModal
         order={selectedOrder}
-        isOpen={isModalOpen}
+        isOpen={!!selectedOrder}
         onClose={() => {
-          setIsModalOpen(false);
-          setSelectedOrder(null);
+          setSelectedOrder(null)
+          setModalType(null)
         }}
         onAccept={acceptOrders}
         onReject={handleRejectOrder}
-        isLoading={actionLoading === selectedOrder?._id}
-      />
+        isLoading={actionLoading === selectedOrder?._id}/>
+      )}
+
+      {modalType === "delivery" && (
+        <WorkDeliveryModal
+        order={selectedOrder}
+        isOpen={!!selectedOrder}
+        onClose={() => {
+          setSelectedOrder(null)
+          setModalType(null)
+        }}
+        onStartWork={startWork}
+        onSubmitDelivery={submitDelivery}
+        isLoading={ actionLoading === selectedOrder?._id}/>
+      )}
     </>
   );
 }

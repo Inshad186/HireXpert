@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react"
-import { getOrderList } from "@/api/freelancer.api"
+import { deliveryOrder, getOrderList, inProgressOrder } from "@/api/freelancer.api"
 import { acceptOrder } from "@/api/freelancer.api";
 import { io, Socket } from 'socket.io-client';
 
@@ -18,7 +18,6 @@ export interface Order {
   }
   plan: string;
   status: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'REVISION' | 'REJECTED' | 'CANCELLED';
-  price: number;
   acceptedAt?: Date;
   startedAt?: Date;
 }
@@ -39,12 +38,8 @@ export const useOrderTracking = (userId: string) => {
     try {
       setLoading(true)
       const response = await getOrderList()
-      if(response.success){
-        // Check if response.data is an array or has an orderDetails property
-        const orderData = Array.isArray(response.data) 
-          ? response.data 
-          : response.data?.orderDetails || [];        
-        setOrders(orderData)
+      if(response.success){;        
+        setOrders(response.data?.orderDetails)
       }
     } catch (error) {
       console.error("Error fetching orders:", error)
@@ -98,6 +93,7 @@ export const useOrderTracking = (userId: string) => {
     };
   }, [userId, fetchOrders]);
 
+  //! ACCEPT ORDER
   const acceptOrders = useCallback(async(orderId: string): Promise<ApiResponse> => {
     setActionLoading(orderId);
     
@@ -106,28 +102,55 @@ export const useOrderTracking = (userId: string) => {
       if (response.success) {        
         setOrders((prev) =>
           prev.map((order) =>
-            order._id === orderId
-              ? { ...order, status: 'ACCEPTED', acceptedAt: new Date() }
-              : order
+            order._id === orderId ? { ...order, status: 'ACCEPTED', acceptedAt: new Date()} : order
           )
         );
-        
-        return { 
-          success: true, 
-          message: 'Order accepted successfully' 
-        };
+        return { success: true, message: 'Order accepted successfully'};
       } else {
-        return { 
-          success: false, 
-          message: response.error || 'Failed to accept order' 
-        };
+        return { success: false, message: response.error || 'Failed to accept order' };
       }
     } catch (error) {
       console.error('Error accepting order:', error);
-      return { 
-        success: false, 
-        message: 'Failed to accept order' 
-      };
+      return { success: false, message: 'Failed to accept order' };
+    } finally {
+      setActionLoading(null);
+    }
+  }, [])
+
+  const startWork = useCallback(async(orderId: string) => {
+    setActionLoading(orderId)
+    try {
+      const response = await inProgressOrder(orderId)
+      if(response.success){
+        setOrders((prev) =>
+        prev.map((order) =>
+        order._id === orderId ? {...order, status: "IN_PROGRESS", acceptedAt: new Date()} : order))
+      }
+      return { success: true, message: "Order inProgress"}
+    } catch (error) {
+      console.error('Error inProgress order:', error);
+      return { success: false, message: 'Failed inProgress order' };
+    } finally {
+      setActionLoading(null)
+    }
+  },[])
+
+  const submitDelivery = useCallback(async(orderId: string, deliveryFiles: File[], deliveryNotes: string) => {
+    setActionLoading(orderId);
+    
+    try {
+      const response = await deliveryOrder(orderId, deliveryFiles, deliveryNotes)
+      console.log("submitDelivery Response", response)
+      if(response.success){
+        setOrders((prev) =>
+        prev.map((order =>
+          order._id === orderId ? {...order, status: "DELIVERED", deliveredAt: new Date(), deliveryFiles} : order
+        )))
+      }
+      return { success: true, message: "Delivery submitted successfully"}
+    } catch (error) {
+      console.error('Error submit delivery', error);
+      return { success: false, message: 'Failed submit delivery' };
     } finally {
       setActionLoading(null);
     }
@@ -139,6 +162,10 @@ export const useOrderTracking = (userId: string) => {
     loading,
     actionLoading,
     acceptOrders,
+    startWork,
+    submitDelivery,
     refetch: fetchOrders,
   }
 }
+
+

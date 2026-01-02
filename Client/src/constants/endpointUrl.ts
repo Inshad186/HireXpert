@@ -37,6 +37,8 @@ export const freelancerEndpointUrl = {
   GET_ORDERS : "/auth/freelancer/orders",
   ACCEPT_ORDER : "/auth/freelancer/accept-order",
   REJECT_ORDER : "/auth/freelancer/reject-order",
+  INPROGRESS_ORDER : "/auth/freelancer/inProgress-order",
+  DELIVERY_ORDER : "/auth/freelancer/delivery-order",
 }
 
 export const notificationEndpointUrl = {

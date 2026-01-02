@@ -22,7 +22,6 @@ export const getGigList = async() => {
     }
 }
 
-
 export const createGig = async(formData: FormData) => {
     try {
         const {data} = await Api.post(freelancerEndpointUrl.CREATE_GIG, formData)
@@ -89,6 +88,8 @@ export const getOrders = async(orderId: string) => {
     }
 }
 
+
+
 export const acceptOrder = async(orderId: string) => {
     try {
         const { data } = await Api.patch(`${freelancerEndpointUrl.ACCEPT_ORDER}/${orderId}`)
@@ -103,6 +104,33 @@ export const acceptOrder = async(orderId: string) => {
 export const rejectOrder = async(orderId: string, reason: string) => {
     try {
         const { data } = await Api.patch(`${freelancerEndpointUrl.REJECT_ORDER}/${orderId}/${reason}`)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error
+        return { success: false, error: message}
+    }
+}
+
+export const inProgressOrder = async(orderId: string) => {
+    try {
+        const {data} = await Api.patch(`${freelancerEndpointUrl.INPROGRESS_ORDER}/${orderId}`)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error
+        return { success: false, error: message}
+    }
+}
+
+export const deliveryOrder = async(orderId: string, deliveryFiles: File[], deliveryNotes: string) => {
+    try {
+        const formData = new FormData()
+        deliveryFiles.forEach((file) => {
+            formData.append("files", file)
+        })
+        formData.append("deliveryNotes", deliveryNotes);
+        const { data } = await Api.patch(`${freelancerEndpointUrl.DELIVERY_ORDER}/${orderId}`,formData)
         return { success: true, data}
     } catch (error) {
         const err = error as any

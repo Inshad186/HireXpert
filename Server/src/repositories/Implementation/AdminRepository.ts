@@ -144,13 +144,19 @@ async getAllUsers(page: number, limit: number, role: string, search: string, sta
     }
   }
 
-  async getAllOrders(): Promise<OrderType[]> {
+  async getAllOrders(page: number, limit: number): Promise<{orders: OrderType[], total: number}> {
     try {
+      const skip = (page - 1) * limit
       const orders = await Order.find()
       .populate("client", "name")
       .populate("freelancer", "name")
       .populate("gig", "title pricing.basic.price")
-      return orders
+      .skip(skip)
+      .limit(limit)
+      .sort({ createdAt: -1 })
+
+      const total = await Order.countDocuments()
+      return {orders, total}
     } catch (error) {
       throw new Error("Failed to get orders list")
     }

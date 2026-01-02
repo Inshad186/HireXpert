@@ -14,7 +14,6 @@ interface INotification extends Document {
 }
 
 const notificationSchema = new Schema<INotification>({
-
     freelancer: {type: Schema.Types.ObjectId, ref: "FreelancerProfile"},
     orderId: {type: Schema.Types.ObjectId, ref: "Order"},
     clientName: {type: String},

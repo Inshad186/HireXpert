@@ -113,7 +113,6 @@ export class ClientService implements IClientService {
         clientName: clientData?.name,
         isRead: false,
       };
-
       const notification = await this.notificationService.createNotification(notificationData);
 
       // Emit real-time notification via Socket.io
@@ -127,9 +126,7 @@ export class ClientService implements IClientService {
         timestamp: new Date(),
         isRead: false,
       });
-
       console.log(`FreelancerID from Client Service: ${freelancerId}`);
-
       return order;
     } catch (error) {
       console.error("Error creating order:", error);

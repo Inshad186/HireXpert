@@ -11,4 +11,6 @@ export interface IFreelancerService {
     getOrders(orderId: string): Promise<OrderType | null>
     acceptOrder(id: string): Promise<OrderType | null>
     rejectOrder(orderId: string, reason: string): Promise<void>
+    inprogressOrder(orderId: string ): Promise<OrderType | null>
+    deliveryOrder(orderId: string, freelancerId: string, deliveryFiles: FileType[], deliveryNotes: string): Promise<OrderType[]>
 }

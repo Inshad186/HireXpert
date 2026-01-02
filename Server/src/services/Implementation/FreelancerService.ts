@@ -107,7 +107,6 @@ async createGig(gigData: any, gallery: FileType[]): Promise<string> {
   async getOrders(orderId: string): Promise<OrderType | null> {
     try {
       const order = await this.OrderRepository.getOrders(orderId)
-      console.log("💀💀💀💀",order)
       return order
     } catch (error) {
       console.error(error)
@@ -139,4 +138,61 @@ async createGig(gigData: any, gallery: FileType[]): Promise<string> {
       throw error
     }
   }
+
+  async inprogressOrder(orderId: string): Promise<OrderType | null> {
+    try {
+      const order = await this.OrderRepository.findById(orderId)
+      if(!order){
+        throw new Error("Failed to get Order")
+      }
+      if(order.status !== OrderStatus.ACCEPTED){
+        throw new Error("Failed")
+      }
+      return await this.OrderRepository.findByIdAndUpdate(orderId, {status: OrderStatus.IN_PROGRESS})
+    } catch (error) {
+      console.error(error)
+      throw new Error("Error in inProgress Order")
+    }
+  }
+
+  async deliveryOrder(orderId: string, freelancerId : string, deliveryFiles: FileType[], deliveryNotes: string): Promise<OrderType[]> {
+    try {
+      const order = await this.OrderRepository.findById(orderId)
+      if(!order){
+        throw new Error("Failed to get Order")
+      }
+      if(order.freelancer.toString() !== freelancerId){
+        throw new Error("Failed")
+      }
+      if(order.status !== "IN_PROGRESS"){
+        throw new Error("Failed")
+      }
+
+      let deliveryFileURLs: string[] = []
+      if(deliveryFiles && deliveryFiles.length > 0){
+        deliveryFileURLs = await Promise.all(
+          deliveryFiles.map((file) => handleProfileImageUpload(file.buffer, "delivery_files"))
+        )
+      }
+      const updatedOrder = await this.OrderRepository.updateOrder(orderId, {
+        status: "DELIVERED",
+        deliveryFiles: deliveryFileURLs,
+        deliveryNotes: deliveryNotes,
+        deliveredAt: new Date(),
+        $push: {
+          statusHistory: {
+            status: "DELIVERED",
+            timestamp: new Date(),
+            changedBy: "freelancer",
+            reason: "Delivery submitted",
+          },
+        },
+      });
+      return updatedOrder
+    } catch (error) {
+      console.error(error)
+      throw new Error("Error in inProgress Order")
+    }
+  }
+
 }

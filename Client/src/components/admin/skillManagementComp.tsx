@@ -81,7 +81,7 @@ const fetchCategories = async () => {
         </div>
       </div>
 
-      <div className='overflow-x-auto'>
+      <div className='overflow-x-auto bg-gray-900'>
         <table className='w-full table-auto border-collapse'>
           <thead>
             <tr className='bg-black text-left'>
@@ -96,7 +96,7 @@ const fetchCategories = async () => {
               const skills = skillsGrouped[category.name] || [];
 
               return (
-                <tr key={category._id} className="border-b border-gray-700">
+                <tr key={category._id} >
                   <td className='p-3'>{index + 1}</td>
                   <td className='p-3'>{category.name}</td>
                   <td className='p-3'>

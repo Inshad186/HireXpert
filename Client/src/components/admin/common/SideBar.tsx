@@ -14,6 +14,7 @@ function SideBar() {
             {id:"dashboard", label: "Dashboard", icon: "📊" },
             {id:"freelancers", label: "Freelancers", icon: "👨‍💻" },
             {id:"clients", label: "Clients", icon: "🧑‍🤝‍🧑" },
+            {id:"skills", label: "Skill & Category", icon: "🧠" },
             {id:"orders", label: "Orders", icon: "📦" },
             {id:"payments", label: "Payments", icon: "💳" },
           ].map(item => (

@@ -96,8 +96,8 @@ export class AdminService implements IAdminService {
     await this.adminRepository.updateAllSkills(skillId, skillName);
   }
 
-  async getOrdersList(): Promise<OrderType[]> {
-    return await this.adminRepository.getAllOrders()
+  async getOrdersList(page: number, limit: number): Promise<{orders: OrderType[]; total: number}> {
+    return await this.adminRepository.getAllOrders(page, limit)
   }
 
   async deleteCategoryAndSkill(categoryId: string): Promise<void> {

@@ -10,5 +10,6 @@ export interface IFreelancerController {
     getOrders(req:Request, res:Response, next:NextFunction) : Promise<void>
     acceptOrder(req: Request, res: Response, next: NextFunction): Promise<void>
     rejectOrder(req: Request, res: Response, next: NextFunction): Promise<void>
-    
+    inprogressOrder(req: Request, res: Response, next: NextFunction): Promise<void>
+    deliveryOrder(req: Request, res: Response, next: NextFunction): Promise<void>
 }

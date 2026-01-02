@@ -7,7 +7,7 @@ export interface IAdminRepository {
     findById(userId: string): Promise<UserType | null>;
     countTotalDashboardStats(): Promise<{totalUsers:number, totalFreelancers: number; totalClients: number; totalGigs: number;}>
     getAllUsers(page: number, limit: number, role: string, search: string, status: string): Promise<{ users: any[]; totalUsers: number }>
-    getAllOrders(): Promise<any[]>
+    getAllOrders(page: number, limit: number): Promise<{orders: any[]; total: number}>
     save(user:UserType): Promise<boolean>;
     createCategory(name: string): Promise<CategoryType>
     getAllCategories() : Promise<CategoryType[]>

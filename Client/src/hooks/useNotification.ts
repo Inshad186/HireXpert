@@ -17,7 +17,7 @@ export const useNotifications = (userId: string | undefined) => {
       console.log("Notification Hook:", res);
       if (res.success) {
         setNotifications(res.data.notifications);
-        const unread = res.data.notifications.filter((x:NotificationType) => !x.isRead).length
+        const unread = res.data.notifications.filter((x: NotificationType) => !x.isRead).length
         setUnreadCount(unread)
       }
     } catch (error) {
@@ -86,17 +86,14 @@ export const useNotifications = (userId: string | undefined) => {
 
   // FIXED: Added proper console.log and error handling
   const markasRead = useCallback(async (notificationId: string) => {
-    console.log("Marking as read - Notification ID:", notificationId); // ← FIXED
+    console.log("Marking as read - Notification ID:", notificationId); 
     
     if (!notificationId) {
       console.warn("Invalid notification ID");
       return;
     }
-
     try {
       const res = await markAsRead(notificationId);
-      console.log("Mark as read response:", res);
-      
       if (res.success) {
         setNotifications((prev) =>
           prev.map((notify) =>

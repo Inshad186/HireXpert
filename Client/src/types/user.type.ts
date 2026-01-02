@@ -101,7 +101,6 @@ export interface OrderDetail {
     pricing:{
       basic?:{
         price: number;
-        deliveryTime: number
       }
     }
   }

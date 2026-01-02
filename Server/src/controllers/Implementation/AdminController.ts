@@ -125,8 +125,11 @@ export class AdminController implements IAdminController {
 
   async getOrdersList(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const orderDetails = await this.adminService.getOrdersList()
-      res.status(200).json({ success: true, orderDetails})
+      const page = parseInt(req.query.page as string)
+      const limit = parseInt(req.query.limit as string)
+      const {orders, total} = await this.adminService.getOrdersList(page, limit)
+      const totalPages = Math.ceil(total / limit)
+      res.status(200).json({ success: true, orderDetails: orders, total, totalPages, currentPage: page, limit})
     } catch (error) {
       next(error)
     }
@@ -135,7 +138,6 @@ export class AdminController implements IAdminController {
   async deleteCategoryAndSkills(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { categoryId } = req.params
-      console.log("Delete Category And Skills >>>>>>>> : ",categoryId)
       if (!categoryId) {
       res.status(400).json({ success: false, error: "Category ID is required" });
       }

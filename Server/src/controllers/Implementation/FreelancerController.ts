@@ -61,10 +61,6 @@ export class FreelancerController implements IFreelancerController {
     try {
       const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
       const {totalOrders, myGigs, activeOrders} = await this.freelancerService.getFreelancerDashStats(userId)
-      console.log("FREELANCER ID : ",userId)
-      console.log("TOTAL ORDERS : ",totalOrders)
-      console.log("MY GIGS : ",myGigs)
-      console.log("ACTIVE ORDERS : ",activeOrders)
       res.status(HttpStatus.OK).json({ success: true, message: "Gig Status Updated", totalOrders, myGigs, activeOrders});
     } catch (error) {
       next(error)
@@ -86,7 +82,6 @@ export class FreelancerController implements IFreelancerController {
       const { orderId } = req.params;
       console.log("getOrders from Freelancer Controller: ",orderId)
       const orders = await this.freelancerService.getOrders(orderId)
-      console.log("🔴🔴🔴🔴🔴🔴🔴 ",orders)
       res.status(HttpStatus.OK).json({ success: true, message: "Get orders Successfully", orders})
     } catch (error) {
       next(error)
@@ -111,6 +106,37 @@ export class FreelancerController implements IFreelancerController {
       res.status(HttpStatus.OK).json({ success: true})
     } catch (error) {
       next(error)
+    }
+  }
+
+  async inprogressOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { orderId } = req.params;
+      const orderInprogress = await this.freelancerService.inprogressOrder(orderId)
+      res.status(HttpStatus.OK).json({ success: true, orderInprogress})
+    } catch (error) {
+      next()
+    }
+  }
+
+async deliveryOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { orderId } = req.params;
+      const { deliveryNotes } = req.body;
+      const files = req.files as Express.Multer.File[];
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+
+      console.log("=== DELIVERY ORDER CONTROLLER ===");
+      console.log("Order ID:", orderId);
+      console.log("Freelancer ID:", userId);
+      console.log("Files count:", files?.length);
+      console.log("Notes:", deliveryNotes);
+
+      await this.freelancerService.deliveryOrder(orderId, userId, files, deliveryNotes);
+      res.status(HttpStatus.OK).json({ success: true });
+    } catch (error) {
+      console.error("Delivery order error:", error);
+      next(error);
     }
   }
 }

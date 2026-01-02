@@ -33,6 +33,13 @@ export class OrderRepository extends BaseRepository<OrderType> implements IOrder
         return order
     }
 
+    async updateOrder(orderId: string, updatedData: any): Promise<any> {
+        await Order.findByIdAndUpdate(orderId, updatedData, { new: true})
+        .populate("client", "name")
+        .populate("freelancer", "name")
+        .populate("gig", "title pricing.basic.price")
+    }
+
     async deleteOrder(orderId: string): Promise<void> {
         await Order.findByIdAndDelete(orderId)
     }
