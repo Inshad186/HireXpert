@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import { FaUsers, FaBriefcase } from 'react-icons/fa';
 import { BsPersonWorkspace } from "react-icons/bs";
 import { FaUsersBetweenLines } from "react-icons/fa6";
-import { ChevronDown, Users, ShoppingCart, DollarSign, TrendingUp, Eye, CheckCircle, Clock, XCircle, MessageSquare } from 'lucide-react';
+import { ChevronDown, Users, ShoppingCart, DollarSign, TrendingUp, Truck, Eye, CheckCircle, Clock, XCircle, MessageSquare } from 'lucide-react';
 import {
   Pagination,
   PaginationContent,
@@ -82,6 +82,7 @@ function DashboardComponent() {
       case "PENDING": return 'bg-yellow-100 text-yellow-800';
       case "ACCEPTED": return 'bg-blue-100 text-blue-800';
       case "IN_PROGRESS": return 'bg-purple-100 text-purple-800';
+      case "DELIVERED": return 'bg-green-100 text-green-800';
       case "COMPLETED": return 'bg-green-100 text-green-800';
       case "CANCELLED": return 'bg-red-100 text-red-800';
       default: return "bg-black text-red-800";
@@ -93,6 +94,7 @@ function DashboardComponent() {
       case "PENDING": return <Clock className='w-4 h-4' />;
       case "ACCEPTED": return <CheckCircle className='w-4 h-4' />;
       case "IN_PROGRESS": return <Eye className='w-4 h-4' />;
+      case "DELIVERED": return <Truck className='w-4 h-4' />;
       case "COMPLETED": return <CheckCircle className='w-4 h-4' />;
       case "CANCELLED": return <XCircle className='w-4 h-4' />;
       default: return "bg-black text-red-800";

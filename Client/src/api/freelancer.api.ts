@@ -138,3 +138,25 @@ export const deliveryOrder = async(orderId: string, deliveryFiles: File[], deliv
         return { success: false, error: message}
     }
 }
+
+export const startStripeOnboarding = async() => {
+    try {
+        const { data } = await Api.post(freelancerEndpointUrl.STRIPE_ONBOARDING)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error
+        return { success: false, error: message}
+    }
+}
+
+export const getStripeStatus = async() => {
+    try {
+        const { data } = await Api.get(freelancerEndpointUrl.STRIPE_STATUS)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error
+        return { success: false, error: message} 
+    }
+}

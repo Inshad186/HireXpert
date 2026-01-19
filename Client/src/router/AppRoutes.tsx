@@ -15,7 +15,7 @@ import ResetPassword from "@/components/user/resetPassword";
 import Projects from "@/pages/user/Projects";
 import ProjectDetail from "@/pages/user/ProjectDetail";
 import OrderCheckoutPage from "@/pages/user/OrderCheckout";
-import TestingPage from "@/pages/user/TestingPage";
+// import TestingPage from "@/pages/user/TestingPage";
 import NotFoundPage from "@/pages/user/NotFoundPage";
 
 
@@ -57,7 +57,7 @@ export const router = createBrowserRouter([
   {path: "listed-order", element: <PrivateRoute><ListedOrder/></PrivateRoute>},
   {path: "freelancer-dashboard", element: <PrivateRoute><FreelancerDashboardPage/></PrivateRoute>},
   {path: "freelancer-onboarding", element: <PrivateRoute><FreelancerOnboardingPage/></PrivateRoute>},
-  {path : "testingRoute/:projectId", element : <TestingPage/>},
+  // {path : "testingPage", element : <TestingPage/>},
 
   //! Main app
   {element: <AppLayout/>,

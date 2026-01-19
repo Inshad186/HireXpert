@@ -43,4 +43,10 @@ export class OrderRepository extends BaseRepository<OrderType> implements IOrder
     async deleteOrder(orderId: string): Promise<void> {
         await Order.findByIdAndDelete(orderId)
     }
+
+    async findByPaymentIntentId(paymentIntentId: string): Promise<OrderType | null> {
+        return await Order.findOne({
+            paymentDetails: {stripePaymentIntentId: paymentIntentId}
+        })
+    }
 }

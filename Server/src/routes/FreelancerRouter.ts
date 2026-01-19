@@ -34,5 +34,7 @@ router.patch("/accept-order/:orderId", verifyTokenMiddleware, freelancerControll
 router.patch("/reject-order/:orderId/:reason", verifyTokenMiddleware, freelancerController.rejectOrder.bind(freelancerController))
 router.patch("/inProgress-order/:orderId", verifyTokenMiddleware, freelancerController.inprogressOrder.bind(freelancerController))
 router.patch("/delivery-order/:orderId", verifyTokenMiddleware, uploadDeliveryFiles.array("files",3), freelancerController.deliveryOrder.bind(freelancerController))
+router.post("/stripe-onboarding", verifyTokenMiddleware, freelancerController.startStripeOnboarding.bind(freelancerController))
+router.get("/stripe-status", verifyTokenMiddleware, freelancerController.getStripeStatus.bind(freelancerController))
 
 export default router

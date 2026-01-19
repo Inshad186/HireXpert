@@ -12,4 +12,6 @@ export interface IFreelancerController {
     rejectOrder(req: Request, res: Response, next: NextFunction): Promise<void>
     inprogressOrder(req: Request, res: Response, next: NextFunction): Promise<void>
     deliveryOrder(req: Request, res: Response, next: NextFunction): Promise<void>
+    startStripeOnboarding(req: Request, res: Response, next: NextFunction): Promise<void>
+    getStripeStatus(req: Request, res: Response, next: NextFunction): Promise<void>
 }

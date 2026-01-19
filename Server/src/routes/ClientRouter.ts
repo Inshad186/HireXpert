@@ -1,4 +1,4 @@
-import express from "express";
+import express, { application } from "express";
 import { ClientController } from "@/controllers/Implementation/ClientController";
 import { ClientService } from "@/services/Implementation/ClientService";
 import { ClientRepository } from "@/repositories/Implementation/ClientRepository";
@@ -33,5 +33,8 @@ router.get("/get-gigs", verifyTokenMiddleware, clientController.getGigs.bind(cli
 router.get("/get-ProjectDetail/:projectId", verifyTokenMiddleware, clientController.getProjectDetail.bind(clientController))
 router.post("/create-order", verifyTokenMiddleware, clientController.createOrder.bind(clientController))
 router.get("/my-orders", verifyTokenMiddleware, clientController.getMyOrders.bind(clientController))
+router.patch("/accept-orders/:orderId", verifyTokenMiddleware, clientController.acceptOrders.bind(clientController))
+router.patch("/request-revision/:orderId", verifyTokenMiddleware, clientController.requestRevision.bind(clientController))
+router.post("/create-payment-intent", verifyTokenMiddleware, clientController.createPaymentIntent.bind(clientController))
 
 export default router

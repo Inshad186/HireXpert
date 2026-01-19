@@ -1,6 +1,8 @@
 import mongoose, { Schema, Document } from "mongoose";
 
 export enum OrderStatus {
+  PAYMENT_PENDING = "PAYMENT_PENDING",
+  PAYMENT_FAILED = "PAYMENT_FAILED",
   PENDING = "PENDING",
   ACCEPTED = "ACCEPTED",
   IN_PROGRESS = "IN_PROGRESS",
@@ -9,6 +11,24 @@ export enum OrderStatus {
   REVISION = "REVISION",
   REJECTED = "REJECTED",
   CANCELLED = "CANCELLED",
+}
+
+interface PaymentDetails {
+  stripePaymentIntentId: string;
+  stripePlatformChargeId?: string;
+  stripeTransferId?: string;
+  amount: number;
+  currency: string;
+  status: "PENDING" | "SUCCEEDED" | "PROCESSING" | "FAILED";
+  paidAt?: Date;
+  failureReason?: string;
+}
+
+interface EscrowDetails {
+  holdUntilDate: Date;
+  escrowStatus: "HELD" | "RELEASED" | "REFUNDED";
+  releasedAt?: Date;
+  releaseReason?: string;
 }
 
 interface StatusHistory {
@@ -34,6 +54,8 @@ interface OrderDocument extends Document {
   plan: "basic" | "standard" | "premium";
   requirements: string;
   status: OrderStatus;
+  paymentDetails?: PaymentDetails;
+  escrowDetails?: EscrowDetails;
   revisionsRequested: number;
   revisionReason?: string;
   statusHistory: StatusHistory[];
@@ -76,6 +98,31 @@ const orderSchema = new Schema<OrderDocument>(
         reason: { type: String }, // for revisions
       },
     ],
+    paymentDetails: {
+      stripePaymentIntentId: { type: String },
+      stripePlatformChargeId: { type: String },
+      stripeTransferId: { type: String },
+      amount: { type: Number },
+      currency: { type: String, default: "inr" },
+      status: { 
+        type: String, 
+        enum: ["PENDING", "SUCCEEDED", "PROCESSING", "FAILED"],
+        default: "PENDING" 
+      },
+      paidAt: { type: Date },
+      failureReason: { type: String },
+    },
+
+    escrowDetails: {
+      holdUntilDate: { type: Date },
+      escrowStatus: { 
+        type: String, 
+        enum: ["HELD", "RELEASED", "REFUNDED"],
+        default: "HELD" 
+      },
+      releasedAt: { type: Date },
+      releaseReason: { type: String },
+    },
 
     // Key timestamps (ADDED for quick queries)
     acceptedAt: { type: Date },

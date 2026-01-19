@@ -12,6 +12,8 @@ import { GigEntity } from "@/dto/entity";
 import { IOrderRepository } from "@/repositories/Interface/IOrderRepository";
 import { OrderStatus } from "@/models/orderModel";
 import { IUserRepository } from "@/repositories/Interface/IUserRepository";
+import { stripe } from "@/config/stripe.config";
+import { env } from "@/config/env.config";
 
 export class FreelancerService implements IFreelancerService {
   constructor(
@@ -192,6 +194,65 @@ async createGig(gigData: any, gallery: FileType[]): Promise<string> {
     } catch (error) {
       console.error(error)
       throw new Error("Error in inProgress Order")
+    }
+  }
+
+  async startStripeOnboarding(freelancerId: string): Promise<{ onboardingUrl: string; accountId: string; }> {
+    try {
+      console.log("💳💳💳")
+      const user = await this.userRepository.findById(freelancerId)
+
+      if(!user?.email) throw new Error("Email not found")
+      
+      const account = await stripe.accounts.create({
+        type: "express",
+        country: "US",
+        email: user.email
+      })
+
+      const savedFreelancer = await this.freelanceRepository.findByIdAndUpdate(freelancerId,{
+        stripeConnectedAccountId: account.id,
+        stripeOnboardingComplete: false
+      })
+
+      if (!savedFreelancer?.stripeConnectedAccountId) {
+        throw new Error("Failed to save Stripe account ID to database");
+      }
+
+      console.log(`✅ Account ID saved to database: ${savedFreelancer.stripeConnectedAccountId}`);
+
+      const link = await stripe.accountLinks.create({
+        account: account.id,
+        type: "account_onboarding",
+        refresh_url: `${env.CLIENT_URL}/freelancer-dashboard`,
+        return_url: `${env.CLIENT_URL}/freelancer-dashboard`
+      })
+      return {
+        onboardingUrl: link.url,
+        accountId: account.id
+      }
+    } catch (error) {
+      console.error(error)
+      throw error
+    }
+  }
+
+  async getStripeStatus(freelancerId: string): Promise<{ status: string; message: string }> {
+    try {
+      const freelancer = await this.freelanceRepository.findById(freelancerId);
+      if (!freelancer?.stripeConnectedAccountId) {
+        return { status: "not_connected", message: "Not connected" };
+      }
+      const account = await stripe.accounts.retrieve(
+        freelancer.stripeConnectedAccountId
+      );
+      if (account.charges_enabled && account.payouts_enabled) {
+        return { status: "connected", message: "Connected" };
+      }
+      return { status: "pending", message: "Pending verification" };
+    } catch (error) {
+      console.error(error);
+      throw error;
     }
   }
 

@@ -44,6 +44,8 @@ export interface FreelancerProfileType extends Document {
   working_days: string;
   active_hours: string;
   portfolio: string;
+  stripeConnectedAccountId?: string;
+  stripeOnboardingComplete?: boolean;
   isSeller: boolean;
 }
 
@@ -112,8 +114,22 @@ export interface NotificationType {
   updatedAt?: Date;
 }
 
+
+export enum OrderStatus {
+  PAYMENT_PENDING = "PAYMENT_PENDING",
+  PAYMENT_FAILED = "PAYMENT_FAILED",
+  PENDING = "PENDING",
+  ACCEPTED = "ACCEPTED",
+  IN_PROGRESS = "IN_PROGRESS",
+  DELIVERED = "DELIVERED",
+  COMPLETED = "COMPLETED",
+  REVISION = "REVISION",
+  REJECTED = "REJECTED",
+  CANCELLED = "CANCELLED",
+}
+
 interface StatusHistory {
-  status: "PENDING" | "ACCEPTED" | "IN_PROGRESS" | "DELIVERED" | "COMPLETED" | "REVISION" | "REJECTED" | "CANCELLED"
+  status: OrderStatus
   timestamp: Date;
   changedBy: 'freelancer' | 'client';
   reason?: string; // for revisions
@@ -125,6 +141,24 @@ interface ClientFeedback {
   givenAt: Date;
 }
 
+interface PaymentDetails {
+  stripePaymentIntentId?: string;
+  stripePlatformChargeId?: string;
+  stripeTransferId?: string;
+  amount?: number;
+  currency?: string;
+  status?: "PENDING" | "SUCCEEDED" | "PROCESSING" | "FAILED";
+  paidAt?: Date;
+  failureReason?: string;
+}
+
+interface EscrowDetails {
+  holdUntilDate?: Date;
+  escrowStatus?: "HELD" | "RELEASED" | "REFUNDED";
+  releasedAt?: Date;
+  releaseReason?: string;
+}
+
 export interface OrderType {
   _id: Types.ObjectId;
   client: Types.ObjectId;
@@ -134,10 +168,12 @@ export interface OrderType {
   deliveryTime?: number;
   plan: string
   requirements: string;
-  status: "PENDING" | "ACCEPTED" | "IN_PROGRESS" | "DELIVERED" | "COMPLETED" | "REVISION" | "REJECTED" | "CANCELLED"
+  status: OrderStatus
   revisionsRequested?: number;
   revisionReason?: string;
   statusHistory?: StatusHistory[];
+  paymentDetails?: PaymentDetails;
+  escrowDetails?: EscrowDetails;
   clientFeedback?: ClientFeedback;
   cancellationReason?: string;
   cancelledAt?: Date;

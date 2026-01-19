@@ -15,6 +15,8 @@ export interface IFreelancerProfile extends Document {
   working_days?: string;
   active_hours?: string;
   portfolio?: string;
+  stripeConnectedAccountId?: string;
+  stripeOnboardingComplete?: { type: Boolean, default: false}
   isSeller?: string;
 }
 
@@ -33,6 +35,8 @@ const freelancerProfileSchema = new Schema<IFreelancerProfile>({
   working_days: {type: String},
   active_hours: {type: String},
   portfolio: {type: String},
+  stripeConnectedAccountId: {type: String},
+  stripeOnboardingComplete: {type: Boolean},
   isSeller: {type: Boolean, default: false},
 }, { timestamps: true });
 

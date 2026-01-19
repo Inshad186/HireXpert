@@ -23,7 +23,10 @@ export const clientEndpointUrl = {
   GET_GIGS: "/auth/client/get-gigs",
   GET_PROJECTDETAIL : "/auth/client/get-ProjectDetail",
   CREATE_ORDER : "/auth/client/create-order",
-  GET_MYORDERS : "/auth/client/my-orders"
+  GET_MYORDERS : "/auth/client/my-orders",
+  ACCEPT_ORDERS : "/auth/client/accept-orders",
+  REQUEST_REVISION : "/auth/client/request-revision",
+  CREATE_PAYMENT_INTENT : "/auth/client/create-payment-intent"
 }
 
 export const freelancerEndpointUrl = {
@@ -39,6 +42,8 @@ export const freelancerEndpointUrl = {
   REJECT_ORDER : "/auth/freelancer/reject-order",
   INPROGRESS_ORDER : "/auth/freelancer/inProgress-order",
   DELIVERY_ORDER : "/auth/freelancer/delivery-order",
+  STRIPE_ONBOARDING : "/auth/freelancer/stripe-onboarding",
+  STRIPE_STATUS : "/auth/freelancer/stripe-status",
 }
 
 export const notificationEndpointUrl = {

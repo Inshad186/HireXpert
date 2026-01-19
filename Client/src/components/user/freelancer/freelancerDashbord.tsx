@@ -1,8 +1,10 @@
 import Sidebar from '../common/Sidebar'
-import { freelancerDashStats, getOrderList } from '@/api/freelancer.api'
+import { freelancerDashStats, getOrderList, startStripeOnboarding, getStripeStatus } from '@/api/freelancer.api'
 import { useEffect, useState } from 'react'
 import { getProfileImage } from '@/api/user.api'
 import { NotificationBell } from '../notificationBell'
+import toast from 'react-hot-toast'
+import { CheckCircle, AlertCircle, Loader } from 'lucide-react'
 
 function FreelancerDashboard() {
 
@@ -22,6 +24,9 @@ function FreelancerDashboard() {
   const [profile, setProfile] = useState("")
   const [orderList, setOrderList] = useState<Order[]>([])
   const [userId, setUserId] = useState<string | null>(null)
+  const [stripeStatus, setStripeStatus] = useState<"not_connected" | "pending" | "connected">("not_connected")
+  const [stripeLoading, setStripeLoading] = useState(false)
+  const [stripeChecking, setStripeChecking] = useState(false)
 
 
     useEffect(() => {
@@ -43,20 +48,51 @@ function FreelancerDashboard() {
       if(dashRes.success){
         setDashboardStats(dashRes.data)
       }
-
       const profileRes = await getProfileImage()
       if(profileRes.success){
         setProfile(profileRes.data.user.profilePicture)
       }
-
       const orderRes = await getOrderList()
       if(orderRes.success){
         setOrderList(orderRes.data.orderDetails)
       }
-      
+      await checkStripeStatus()
     }
     freelancerStats()
   },[])
+
+  const checkStripeStatus = async() => {
+    try {
+      setStripeChecking(true)
+      const response = await getStripeStatus()
+      if(response.success){
+        setStripeStatus(response.data.status)
+      }
+    } catch (error) {
+      console.error("Error checking Stripe status:", error)
+      setStripeStatus("not_connected")
+    } finally {
+      setStripeChecking(false)
+    }
+  }
+
+  const handleStripeConnect = async() => {
+    try {
+      setStripeLoading(true)
+      const response = await startStripeOnboarding()
+      console.log("Stripe Connect Response",response.data)
+      if(response.success && response.data.result.onboardingUrl){
+        window.location.href = response.data.result.onboardingUrl
+      }else{
+        toast.error(response.error || "Failed to start onboarding")
+      }
+    } catch (error) {
+      console.error("Error:", error)
+      toast.error("Failed to connect Stripe account")
+    } finally {
+      setStripeLoading(false)
+    }
+  }
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -88,6 +124,49 @@ function FreelancerDashboard() {
               src={profile || "image"}
               alt="Freelancer"
             />
+          </div>
+        </div>
+
+        {/* STRIPE CONNECTION CARD - ADD THIS */}
+        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-8 shadow-md">
+          <div className="flex items-center justify-between">
+            <div className="flex-1">
+              <h3 className="text-lg font-bold text-gray-800 mb-2">💳 Stripe Account</h3>
+              
+              {stripeChecking ? (
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Loader size={18} className="animate-spin" />
+                  <p>Checking account status...</p>
+                </div>
+              ) : stripeStatus === "connected" ? (
+                <div className="flex items-center gap-2 text-green-600">
+                  <CheckCircle size={20} />
+                  <div>
+                    <p className="font-semibold">Account Connected ✓</p>
+                    <p className="text-sm">Ready to receive payments!</p>
+                  </div>
+                </div>
+              ) : stripeStatus === "pending" ? (
+                <div className="flex items-center gap-2 text-orange-600">
+                  <AlertCircle size={20} />
+                  <div>
+                    <p className="font-semibold">Verification Pending</p>
+                    <p className="text-sm">Stripe is verifying your account (1-3 business days)</p>
+                  </div>
+                </div>
+              ) : (
+                <div>
+                  <p className="text-gray-700 mb-3">Connect your bank account to receive payments from clients</p>
+                  <button
+                    onClick={handleStripeConnect}
+                    disabled={stripeLoading}
+                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-semibold transition duration-200"
+                  >
+                    {stripeLoading ? "Connecting..." : "Connect Stripe Account"}
+                  </button>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 

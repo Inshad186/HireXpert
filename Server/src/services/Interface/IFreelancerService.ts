@@ -13,4 +13,6 @@ export interface IFreelancerService {
     rejectOrder(orderId: string, reason: string): Promise<void>
     inprogressOrder(orderId: string ): Promise<OrderType | null>
     deliveryOrder(orderId: string, freelancerId: string, deliveryFiles: FileType[], deliveryNotes: string): Promise<OrderType[]>
+    startStripeOnboarding(freelancerId: string): Promise<{onboardingUrl: string, accountId: string}>
+    getStripeStatus(freelancerId: string): Promise<{status: string, message: string}>
 }

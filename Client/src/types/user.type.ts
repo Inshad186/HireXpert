@@ -106,7 +106,21 @@ export interface OrderDetail {
   }
   requirements: string;
   plan?: string;
-  status?: 'pending' | 'in-progress' | 'completed' | 'cancelled';
+  status?: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'REVISION' | 'REJECTED' | 'CANCELLED';
+  deliveryFiles?: string[];
+  deliveryNotes?: string;
+  revisionReason?: string;
+  revisionsRequested?: number;
+  statusHistory?: [
+    {changedBy?: string},
+    {reason?: string},
+    {status?: string},
+    {timestamp?: Date}
+  ],
+  clientFeedback?: {
+    rating: number;
+    comment: string;
+  }
 }
 
 

@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle, XCircle, Eye, MessageSquare, Download } from 'lucide-react';
+import { Clock, CheckCircle, XCircle, Eye, MessageSquare, Download, Truck, Check, ClipboardCheck } from 'lucide-react';
 import { getMyOrders } from '@/api/client.api';
 import { OrderDetail } from '@/types/user.type';
+import { useClientOrderAction } from '@/hooks/useClientOrderAction';
+import { ClientDeliveryModal } from './clientDeliveryModal';
 
 function MyOrders() {
   const [activeTab, setActiveTab] = useState('ALL');
@@ -9,11 +11,16 @@ function MyOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null)
+  const [showDeliveryModal, setShowDeliveryModal] = useState(false)
+
+  const { acceptDelivery, requestRevision, actionLoading} = useClientOrderAction()
 
   const getStatusColor = (status: string = '') => {
     switch(status) {
       case 'PENDING': return 'bg-yellow-100 text-yellow-800';
-      case 'IN_PROGRESS': return 'bg-blue-100 text-blue-800';
+      case 'ACCEPTED': return 'bg-blue-100 text-blue-800';
+      case 'IN_PROGRESS': return 'bg-purple-100 text-purple-800';
+      case 'DELIVERED': return 'bg-green-100 text-green-800';
       case 'COMPLETED': return 'bg-green-100 text-green-800';
       case 'CANCELLED': return 'bg-red-100 text-red-800';
       default: return 'bg-gray-100 text-gray-800';
@@ -23,7 +30,9 @@ function MyOrders() {
   const getStatusIcon = (status: string = '') => {
     switch(status) {
       case 'PENDING': return <Clock size={18} />;
+      case 'ACCEPTED': return <ClipboardCheck size={18} />;
       case 'IN_PROGRESS': return <Clock size={18} />;
+      case 'DELIVERED': return <Truck size={18} />;
       case 'COMPLETED': return <CheckCircle size={18} />;
       case 'CANCELLED': return <XCircle size={18} />;
       default: return null;
@@ -41,6 +50,7 @@ function MyOrders() {
         setError(null);
         const res = await getMyOrders();
         if(res.success){
+          console.log("Response from My orders : ",res)
           setOrders(res.data.OrderDetail || []);
         } else {
           setError('Failed to fetch orders');
@@ -55,6 +65,13 @@ function MyOrders() {
     fetchOrderDetails();
   }, []);
 
+  const handleViewDelivery = (order: OrderDetail) => {
+    if(order.status === "DELIVERED"){
+      setSelectedOrder(order)
+      setShowDeliveryModal(true)
+    }
+  }
+
   return (
     <div className="p-8 max-w-6xl mx-auto min-h-screen">
       {/* Header */}
@@ -65,7 +82,7 @@ function MyOrders() {
 
       {/* Filter Tabs */}
       <div className="flex gap-2 mb-6 border-b border-gray-200 bg-white rounded-t-lg">
-        {['ALL', 'PENDING', 'IN-PROGRESS', 'COMPLETED', 'CANCELLED'].map(tab => (
+        {['ALL', 'PENDING', 'ACCEPTED', 'IN-PROGRESS', 'DELIVERED', 'COMPLETED', 'CANCELLED'].map(tab => (
           <button
             key={tab}
             onClick={() => setActiveTab(tab)}
@@ -145,17 +162,26 @@ function MyOrders() {
 
               {/* Action Buttons */}
               <div className="flex gap-3 pt-4 border-t border-gray-200">
+                {order.status === "DELIVERED" ? (
+                  <button
+                  onClick={() => handleViewDelivery(order)}
+                  className="flex items-center gap-2 px-4 py-2 text-green-600 hover:bg-green-50 rounded transition font-medium">
+                    <Eye size={18}/>
+                    <span className='text-sm font-medium'>Review Delivery</span>
+                  </button>
+                ) : (
                 <button 
                 onClick={() => setSelectedOrder(order)}
                 className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded transition">
                   <Eye size={18} />
                   <span className="text-sm font-medium">View Details</span>
                 </button>
+                )}
                 <button className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded transition">
                   <MessageSquare size={18} />
                   <span className="text-sm font-medium">Message</span>
                 </button>
-                {order.status === 'completed' && (
+                {order.status === 'COMPLETED' && (
                   <button className="flex items-center gap-2 px-4 py-2 text-green-600 hover:bg-green-50 rounded transition">
                     <Download size={18} />
                     <span className="text-sm font-medium">Download</span>
@@ -223,6 +249,16 @@ function MyOrders() {
           ))}
         </div>
       )}
+      <ClientDeliveryModal
+      order={selectedOrder}
+      isOpen={showDeliveryModal}
+      onClose={() => {
+        setShowDeliveryModal(false)
+        setSelectedOrder(null)
+      }}
+      onAccept={acceptDelivery}
+      onRequestRevision={requestRevision}
+      isLoading={actionLoading === selectedOrder?._id}/>
     </div>
   );
 }

@@ -126,17 +126,31 @@ async deliveryOrder(req: Request, res: Response, next: NextFunction): Promise<vo
       const files = req.files as Express.Multer.File[];
       const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
 
-      console.log("=== DELIVERY ORDER CONTROLLER ===");
-      console.log("Order ID:", orderId);
-      console.log("Freelancer ID:", userId);
-      console.log("Files count:", files?.length);
-      console.log("Notes:", deliveryNotes);
-
       await this.freelancerService.deliveryOrder(orderId, userId, files, deliveryNotes);
       res.status(HttpStatus.OK).json({ success: true });
     } catch (error) {
       console.error("Delivery order error:", error);
       next(error);
+    }
+  }
+
+  async startStripeOnboarding(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string)
+      const result = await this.freelancerService.startStripeOnboarding(userId)
+      res.status(HttpStatus.OK).json({ success: true, result})
+    } catch (error) {
+      next()
+    }
+  }
+
+  async getStripeStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string)
+      const result = await this.freelancerService.getStripeStatus(userId)
+      res.status(HttpStatus.OK).json({ success: true, status: result.status, message: result.message })
+    } catch (error) {
+      next()
     }
   }
 }

@@ -12,6 +12,7 @@ import clientRouter from "./routes/ClientRouter";
 import freelancerRouter from "./routes/FreelancerRouter"
 import adminRouter from "./routes/AdminRouter"
 import notificationRouter from "./routes/NotificationRouter"
+import webhookRouter from "./routes/WebhookRouter"
 
 import { connectDB } from "./config/mongo.config";
 import { verifyTokenMiddleware } from "./middlewares/verifyToken.middleware";
@@ -34,6 +35,8 @@ app.use(
     allowedHeaders: ["Content-Type", "Authorization"]
   })
 )
+
+app.use("/api/auth/webhook", webhookRouter)
 
 app.use(express.json())
 app.use(express.urlencoded({ extended : true }))

@@ -34,9 +34,20 @@ export const getProjectDetails = async(projectId : string) => {
     }
 }
 
-export const createOrder = async(gigId:string, freelancerId:string ,requirements:string, selectedPlan:string) => {
+export const createPaymentIntent = async(gigId: string, freelancerId: string, price: number) => {
     try {
-        const {data} = await Api.post(clientEndpointUrl.CREATE_ORDER, {gigId, freelancerId, requirements, selectedPlan})
+        const {data} = await Api.post(clientEndpointUrl.CREATE_PAYMENT_INTENT, {gigId, freelancerId, price})
+        return {success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return { success: false, error: message}
+    }
+}
+
+export const createOrder = async(freelancerId:string, gigId:string, requirements:string, selectedPlan:string, paymentIntentId: string, price: number) => {
+    try {
+        const {data} = await Api.post(clientEndpointUrl.CREATE_ORDER, {freelancerId, gigId, requirements, selectedPlan, paymentIntentId, price})
         return {success: true, data}
     } catch (error) {
         const err = error as any
@@ -54,4 +65,26 @@ export const getMyOrders = async() => {
         const message = err.response?.data?.error || "Something went wrong"
         return {success: false, error: message}
     }
+}
+
+export const accept_Delivery = async(orderId: string, feedback: string, rating: number) => {
+    try {
+        const { data } = await Api.patch(`${clientEndpointUrl.ACCEPT_ORDERS}/${orderId}`,{feedback, rating})
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return { success: false, error: message}
+    }
+}
+
+export const request_Revision = async(orderId: string, revisionReason: string, revisionCount: number) => {
+    try {
+        const { data } = await Api.patch(`${clientEndpointUrl.REQUEST_REVISION}/${orderId}`, {revisionReason, revisionCount})
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return { success: false, error: message}
+    }    
 }
