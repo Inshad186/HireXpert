@@ -6,12 +6,13 @@ import { removeUser } from "@/redux/slices/userSlice";
 import { useNavigate } from "react-router-dom";
 import { userRoutes } from "@/constants/routeUrl";
 import { useState } from "react";
+import toast from "react-hot-toast";
 
 function Sidebar() {
 
   const dispatch = useDispatch()
   const navigate = useNavigate()
-  const [isLoggingOut, setIsLoggingOut] = useState(false)
+  const [isUserLogout, setIsUserLogout] = useState(false)
 
   const links = [
     { name: "Dashboard", icon: <LayoutDashboard size={20} />, path: "/freelancer-dashboard" },
@@ -22,19 +23,21 @@ function Sidebar() {
   ];
 
 const handleLogout = async() => {
-  if (isLoggingOut) return
-  
-  setIsLoggingOut(true)
+  if(isUserLogout) return
+  setIsUserLogout(true)
   try {
     const res = await userLogout()
     if(res.success){
-      dispatch(removeUser())
-      navigate(userRoutes.LOGOUT)
+      toast.success("Freelancer Logout Successfully")
     }
   } catch (error) {
     console.error("Logout error:", error)
   } finally {
-    setIsLoggingOut(false)
+    sessionStorage.removeItem("accessToken")
+    sessionStorage.removeItem("userData")
+    dispatch(removeUser())
+    navigate(userRoutes.LOGIN, { replace: true })
+    setIsUserLogout(false)
   }
 }
 
@@ -64,9 +67,8 @@ const handleLogout = async() => {
       <div className="mt-auto pt-6 border-t border-gray-200">
         <button 
         className="w-full bg-red-200 text-red-600 hover:bg-red-800 hover:text-white font-medium py-2 rounded-md transition-all"
-        disabled={isLoggingOut}
         onClick={handleLogout}>
-        {isLoggingOut ? "Logging out..." : "Logout"}
+          {isUserLogout? "Logging Out..." : "Logout"}
         </button>
       </div>
     </aside>

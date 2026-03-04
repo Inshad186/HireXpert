@@ -1,18 +1,31 @@
 import axios from "axios";
 import store from "@/redux/store";
 import { responses } from "@/constants/response.constants";
-import { setUser, removeUser } from "@/redux/slices/userSlice";
+import { removeUser } from "@/redux/slices/userSlice";
 import { endpointUrl } from "@/constants/endpointUrl";
+import { setAccessToken, logout } from "@/redux/slices/authSlice";
 
-const getUserLevelToken = () : string | null => {
+
+const getAccessToken = () : string | null => {
     const state = store.getState()
-    const token = state.user.accessToken
-    return token
+    return state.auth.accessToken
 }
 
-const refreshToken = () => {
-    const response = Api.post(endpointUrl.REFRESH_TOKEN, {}, {withCredentials:true}) as any
-}
+const refreshToken = async (): Promise<string> => {
+    const response = await Api.post(
+        endpointUrl.REFRESH_TOKEN,
+        {},
+        { withCredentials: true }
+    );
+
+    const newAccessToken = response.data?.accessToken;
+
+    if (!newAccessToken) {
+        throw new Error("No access token returned");
+    }
+    store.dispatch(setAccessToken(newAccessToken));
+    return newAccessToken;
+};
 
 const Api = axios.create({
     baseURL : import.meta.env.VITE_API_URL,
@@ -22,7 +35,7 @@ const Api = axios.create({
 Api.interceptors.request.use(
     (config) => {
         config.headers = config.headers || {}
-        const token = getUserLevelToken()
+        const token = getAccessToken()
 
         if(token){
             config.headers.Authorization = `Bearer ${token}`
@@ -41,6 +54,7 @@ Api.interceptors.response.use(
             const { status, data } = error.response;
 
             if (status === 403 || data.message === responses.USER_BLOCKED) {
+                store.dispatch(logout())
                 store.dispatch(removeUser());
                 return Promise.reject(error);
             }
@@ -49,17 +63,18 @@ Api.interceptors.response.use(
                 originalRequest._retry = true;
 
                 try {
-                    const userLevel = originalRequest.headers['X-User-Level'];
                     const newToken = await refreshToken();
-
                     originalRequest.headers.Authorization = `Bearer ${newToken}`;
                     return Api(originalRequest);
                 } catch (refreshError) {
-                    if (originalRequest.headers['X-User-Level'] === 'user') { 
-                        store.dispatch(removeUser());
-                    }
+                    store.dispatch(logout())
+                    store.dispatch(removeUser());
                     return Promise.reject(refreshError);
                 }
+            }
+            if(status === 403){
+                store.dispatch(logout())
+                store.dispatch(removeUser())
             }
         }
         return Promise.reject(error)

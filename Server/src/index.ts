@@ -4,14 +4,16 @@ dotenv.config()
 
 import express from "express"
 import cors from "cors"
+import cookieParser from "cookie-parser"
 import morgan from "morgan";
-import http from "http";
+import { createServer } from "http"
 
 import userRouter from "./routes/UserRouter";
 import clientRouter from "./routes/ClientRouter";
 import freelancerRouter from "./routes/FreelancerRouter"
 import adminRouter from "./routes/AdminRouter"
 import notificationRouter from "./routes/NotificationRouter"
+import messageRouter from "./routes/MessageRouter"
 import webhookRouter from "./routes/WebhookRouter"
 
 import { connectDB } from "./config/mongo.config";
@@ -24,7 +26,7 @@ import { initSocket } from "./socket/socket"
 const app = express()
 const PORT = process.env.PORT
 
-const server = http.createServer(app)
+const server = createServer(app)
 initSocket(server)
 
 app.use(
@@ -40,6 +42,7 @@ app.use("/api/auth/webhook", webhookRouter)
 
 app.use(express.json())
 app.use(express.urlencoded({ extended : true }))
+app.use(cookieParser())
 app.use(morgan("dev"))
 connectDB()
 gigMapper()
@@ -50,6 +53,7 @@ app.use("/api/auth/client", clientRouter)
 app.use("/api/auth/freelancer", freelancerRouter)
 app.use("/api/auth/admin", adminRouter)
 app.use("/api/auth/notification", notificationRouter)
+app.use("/api/auth/message" ,messageRouter)
 
 app.use((req, res, next) =>{
   verifyTokenMiddleware(req, res, next)

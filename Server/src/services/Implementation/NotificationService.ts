@@ -1,9 +1,6 @@
 import { NotificationType } from "@/types/Type";
 import { INotificationService } from "../Interface/INotificationService";
 import { INotificationRepository } from "@/repositories/Interface/INotificationRepository";
-import { IClientRepository } from "@/repositories/Interface/IClientRepository";
-import { IFreelancerRepository } from "@/repositories/Interface/IFreelancerRepository";
-import { IOrderRepository } from "@/repositories/Interface/IOrderRepository";
 
 export class NotificationService implements INotificationService {
     constructor(

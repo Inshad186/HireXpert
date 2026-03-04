@@ -1,4 +1,4 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { UserStoreType } from "../../types/user.type";
 
 const initialState : UserStoreType = {
@@ -6,7 +6,6 @@ const initialState : UserStoreType = {
     name : '',
     email : '',
     role : '',
-    accessToken : null,
     createdAt : new Date(),
     updatedAt : new Date(),
 }
@@ -15,8 +14,8 @@ const userSlice = createSlice({
     name : 'user',
     initialState,
     reducers : {
-        setUser:(state, action) => {
-            return {...state, ...action.payload}
+        setUser:(state, action: PayloadAction<UserStoreType>) => {
+            return { ...state, ...action.payload}
         },
         removeUser:() => {
             return initialState

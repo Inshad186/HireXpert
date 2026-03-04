@@ -32,8 +32,7 @@ export class UserController implements IUserController {
         maxAge: 7 * 24 * 60 * 60 * 1000,
         sameSite: "strict",
       });
-
-      res.status(HttpStatus.OK).json({ accessToken, user });
+      res.status(HttpStatus.OK).json({ accessToken, refreshToken, user });
     } catch (err) {
       next();
     }
@@ -124,6 +123,7 @@ export class UserController implements IUserController {
   async refreshToken(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const refreshToken = req.cookies.refreshToken
+      console.log("Refresh Token : ",refreshToken)
       if(!refreshToken){
         res.status(HttpStatus.BAD_REQUEST).json({ message: HttpResponse.NO_TOKEN });
         return;

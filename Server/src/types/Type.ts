@@ -186,3 +186,15 @@ export interface OrderType {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface MessageType {
+  _id: string,
+  orderId: Types.ObjectId,
+  senderId: Types.ObjectId,
+  senderName: string,
+  senderImage: string,
+  recipientId: Types.ObjectId,
+  content: string,
+  timeStamp: Date;
+  read: boolean;
+}

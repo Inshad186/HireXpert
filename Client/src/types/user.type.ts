@@ -2,6 +2,7 @@ import mongoose, {ObjectId, Types} from "mongoose"
 
 export type UserRole = "freelancer" | "client" | "admin" | "none";
 
+//! UserSignUpType
 export interface UserSignUpType {
     name : string,
     email : string,
@@ -10,17 +11,20 @@ export interface UserSignUpType {
     role? : UserRole,
 }
 
+//! UserSignupAction
 export type UserSignupAction =
     | { type: "SET_NAME"; payload: string }
     | { type: "SET_EMAIL"; payload: string }
     | { type: "SET_PASSWORD"; payload: string }
     | { type: "SET_CONFIRM_PASSWORD"; payload: string }
 
+//! ErrorState
 export interface ErrorState {
     field?: string;
     message?: string;
 }
 
+//! UserStoreType
 export interface UserStoreType {
     _id: string;
     name: string;
@@ -29,7 +33,6 @@ export interface UserStoreType {
     createdAt?: Date;
     isBlocked?:Boolean;
     updatedAt?: Date;
-    accessToken : null;
     profilePicture?: string;
     companyName?: string;
     website?: string;
@@ -43,6 +46,7 @@ export interface UserStoreType {
     ratingsFromFreelancers?: Array<{ rating: number; comment: string }>;
 }
 
+//! FreelancerDetail
 export interface FreelancerDetail {
   _id: string
   name: string
@@ -60,6 +64,7 @@ export interface FreelancerDetail {
   isSeller:string
 }
 
+//! InitialProjectDetail
 export interface InitialProjectDetail {
     _id:string;
     title?: string;
@@ -72,6 +77,7 @@ export interface InitialProjectDetail {
     gallery:string[]
 }
 
+//! ProjectDetail
 export interface ProjectDetail {
   _id?: string;
   title: string;
@@ -88,12 +94,15 @@ export interface ProjectDetail {
   skills: string[]
 }
 
+//! OrderDetail
 export interface OrderDetail {
   _id?: string;
   client?: {
+    _id?: string
     name: string
   }
   freelancer?:{
+    _id?: string
     name: string
   }
   gig?:{
@@ -121,9 +130,12 @@ export interface OrderDetail {
     rating: number;
     comment: string;
   }
+  acceptedAt?: Date;
+  startedAt?: Date;
+  deliveredAt?: Date;
 }
 
-
+//! NotificationType
 export interface NotificationType {
   _id: string;
   type: "new_order" | "order_completed" | "message" | "review";

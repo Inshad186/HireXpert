@@ -8,6 +8,8 @@ import { PersistGate } from "redux-persist/integration/react";
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import { Elements } from "@stripe/react-stripe-js";
 import { stripePromise } from "./config/stripe.ts";
+import AuthInitializer from "./auth/AuthInitializer.tsx";
+import { MessagingProvider } from "./context/messagingContext.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
@@ -15,7 +17,11 @@ createRoot(document.getElementById("root")!).render(
       <StrictMode>
         <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_CLIENT_ID}>
           <Elements stripe={stripePromise}>
-            <App />
+            <AuthInitializer>
+              <MessagingProvider>
+                <App/>
+              </MessagingProvider>
+            </AuthInitializer>
           </Elements>
         </GoogleOAuthProvider>
       </StrictMode>

@@ -38,6 +38,7 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
 
     try {
       const response = await login(formData);
+      console.log("Response from login : ",response)
       const userRole = response.data?.user?.role
       if (response.success) {
         toast.success("Login successfully")
@@ -47,42 +48,41 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
             name: response.data.user.name,
             email: response.data.user.email,
             role: response.data.user.role,
-            accessToken: response.data.accessToken,
             createdAt: response.data.user.createdAt,
             updatedAt: response.data.user.updatedAt,
             profilePicture: response.data.user.profilePicture,
           })
         );
-
-        setTimeout(async() => {
-          switch (userRole) {
-            case "none":
-            case "client":
-              navigate(userRoutes.HOME, {replace: true});
-              break;            
-            case "freelancer":
-              const profileRes = await getFreelancerFullProfile()
-              if(profileRes.data.fullProfile.isSeller){
-                navigate(userRoutes.FREELANCER_DASH, {replace: true});
-              }else{
-                navigate(userRoutes.FREELANCER_ONBOARDING, {replace: true})
-              }
-              break;
-            default:
-              navigate(userRoutes.LOGIN, {replace: true});
+        
+        if (userRole === "none" || userRole === "client") {
+          navigate(userRoutes.HOME, { replace: true });
+        } else if (userRole === "freelancer") {
+          try {
+            const profileRes = await getFreelancerFullProfile();
+            if (profileRes.data.fullProfile.isSeller) {
+              navigate(userRoutes.FREELANCER_DASH, { replace: true });
+            } else {
+              navigate(userRoutes.FREELANCER_ONBOARDING, { replace: true });
+            }
+          } catch (profileError) {
+            console.error("Error fetching freelancer profile:", profileError);
+            navigate(userRoutes.FREELANCER_DASH, { replace: true });
           }
-        }, 1000);
+        } else {
+          navigate(userRoutes.LOGIN, { replace: true });
+        }
       } else {
         setLoading(false);
-        toast.error("Something went wrong")
+        toast.error("Something went wrong");
         setError({ field: "form", message: response.data.error });
       }
     } catch (error) {
       console.log(error);
-      setError({ field: "form", message: "Invalid email" });
+      setError({ field: "form", message: "Invalid email or password" });
       setLoading(false);
     }
   };
+
 
   const googleSignin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
@@ -96,14 +96,13 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
         });
 
         if (response.success) {
-          const {accessToken , user} = response.data
+          const { user} = response.data
           dispatch(
             setUser({
               _id: user._id,
               name: user.name,
               email: response.data.user.email,
               role: user.role,
-              accessToken: accessToken,
             })
           );
           setTimeout(() => {

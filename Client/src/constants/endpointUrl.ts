@@ -44,6 +44,7 @@ export const freelancerEndpointUrl = {
   DELIVERY_ORDER : "/auth/freelancer/delivery-order",
   STRIPE_ONBOARDING : "/auth/freelancer/stripe-onboarding",
   STRIPE_STATUS : "/auth/freelancer/stripe-status",
+  TRACK_ORDERS : "/auth/freelancer/track-Orders"
 }
 
 export const notificationEndpointUrl = {
@@ -64,4 +65,10 @@ export const adminEndpointUrl = {
   EDIT_SKILLS : "/auth/admin/editSkills",
   ADD_SKILLS : "/auth/admin/addSkills",
   DELETE_CATEGORY_AND_SKILL : "/auth/admin/deleteCategory-Skill"
+}
+
+export const messageEndpointUrl = {
+  CREATE_MESSAGE : "/auth/message/create_message",
+  GET_MESSAGES : "/auth/message/get_messages",
+  MARK_AS_READ : "/auth/message/mark_as_read"
 }

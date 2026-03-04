@@ -236,36 +236,33 @@ async assignRole(role: string, email: string): Promise<{ userRole: string }> {
 }
 
 
-    async updateProfileImage(id: string, profileImage: FileType | undefined): Promise<{user: UserType}> {        
-        if (!profileImage) {            
-            throw generateHttpError(HttpStatus.BAD_REQUEST, "Profile image is required")
-        }
-        const imageURL = await handleProfileImageUpload(profileImage.buffer,"profile_image")
-        
-        const user = await this.userRepository.findById(id)
+async updateProfileImage(id: string, profileImage: FileType | undefined): Promise<{user: UserType}> {        
+   if (!profileImage) {            
+      throw generateHttpError(HttpStatus.BAD_REQUEST, "Profile image is required")
+   }
+   const imageURL = await handleProfileImageUpload(profileImage.buffer,"profile_image")
+   
+   const user = await this.userRepository.findById(id)
+   if (!user) {
+      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
+   }
+   user.profilePicture = imageURL;
+   await this.userRepository.findByIdAndUpdate(id, user);
+   return {user}
+}
 
-        if (!user) {
-            throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
-        }
-        user.profilePicture = imageURL;
-        await this.userRepository.findByIdAndUpdate(id, user);
-        return {user}
+  async refreshToken(token: string): Promise<string> {
+    const payload = verifyToken(token)
+    if(!payload){
+      throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.NO_TOKEN)
     }
-
-    async refreshToken(token: string): Promise<string> {
-      const payload = verifyToken(token)
-
-      if(!payload){
-        throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.NO_TOKEN)
-      }
-      const user = await this.userRepository.findById(payload.userId)
-
-      if(!user){
-        throw generateHttpError(HttpStatus.NOT_FOUND , HttpResponse.USER_NOT_FOUND)
-      }
-      const accessToken = await generateAccessToken(user._id as ObjectId, user.role as string)
-      return accessToken
+    const user = await this.userRepository.findById(payload.userId)
+    if(!user){
+      throw generateHttpError(HttpStatus.NOT_FOUND , HttpResponse.USER_NOT_FOUND)
     }
+    const accessToken = await generateAccessToken(user._id as ObjectId, user.role as string)
+    return accessToken
+  }
 
     async updateUserName(userId: string, name: string): Promise<{ newName: string; }> {
       const user = await this.userRepository.findById(userId)

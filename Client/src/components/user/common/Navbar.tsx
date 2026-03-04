@@ -4,11 +4,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { userRoutes } from "@/constants/routeUrl";
 import { userLogout } from "@/api/user.api";
 import { removeUser } from "@/redux/slices/userSlice";
+import toast from "react-hot-toast";
 
 function Navbar() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
+  const accessToken = useSelector((state: RootState) => state.auth.accessToken)
 
   const pageRoutes = {
     "about us": userRoutes.ABOUT,
@@ -28,27 +30,36 @@ function Navbar() {
     "profile" : userRoutes.PROFILE
   }
 
-  const handleLogout = async () => {
+const handleLogout = async () => {
+  try {
     const res = await userLogout();
+
     if (res.success) {
-      dispatch(removeUser());
-      navigate(userRoutes.LOGIN);
+      toast.success("Logout Successful");
     } else {
-      console.error("Logout failed:", res.error);
+      console.warn("⚠️ Backend logout failed, clearing frontend anyway");
     }
-  };
+  } catch (error) {
+    console.error("❌ Logout error:", error);
+  } finally {
+    dispatch(removeUser());   // clear redux
+    navigate(userRoutes.LOGIN, { replace: true });
+  }
+};
 
   let navRoutes:Record<string, string> = {}
 
-  if(user?.accessToken){
-    if(user.role === "client"){
-      navRoutes = clientRoutes;
-    }else if(user.role === "freelancer"){
-      navRoutes = freelancerRoutes;
-    }else{
-      navRoutes = pageRoutes
-    }
+const isAuthenticated = !!user._id && !!accessToken;
+
+if (isAuthenticated) {
+  if (user.role === "client") {
+    navRoutes = clientRoutes;
+  } else if (user.role === "freelancer") {
+    navRoutes = freelancerRoutes;
+  } else {
+    navRoutes = pageRoutes;
   }
+}
 
   return (
     <nav className="bg-white shadow-2xl py-4">
@@ -61,7 +72,7 @@ function Navbar() {
         </div>
 
         <div className="hidden md:flex gap-4 items-center">
-          {user.accessToken ? (
+          {isAuthenticated ? (
             <>
             {Object.entries(navRoutes).map(([name,route]) => (
               <Link

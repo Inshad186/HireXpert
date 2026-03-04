@@ -1,9 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { Clock, CheckCircle, XCircle, Eye, MessageSquare, Download, Truck, Check, ClipboardCheck } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Clock, CheckCircle, XCircle, Eye, MessageSquare, Download, Truck, ClipboardCheck } from 'lucide-react';
 import { getMyOrders } from '@/api/client.api';
 import { OrderDetail } from '@/types/user.type';
 import { useClientOrderAction } from '@/hooks/useClientOrderAction';
+import { ChatModal } from './chatModal';
 import { ClientDeliveryModal } from './clientDeliveryModal';
+import { useSelector } from 'react-redux';
+import { RootState } from '@/redux/store';
+import { useMessagingContext } from '@/context/messagingContext';
 
 function MyOrders() {
   const [activeTab, setActiveTab] = useState('ALL');
@@ -12,8 +16,16 @@ function MyOrders() {
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null)
   const [showDeliveryModal, setShowDeliveryModal] = useState(false)
+  const [showChatModal, setShowChatModal] = useState(false)
 
-  const { acceptDelivery, requestRevision, actionLoading} = useClientOrderAction()
+  const userId = useSelector((state: RootState) => state.user._id)
+  const clientName = useSelector((state: RootState) => state.user.name)
+
+  const { messages, markAsRead } = useMessagingContext()
+  const { acceptDelivery, requestRevision, actionLoading } = useClientOrderAction()
+
+  const currentUserId = userId; 
+  const currentUserName = clientName;
 
   const getStatusColor = (status: string = '') => {
     switch(status) {
@@ -39,6 +51,14 @@ function MyOrders() {
     }
   };
 
+  const getUnreadCount = (orderId: string) => {
+    return messages.filter(
+      (msg) => 
+      msg.orderId === orderId &&
+      msg.senderId !== currentUserId &&
+      !msg.read).length
+  }
+
   const filteredOrders = activeTab === "ALL"
     ? orders 
     : orders.filter((order) => order.status === activeTab);
@@ -50,10 +70,7 @@ function MyOrders() {
         setError(null);
         const res = await getMyOrders();
         if(res.success){
-          console.log("Response from My orders : ",res)
           setOrders(res.data.OrderDetail || []);
-        } else {
-          setError('Failed to fetch orders');
         }
       } catch (error) {
         console.error("Error fetching order detail", error);
@@ -71,6 +88,12 @@ function MyOrders() {
       setShowDeliveryModal(true)
     }
   }
+
+  const handleMessageClick = (order: OrderDetail) => {
+    setSelectedOrder(order);
+    setShowChatModal(true);
+    markAsRead(order._id as string)
+  };
 
   return (
     <div className="p-8 max-w-6xl mx-auto min-h-screen">
@@ -177,9 +200,16 @@ function MyOrders() {
                   <span className="text-sm font-medium">View Details</span>
                 </button>
                 )}
-                <button className="flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded transition">
+                <button
+                onClick={() => handleMessageClick(order)}
+                 className="relative flex items-center gap-2 px-4 py-2 text-purple-600 hover:bg-purple-50 rounded transition">
                   <MessageSquare size={18} />
-                  <span className="text-sm font-medium">Message</span>
+                  {getUnreadCount(order._id as string) > 0 && (
+                    <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
+                      {getUnreadCount(order._id as string)}
+                    </span>
+                  )}
+                  Message
                 </button>
                 {order.status === 'COMPLETED' && (
                   <button className="flex items-center gap-2 px-4 py-2 text-green-600 hover:bg-green-50 rounded transition">
@@ -218,7 +248,7 @@ function MyOrders() {
                     </div>
                     <div>
                         <p className="text-gray-600 text-sm">Status</p>
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(order.status)}`}>
+                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
                         {getStatusIcon(selectedOrder.status)}
                         {selectedOrder.status}
                         </span>
@@ -249,6 +279,23 @@ function MyOrders() {
           ))}
         </div>
       )}
+  
+        {/* Chat Modal */}
+      {selectedOrder && (
+        <ChatModal
+          isOpen={showChatModal}
+          onClose={() => {
+            setShowChatModal(false);
+            setSelectedOrder(null);
+          }}
+          orderId={selectedOrder._id as string}
+          recipientId={selectedOrder.freelancer?._id || ""}
+          recipientName={selectedOrder.freelancer?.name as string}
+          currentUserId={currentUserId}
+          currentUserName={currentUserName}
+          />
+      )}
+
       <ClientDeliveryModal
       order={selectedOrder}
       isOpen={showDeliveryModal}
