@@ -8,4 +8,5 @@ export interface IOrderRepository extends IBaseRepository<OrderType>{
     updateOrder(orderId: string, updatedData: any): Promise<any>
     deleteOrder(orderId: string): Promise<void>
     findByPaymentIntentId(paymentIntentId: string): Promise<OrderType | null>
+    getFreelancerReviews(freelancerId: string): Promise<any>
 }

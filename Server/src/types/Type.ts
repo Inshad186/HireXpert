@@ -44,6 +44,10 @@ export interface FreelancerProfileType extends Document {
   working_days: string;
   active_hours: string;
   portfolio: string;
+  rating: {
+    average: number,
+    count: number
+  }
   stripeConnectedAccountId?: string;
   stripeOnboardingComplete?: boolean;
   isSeller: boolean;
@@ -88,18 +92,6 @@ export interface GoogleAuthUserType {
     profilePicture?: string;
 }
 
-// export interface OrderType {
-//   _id: Types.ObjectId; 
-//   client: Types.ObjectId;
-//   freelancer: Types.ObjectId;
-//   gig: Types.ObjectId;
-//   requirements: string;
-//   plan: string;
-//   status: string;
-//   createdAt?: Date;
-//   updatedAt?: Date;
-// } 
-
 export interface NotificationType {
   id?: Types.ObjectId;
   orderId: Types.ObjectId;
@@ -137,7 +129,7 @@ interface StatusHistory {
 
 interface ClientFeedback {
   rating: number;
-  comment: string;
+  feedback: string;
   givenAt: Date;
 }
 
@@ -197,4 +189,13 @@ export interface MessageType {
   content: string,
   timeStamp: Date;
   read: boolean;
+}
+
+export interface ReviewType {
+  _id: string,
+  client: Types.ObjectId,
+  freelancer: Types.ObjectId,
+  order: Types.ObjectId,
+  rating: number,
+  feedback: string
 }

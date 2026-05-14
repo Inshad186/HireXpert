@@ -34,6 +34,17 @@ export const getProjectDetails = async(projectId : string) => {
     }
 }
 
+export const getFreelancerReviews = async(projectId: string) => {
+    try {
+        const { data } = await Api.get(`${clientEndpointUrl.GET_REVIEWS}/${projectId}`)
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };    
+    }
+}
+
 export const createPaymentIntent = async(gigId: string, freelancerId: string, price: number) => {
     try {
         const {data} = await Api.post(clientEndpointUrl.CREATE_PAYMENT_INTENT, {gigId, freelancerId, price})

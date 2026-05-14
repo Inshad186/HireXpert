@@ -46,6 +46,8 @@ export interface UserStoreType {
     ratingsFromFreelancers?: Array<{ rating: number; comment: string }>;
 }
 
+export type Role = "" | "freelancer" | "client" | "admin" | "none";
+
 //! FreelancerDetail
 export interface FreelancerDetail {
   _id: string
@@ -61,6 +63,10 @@ export interface FreelancerDetail {
   working_days: string
   active_hours: string
   portfolio: string
+  rating: {
+    average: number;
+    count: number;
+  }
   isSeller:string
 }
 
@@ -74,6 +80,12 @@ export interface InitialProjectDetail {
         standard: { price: number, description: string, deliveryTime: number },
         premium: { price: number, description: string, deliveryTime: number }
         };
+    freelancer: {
+      rating: {
+        average: number;
+        count: number;
+      }
+    }
     gallery:string[]
 }
 

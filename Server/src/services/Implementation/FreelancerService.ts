@@ -134,7 +134,7 @@ async createGig(gigData: any, gallery: FileType[]): Promise<string> {
 
   async rejectOrder(orderId: string, reason: string): Promise<void> {
     try {
-      await this.OrderRepository.findByIdAndUpdate(orderId,{cancellationReason: reason})
+      await this.OrderRepository.findByIdAndUpdate(orderId,{cancellationReason: reason, status: OrderStatus.CANCELLED})
     } catch (error) {
       console.error(error)
       throw error
@@ -243,9 +243,7 @@ async createGig(gigData: any, gallery: FileType[]): Promise<string> {
       if (!freelancer?.stripeConnectedAccountId) {
         return { status: "not_connected", message: "Not connected" };
       }
-      const account = await stripe.accounts.retrieve(
-        freelancer.stripeConnectedAccountId
-      );
+      const account = await stripe.accounts.retrieve(freelancer.stripeConnectedAccountId );
       if (account.charges_enabled && account.payouts_enabled) {
         return { status: "connected", message: "Connected" };
       }

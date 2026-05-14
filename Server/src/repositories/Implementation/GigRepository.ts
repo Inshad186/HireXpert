@@ -14,5 +14,6 @@ export class GigRepository extends BaseRepository<GigType> implements IGigReposi
 
   async findGigs(): Promise<GigType[]> {
     return await Gig.find({isActive: true})
+    .populate("freelancer", "rating")
   }
 }

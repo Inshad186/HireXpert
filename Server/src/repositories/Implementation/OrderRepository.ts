@@ -49,4 +49,15 @@ export class OrderRepository extends BaseRepository<OrderType> implements IOrder
             paymentDetails: {stripePaymentIntentId: paymentIntentId}
         })
     }
+
+    async getFreelancerReviews(freelancerId: string): Promise<any> {
+        return await Order.find({
+            freelancer: freelancerId,
+            "clientFeedback.rating": { $exists: true}
+        })
+        .populate("client", "name profilePicture")
+        .select("client clientFeedback createdAt")
+        .sort({createdAt: -1})
+    }
+
 }

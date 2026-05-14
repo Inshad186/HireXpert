@@ -26,7 +26,8 @@ export const clientEndpointUrl = {
   GET_MYORDERS : "/auth/client/my-orders",
   ACCEPT_ORDERS : "/auth/client/accept-orders",
   REQUEST_REVISION : "/auth/client/request-revision",
-  CREATE_PAYMENT_INTENT : "/auth/client/create-payment-intent"
+  CREATE_PAYMENT_INTENT : "/auth/client/create-payment-intent",
+  GET_REVIEWS : "/auth/client/get-freelancer-reviews"
 }
 
 export const freelancerEndpointUrl = {

@@ -40,7 +40,7 @@ interface StatusHistory {
 
 interface ClientFeedback {
   rating: number;
-  comment: string;
+  feedback: string;
   givenAt: Date;
 }
 
@@ -135,7 +135,7 @@ const orderSchema = new Schema<OrderDocument>(
     
     clientFeedback: {
       rating: { type: Number, min: 1, max: 5 },
-      comment: { type: String },
+      feedback: { type: String },
       givenAt: { type: Date },
     },
 

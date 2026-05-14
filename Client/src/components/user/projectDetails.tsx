@@ -1,6 +1,6 @@
 import { useParams } from "react-router-dom"
 import { useEffect, useState } from "react"
-import { getProjectDetails } from "@/api/client.api"
+import { getFreelancerReviews, getProjectDetails } from "@/api/client.api"
 import { ProjectDetail, FreelancerDetail } from "@/types/user.type"
 import { useNavigate } from "react-router-dom"
 import { userRoutes } from "@/constants/routeUrl"
@@ -11,6 +11,7 @@ function ProjectDetails() {
   const [project, setProject] = useState<any | null>(null)
   const [freelancer, setFreelancer] = useState<FreelancerDetail | null>(null)
   const [profileImg, setProfileImg] = useState("")
+  const [freelancerReviews, setFreelancerReviews] = useState<any[]>([])
   const [selectedPlan, setSelectedPlan] = useState<"basic" | "standard" | "premium">("basic");
 
   const navigate = useNavigate()
@@ -18,11 +19,11 @@ function ProjectDetails() {
   useEffect(() => {
     const projectFullDetail = async () => {
       const response = await getProjectDetails(projectId as string)
-
-      console.log("Project Full Details : ",response.data)
+      console.log("Project Full Details : ",response.data.projectDetails)
       setProject(response.data.projectDetails.gig)
       setFreelancer(response.data.projectDetails.freelancer)
       setProfileImg(response.data.projectDetails.profileImage)
+      setFreelancerReviews(response.data.projectDetails.freelancerReviews)
     }
     projectFullDetail()
   }, [projectId])
@@ -76,6 +77,23 @@ function ProjectDetails() {
           <p><span className="font-medium">Delivery Time:</span> {project.pricing[selectedPlan]?.deliveryTime} days</p>
           <p><span className="font-medium">Active:</span> {project?.isActive ? "Yes ✅" : "No ❌"}</p>
 
+          {/* Rating */}
+          <div className="flex items-center gap-1.5 mt-5">
+            <div className="flex">
+              {[1,2,3,4,5].map(s => (
+                <svg
+                  key={s}
+                  className={`w-6 h-6 ${s <= Math.round(freelancer?.rating?.average ?? 0) ? "text-amber-500 fill-current" : "text-gray-300"}`}
+                  viewBox="0 0 20 20"
+                >
+                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95 4.146.018c.958.004 1.355 1.226.584 1.818l-3.36 2.455 1.287 3.951c.3.922-.756 1.688-1.541 1.125L10 13.011l-3.353 2.333c-.785.563-1.841-.203-1.541-1.125l1.287-3.951-3.36-2.455c-.77-.592-.374-1.814.584-1.818l4.146-.018 1.286-3.95z" />
+                </svg>
+              ))}
+            </div>
+            <span className="font-semibold">{freelancer?.rating?.average?.toFixed(1) ?? "—"}</span>
+            <span className="text-gray-500">({freelancer?.rating?.count})</span>
+          </div>
+
           {/* Pricing Plans */}
           <div className="mt-6">
             <h3 className="text-lg font-semibold mb-3">Pricing Plans</h3>
@@ -124,8 +142,68 @@ function ProjectDetails() {
         </div>
       </div>
 
+      {/* Reviews Section */}
+      <div className="mt-10 max-w-4xl px-4">
+          <h2 className="text-2xl font-bold text-gray-900">
+            Client Reviews ({freelancerReviews.length})
+          </h2>
+        <div className="space-y-10">
+          {freelancerReviews.length > 0 ? (
+            freelancerReviews.map((review) => (
+              <div
+                key={review._id}
+                className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow"
+              >
+                <div className="flex items-start gap-4">
+                  {/* Client Avatar */}
+                  <div className="w-10 h-10 bg-gray-200 rounded-full flex-shrink-0 flex items-center justify-center text-gray-500 font-medium">
+                    {review.client?.name?.charAt(0)?.toUpperCase() || "C"}
+                  </div>
+
+                  {/* Review Content */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-semibold text-gray-900">
+                        {review.client?.name || "Anonymous Client"}
+                      </h3>
+                      
+                      {/* Star Rating */}
+                      <div className="flex items-center gap-1 text-amber-500">
+                        {[...Array(5)].map((_, i) => (
+                          <span key={i} className="text-lg">
+                            {i < (review.rating || 0) ? "★" : "☆"}
+                          </span>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Review Date */}
+                    <p className="text-xs text-gray-500 mt-1">
+                      {new Date(review.givenAt || review.createdAt).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                      })}
+                    </p>
+
+                    {/* Feedback */}
+                    <p className="mt-3 text-gray-700 leading-relaxed">
+                      "{review.clientFeedback?.feedback || "No feedback provided."}"
+                    </p>
+                  </div>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="bg-white rounded-2xl p-10 text-center text-gray-500">
+              No reviews yet. Be the first to review this freelancer!
+            </div>
+          )}
+        </div>
+      </div>
+
       {/* Freelancer Profile Section */}
-      <div className="bg-white rounded-xl shadow-md p-6">
+      <div className="bg-white rounded-xl shadow-md p-6 border border-gray-100">
         <h2 className="text-2xl font-bold mb-4">About the Freelancer</h2>
         <img src={profileImg} alt={freelancer.name} className="w-32 h-32 rounded-full object-cover border-4 border-white shadow-md mx-auto" />
         <p className="text-lg font-semibold capitalize text-gray-800">{freelancer.name}</p>

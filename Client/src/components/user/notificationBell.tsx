@@ -51,6 +51,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
     // TODO: Create a rejectOrder function in your hook similar to acceptOrders
     try {
       const response = await rejectOrder(orderId, reason)
+      console.log("Rejection Response : ",response)
       if (response.success) {
         return { success: true, message: 'Order rejected successfully' };
       } else {

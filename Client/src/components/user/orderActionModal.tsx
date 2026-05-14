@@ -43,7 +43,7 @@ export function OrderActionModal({ order, isOpen, onClose, onAccept, onReject, i
     setError(null);
     setSuccess(null);
     const result = await onReject(order._id, rejectReason);
-    
+    console.log("Rejection Result✅ : ",result)
     if (result.success) {
       setSuccess('Order rejected successfully!');
       setTimeout(() => {

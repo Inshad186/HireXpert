@@ -41,6 +41,17 @@ export class ClientController implements IClientController {
         }
     }
 
+    // async getFreelancerReviews(req: Request, res: Response, next: NextFunction): Promise<void> {
+    //     try {
+    //         const { projectId } = req.params
+    //         console.log("Gig IDDD : ", projectId)
+    //         const gigDetails = await this.clientService.getFreelancerReviews(projectId)
+    //         console.log("Gig Detailsssss : ", gigDetails)
+    //     } catch (error) {
+
+    //     }
+    // }
+
     async createPaymentIntent(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { gigId, freelancerId, price } = req.body;

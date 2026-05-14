@@ -60,17 +60,19 @@ export class ClientService implements IClientService {
         throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND)
       }
       const userDetails = await this.userRepository.findById(freelancerId as string)
+      const freelancerReviews = await this.orderRepository.getFreelancerReviews(freelancerId as string)
+      console.log("Freelancer REviewsss  :",freelancerReviews)
       return {
         gig : gigDetails,
         freelancer : freelancerDetails,
-        profileImage : userDetails?.profilePicture as string
+        profileImage : userDetails?.profilePicture as string,
+        freelancerReviews: freelancerReviews
       }
     } catch (error) {
       console.error(error)
       throw error
     }
   }
-
 
   async createPaymentIntent(userId: string, freelancerId: string, gigId: string, price: number ): Promise<{clientSecret: string, paymentIntentId: string}> {
     try {
@@ -260,22 +262,35 @@ export class ClientService implements IClientService {
     console.log(`Order ${orderId}: Total: ₹${totalAmount}, Fee: ₹${platformFee}, Freelancer: ₹${freelancerAmount}`);
 
     // Get freelancer and check Stripe account
-    const freelancer = await this.freelancerRepository.findById(
-      order.freelancer.toString()
-    );
+    const freelancer = await this.freelancerRepository.findById(order.freelancer.toString());
 
     if (!freelancer) {
       throw new Error("Freelancer not found");
     }
+
+    if(order.clientFeedback?.rating){
+      throw new Error("Client already reviewed this order")
+    }
+
+    const oldAverage = freelancer?.rating.average || 0
+    const oldCount = freelancer?.rating.count || 0
+
+    const newCount = oldCount + 1
+    const newAverage = ((oldAverage * oldCount) + rating) / newCount;
+
+    await this.freelancerRepository.findByIdAndUpdate(order.freelancer.toString(), {
+      rating: {
+        average: newAverage,
+        count: newCount
+      }
+    })
 
     if (!freelancer.stripeConnectedAccountId) {
       throw new Error("Freelancer has not connected Stripe account");
     }
 
     // Verify account is ready
-    const account = await stripe.accounts.retrieve(
-      freelancer.stripeConnectedAccountId
-    );
+    const account = await stripe.accounts.retrieve(freelancer.stripeConnectedAccountId);
 
     if (!account.charges_enabled || !account.payouts_enabled) {
       throw new Error("Freelancer's Stripe account not ready");
@@ -297,7 +312,7 @@ export class ClientService implements IClientService {
         completedAt: new Date(),
         clientFeedback : {
           rating: rating,
-          comment: feedback,
+          feedback:feedback,
           givenAt: new Date()
         },
         paymentDetails: {

@@ -102,6 +102,7 @@ export class FreelancerController implements IFreelancerController {
   async rejectOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { orderId, reason } = req.params;
+      console.log(orderId)
       await this.freelancerService.rejectOrder(orderId, reason)
       res.status(HttpStatus.OK).json({ success: true})
     } catch (error) {

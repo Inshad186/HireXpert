@@ -10,14 +10,18 @@ import Footer from "@/components/user/common/Footer";
 import { userRoutes } from "@/constants/routeUrl";
 import toast from "react-hot-toast";
 import { getFreelancerFullProfile } from "@/api/user.api";
+import { Role } from "@/types/user.type";
+import FeatureBoxes from "@/components/user/home/FeatureBoxes";
 
-function Home() {
-  const [role, setRole] = useState("");
+function Home() { 
+
+  const [role, setRole] = useState<Role>("");
   const [showModal, setShowModal] = useState(false);
   const [leftClick, setLeftClick] = useState(false);
   const [rightClick, setRightClick] = useState(false);
   const [loading, setLoading] = useState(false);
   const [gigs, setGigs] = useState<InitialProjectDetail[]>([])
+
   const navigate = useNavigate();
   const dispatch = useDispatch();
 
@@ -59,12 +63,12 @@ function Home() {
     fetchProjects();
   }, []);
 
-  const HandleAssignRole = async () => {
+  const handleAssignRole = async () => {
     setLoading(true);
     try {
       const response = await assignRole(role, user.email);
       if (response.success) {
-        dispatch(setUser({ role }));
+        dispatch(setUser({...user, role }));
         setShowModal(false);
         toast.success(`Switched to ${role} mode`);
 
@@ -92,99 +96,147 @@ function Home() {
   return (
     <div className="min-h-screen bg-white text-gray-800 flex flex-col">
       <main className="flex-grow">
-        <section className="px-6 md:px-24 py-20 flex flex-col-reverse md:flex-row items-center justify-between bg-blue-200">
-          <div className="md:w-1/2 space-y-6">
-            <h1 className="text-4xl md:text-5xl font-bold leading-tight">
-              Find the perfect freelance services for your business
-            </h1>
-            <p className="text-lg text-gray-600">
-              Connect with skilled freelancers and get work done efficiently.
-            </p>
-          </div>
-          <div className="md:w-1/2 mb-10 md:mb-0">
-            <img
-              src="./src/assets/home.jpg"
-              alt="Freelancer working"
-              className="max-w-lg h-auto"
-            />
+{/* ─── HERO SECTION ──────────────────────────────────────── */}
+        <section className="relative bg-gradient-to-br from-indigo-700 via-indigo-800 to-purple-900 text-white overflow-hidden">
+          <div className="absolute inset-0 bg-black/20"></div>
+
+          <div className="relative max-w-7xl mx-auto px-6 py-20 md:py-28 lg:py-36 flex flex-col md:flex-row items-center justify-between gap-12">
+            <div className="md:w-3/5 space-y-7 text-center md:text-left">
+              <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold leading-tight tracking-tight">
+                Hire top talent.<br className="hidden sm:block" />
+                Get your project done — fast.
+              </h1>
+              <p className="text-xl md:text-2xl opacity-90 max-w-3xl">
+                Connect with skilled freelancers for design, development, marketing, and more.
+              </p>
+
+              <div className="flex flex-col sm:flex-row gap-5 justify-center md:justify-start pt-4">
+                <Link
+                  to={userRoutes.PROJECTS || "/projects"}
+                  className="bg-white text-indigo-900 px-10 py-5 rounded-xl font-bold text-lg shadow-xl hover:bg-gray-100 transition transform hover:scale-105"
+                >
+                  Browse Services
+                </Link>
+                <Link
+                  to={userRoutes.FREELANCER_ONBOARDING || "/become-freelancer"}
+                  className="border-2 border-white/70 px-10 py-5 rounded-xl font-bold text-lg hover:bg-white/10 transition"
+                >
+                  Become a Freelancer
+                </Link>
+              </div>
+            </div>
+
+            <div className="md:w-2/5 flex justify-center">
+              <img
+                src="./src/assets/home.jpg"
+                alt="Freelance collaboration"
+                className="max-w-md lg:max-w-lg h-auto rounded-2xl shadow-2xl object-cover"
+              />
+            </div>
           </div>
         </section>
         
-        <section className="px-6 md:px-24 py-16 bg-white">
-          {gigs.length > 0 && (
-            <h2 className="text-3xl font-extrabold text-gray-800 tracking-wide text-center md:text-left mb-10">
-              <span className="border-b-4 border-indigo-500 pb-1">TOP FREELANCE SERVICES</span>
-            </h2>
-          )}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 max-w-screen-xl mx-auto">
-            {gigs.slice(0, 6).map((gig) => (
-              <Link to={`${userRoutes.PROJECT_DETAILS}/${gig._id}`} key={gig._id}>
-                <div className="bg-white rounded-2xl shadow-lg overflow-hidden hover:shadow-xl transition-shadow duration-300">
-                  <img
-                    src={gig.gallery && gig.gallery.length > 0 ? gig.gallery[0] : "/placeholder.jpg"}
-                    alt={gig.title}
-                    className="w-full h-40 object-cover"
-                  />
-                  <div className="p-6">
-                    <h3 className="text-lg font-semibold text-gray-900 truncate">
+        {/* ─── FEATURED SERVICES ─────────────────────────────────── */}
+        <section className="py-16 md:py-20 bg-white">
+          <div className="max-w-7xl mx-auto px-6">
+            {gigs.length > 0 && (
+              <h2 className="text-3xl md:text-4xl font-bold text-gray-900 text-center mb-12">
+                Popular Services
+                <span className="block w-20 h-1 bg-indigo-500 mx-auto mt-4 rounded"></span>
+              </h2>
+            )}
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6 md:gap-8">
+              {gigs.slice(0, 6).map((gig) => (
+                <Link
+                  key={gig._id}
+                  to={`${userRoutes.PROJECT_DETAILS}/${gig._id}`}
+                  className="group bg-white rounded-xl shadow-md hover:shadow-xl transition-all duration-300 overflow-hidden border border-gray-100"
+                >
+                  <div className="aspect-[4/3] overflow-hidden">
+                    <img
+                      src={gig.gallery?.[0] ?? "/placeholder.jpg"}
+                      alt={gig.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    />
+                  </div>
+                  <div className="p-5">
+                    <h3 className="font-semibold text-gray-900 truncate text-lg">
                       {gig.title}
                     </h3>
-                    <p className="text-sm text-gray-600 mt-2 line-clamp-2">
-                      {gig.pricing?.basic.description}
+                    <p className="text-sm text-gray-600 mt-2 line-clamp-2 min-h-[3rem]">
+                      {gig.pricing?.basic?.description || "Professional service"}
                     </p>
-                    <div className="mt-4">
+                    <div className="mt-4 flex items-baseline">
                       <span className="text-xl font-bold text-indigo-600">
-                        ${gig.pricing?.basic.price}
+                        ${gig.pricing?.basic?.price ?? "?"}
                       </span>
-                      <span className="text-gray-500 text-sm ml-1">starting</span>
+                      <span className="text-gray-500 text-sm ml-1.5">starting</span>
                     </div>
                   </div>
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
+
+            {gigs.length === 0 && (
+              <p className="text-center text-gray-500 py-12">
+                Loading popular services...
+              </p>
+            )}
           </div>
         </section>
 
+        <FeatureBoxes/>
+
+{/* ─── ROLE SELECTION MODAL ─────────────────────────────── */}
         {showModal && (
-          <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-40 z-50">
-            <div className="bg-white rounded-lg p-6 w-[90%] md:w-[600px] text-center shadow-lg">
-              <h2 className="text-xl font-semibold mb-4">
-                {user.name}, your account has been created!
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm px-4">
+            <div className="bg-white rounded-2xl p-8 md:p-10 w-full max-w-lg shadow-2xl">
+              <h2 className="text-2xl font-bold text-gray-900 mb-3 text-center">
+                Welcome, {user.name}!
               </h2>
-              <p className="mb-6 text-gray-600">What brings you to our platform?</p>
+              <p className="text-gray-600 text-center mb-8">
+                Choose how you'd like to use the platform
+              </p>
 
-              <div className="flex flex-col md:flex-row justify-between gap-4 mb-6">
-                <div
-                  className={`border-2 p-4 rounded-lg flex-1 cursor-pointer transition-all duration-200 ${
-                    leftClick ? "border-blue-500 bg-blue-100" : "border-gray-300 hover:border-gray-400"
-                  }`}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-8">
+                <button
+                  type="button"
                   onClick={handleLeftClick}
-                >
-                  <p className="font-medium text-gray-900">I am a client</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    I want to order freelance services.
-                  </p>
-                </div>
-
-                <div
-                  className={`border-2 p-4 rounded-lg flex-1 cursor-pointer transition-all duration-200 ${
-                    rightClick ? "border-blue-500 bg-blue-100" : "border-gray-300 hover:border-gray-400"
+                  className={`p-6 border-2 rounded-xl text-left transition-all ${
+                    leftClick
+                      ? "border-indigo-600 bg-indigo-50 shadow-md"
+                      : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
                   }`}
-                  onClick={handleRightClick}
                 >
-                  <p className="font-medium text-gray-900">I'm a freelancer</p>
-                  <p className="text-sm text-gray-500 mt-1">
-                    I want to offer my services.
-                  </p>
-                </div>
+                  <div className="font-semibold text-lg text-gray-900">I'm a Client</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    I want to hire freelancers
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={handleRightClick}
+                  className={`p-6 border-2 rounded-xl text-left transition-all ${
+                    rightClick
+                      ? "border-indigo-600 bg-indigo-50 shadow-md"
+                      : "border-gray-200 hover:border-indigo-300 hover:bg-gray-50"
+                  }`}
+                >
+                  <div className="font-semibold text-lg text-gray-900">I'm a Freelancer</div>
+                  <div className="text-sm text-gray-600 mt-1">
+                    I want to offer services
+                  </div>
+                </button>
               </div>
 
               <button
-                onClick={HandleAssignRole}
+                onClick={handleAssignRole}
                 disabled={!role || loading}
-                className="w-full bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded font-medium disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200"
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-4 rounded-xl font-semibold text-lg disabled:opacity-50 disabled:cursor-not-allowed transition"
               >
-                {loading ? "Saving..." : "Next"}
+                {loading ? "Saving..." : "Continue →"}
               </button>
             </div>
           </div>

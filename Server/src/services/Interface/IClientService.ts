@@ -5,6 +5,7 @@ export interface GigWithFreelancer {
     gig: GigType
     freelancer: FreelancerProfileType
     profileImage: string
+    freelancerReviews: any[]
 }
 export interface IClientService {
     updateProfile(userId: string, userData : Partial<ClientProfileType>) : Promise<ClientProfileType>;

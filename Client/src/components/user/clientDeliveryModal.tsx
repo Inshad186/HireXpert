@@ -35,7 +35,7 @@ export function ClientDeliveryModal({ order, isOpen, onClose, onAccept, onReques
     setSuccess(null);
 
     const result = await onAccept(order?._id as string, feedback, rating);
-
+    console.log("Result from Cleint Delivery Modal🦑🦑 :",result)
     if (result.success) {
       setSuccess('Order completed! Thank you for your feedback.');
       setTimeout(() => {
