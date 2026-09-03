@@ -81,7 +81,6 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
     onSuccess: async (tokenResponse) => {
       try {
         const decoded = await decodeToken(tokenResponse.access_token);
-        console.log("DECODED >> ? >>>>> : ",decoded)
 
         const response = await googleAuth({
           email: decoded.email,
@@ -98,7 +97,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
               name: user.name,
               email: response.data.user.email,
               role: user.role,
-              accessToken: accessToken,
+              // accessToken: accessToken,
             })
           );
           setTimeout(() => {

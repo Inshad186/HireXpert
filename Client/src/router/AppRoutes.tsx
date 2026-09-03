@@ -45,8 +45,8 @@ export const router = createBrowserRouter([
   {path: "login", element: <PublicRoute><Login/></PublicRoute>},
   {path: "signup", element: <PublicRoute><SignUp/></PublicRoute>},
   {path: "otp", element: <PublicRoute><InputOTPDemo/></PublicRoute>},
-  {path: "forgot-password", element: <PublicRoute><ForgotPassword/></PublicRoute>},
-  {path: "reset-password", element: <PublicRoute><ResetPassword/></PublicRoute>},
+  {path: "forgotPassword", element: <PublicRoute><ForgotPassword/></PublicRoute>},
+  {path: "resetPassword", element: <PublicRoute><ResetPassword/></PublicRoute>},
 
   //! Freelancer onboarding
   {path: "freelancer-requirements", element: <PrivateRoute><FreelancerRequirements/></PrivateRoute>},

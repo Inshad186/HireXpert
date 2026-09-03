@@ -1,4 +1,3 @@
-import React from 'react'
 import RequirementComp from '@/components/user/freelancer/requirementComp'
 import SimpleNavbar from '@/components/user/simpleNavbar'
 

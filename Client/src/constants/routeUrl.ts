@@ -2,7 +2,7 @@ export const userRoutes = {
     LOGIN : "/login",
     SIGNUP : "/signup",
     OTP : "/otp",
-    FORGOT_PASSWORD: "/forgotpassword",
+    FORGOT_PASSWORD: "/forgotPassword",
     NEW_PASSWORD: "/newpassword",
     DASHBOARD: '/dashboard',
     PROFILE: '/profile',
