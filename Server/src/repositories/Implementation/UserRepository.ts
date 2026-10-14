@@ -1,4 +1,4 @@
-import User from "@/models/userModel";
+import User from "@/models/userBaseModel";
 import { IUserRepository } from "../Interface/IUserRepository";
 import { UserType } from "@/types/Type";
 import { BaseRepository } from "../BaseRepository/implementation";
@@ -8,13 +8,6 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
 
   constructor(){
     super(User)
-  }
-
-  async createUser(user: UserType): Promise<UserType> {
-    console.log("verify OTP ? > ?")
-    const userData = await User.create(user)
-    console.log("User Repository User DAta",userData)
-    return userData
   }
 
   async findByEmail(email: string): Promise<UserType | null> {
@@ -28,16 +21,6 @@ export class UserRepository extends BaseRepository <UserType> implements IUserRe
       await User.updateOne({email}, {$set:{role}})
     } catch (err) {
       console.error(err)
-    }
-  }
-
-  async updateUser(user: UserType): Promise<void> {
-    try {
-      const hello = await User.findByIdAndUpdate(user._id, user)
-      console.log("oh baby oh yaay > ",hello)
-    } catch (error) {
-      console.error(error);
-      throw new Error("Error when updating the user");
     }
   }
 

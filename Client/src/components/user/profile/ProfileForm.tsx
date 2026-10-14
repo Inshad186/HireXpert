@@ -7,6 +7,14 @@ interface Props {
 }
 
 export default function ProfileForm({ form, onChange, fields }: Props) {
+    const [multiSelectOpen, setMultiSelectOpen] = useState<{ [key: string]: boolean }>({});
+      const toggleSelect = (fieldName: string) => {
+      setMultiSelectOpen((prev) => ({
+        ...prev,
+        [fieldName]: !prev[fieldName]
+      }));
+    };
+
   return (
     <div className="space-y-4 text-sm text-gray-700">
       {fields.map((field) => {
@@ -14,53 +22,66 @@ export default function ProfileForm({ form, onChange, fields }: Props) {
         // --- Custom Multiselect ---
         if (field.type === "multiselect") {
           const selected = form[field.name] || [];
-          const [open, setOpen] = useState(false);
 
           return (
             <div key={field.name} className="relative">
               <label className="block mb-1 font-medium">{field.placeholder}</label>
               <div
-                onClick={() => setOpen(!open)}
+                onClick={() => toggleSelect(field.name)}
                 className="border p-2 rounded cursor-pointer bg-white"
               >
+
                 {selected.length > 0
-                  ? selected.join(", ")
+                  ? selected
+                      .map((id: string) => {
+                        const allSkills = Object.values(field.options || {}).flat() as { _id: string; name: string }[];
+                        const match = allSkills.find((s) => s._id === id);
+                        return match?.name || id;
+                      })
+                      .join(", ")
                   : `Select ${field.placeholder}`}
+
               </div>
 
-              {open && (
-                <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-40 overflow-y-auto">
-                  {field.options.map((opt: string) => (
-                    <label
-                      key={opt}
-                      className="block px-3 py-2 hover:bg-gray-100 cursor-pointer"
-                    >
-                      <input
-                        type="checkbox"
-                        value={opt}
-                        checked={selected.includes(opt)}
-                        onChange={(e) => {
-                          let updated = [...selected];
-                          if (e.target.checked) {
-                            updated.push(opt);
-                          } else {
-                            updated = updated.filter((v) => v !== opt);
-                          }
+            {multiSelectOpen[field.name] && field.options && typeof field.options === "object" && (
+              <div className="absolute z-10 bg-white border rounded w-full mt-1 max-h-40 overflow-y-auto">
+                {Object.entries(field.options).map(([category, skills]) => {
+                  const safeSkills = Array.isArray(skills) ? skills : [];
 
-                          onChange({
-                            target: {
-                              name: field.name,
-                              value: updated
-                            }
-                          } as any);
-                        }}
-                        className="mr-2"
-                      />
-                      {opt}
-                    </label>
-                  ))}
-                </div>
-              )}
+                  return (
+                    <div key={category} className="border-t border-gray-300 px-2 py-1">
+                      <div className="font-semibold text-gray-800 mb-1">{category}</div>
+                      {safeSkills.map((opt) => (
+                        <label key={opt._id} className="block px-3 py-1 hover:bg-gray-100 cursor-pointer">
+                          <input
+                            type="checkbox"
+                            value={opt._id}
+                            checked={selected.includes(opt._id)}
+                            onChange={(e) => {
+                              let updated = [...selected];
+                              if (e.target.checked) {
+                                updated.push(opt._id);
+                              } else {
+                                updated = updated.filter((v) => v !== opt._id);
+                              }
+                              onChange({
+                                target: {
+                                  name: field.name,
+                                  value: updated,
+                                },
+                              } as any);
+                            }}
+                            className="mr-2"
+                          />
+                          {opt.name}
+                        </label>
+                      ))}
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
             </div>
           );
         }

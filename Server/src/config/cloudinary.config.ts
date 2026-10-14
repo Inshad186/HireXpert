@@ -7,10 +7,10 @@ cloudinary.config({
   api_secret: env.CLOUDINARY_API_SECRET,
 });
 
-function uploadToCloudinary(fileBuffer : Buffer): Promise<string>{
+function uploadToCloudinary(fileBuffer : Buffer, folderName:string): Promise<string>{
     return new Promise((resolve, reject) => {
         const uploaderStream = cloudinary.uploader.upload_stream(
-            {folder : "profile_images", resource_type : "image"},
+            {folder : folderName, resource_type : "image"},
             (error , result) => {
                 if(error) {
                     return reject(error)
@@ -25,6 +25,6 @@ function uploadToCloudinary(fileBuffer : Buffer): Promise<string>{
     })
 }
 
-export async function handleProfileImageUpload(fileBuffer: Buffer): Promise<string> {
-    return uploadToCloudinary(fileBuffer)
+export async function handleProfileImageUpload(fileBuffer: Buffer, folderName:string): Promise<string> {
+    return uploadToCloudinary(fileBuffer, folderName)
 }

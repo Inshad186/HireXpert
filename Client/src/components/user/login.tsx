@@ -6,7 +6,7 @@ import { decodeToken } from "@/utils/googleAuthToken.util";
 import { useDispatch } from "react-redux";
 import { setUser } from "@/redux/slices/userSlice";
 import { ErrorState } from "@/types/user.type";
-import { login, googleAuth } from "@/api/user.api";
+import { login, googleAuth, getFreelancerFullProfile } from "@/api/user.api";
 import { userRoutes } from "@/constants/routeUrl";
 import toast from "react-hot-toast";
 
@@ -38,6 +38,7 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
 
     try {
       const response = await login(formData);
+      console.log("Response from login : ",response)
       const userRole = response.data?.user?.role
       if (response.success) {
         toast.success("Login successfully")
@@ -47,73 +48,73 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
             name: response.data.user.name,
             email: response.data.user.email,
             role: response.data.user.role,
-            accessToken: response.data.accessToken,
             createdAt: response.data.user.createdAt,
             updatedAt: response.data.user.updatedAt,
             profilePicture: response.data.user.profilePicture,
           })
         );
-
-        console.log("RESPONSE >>>>>>>> : ", response.data);
-        setTimeout(() => {
-          switch (userRole) {
-            case "none":
-            case "client":
-              navigate(userRoutes.HOME);
-              break;            
-            case "freelancer":
-              navigate(userRoutes.FREELANCER_DASH);
-              break;
-            default:
-              navigate(userRoutes.LOGIN);
+        
+        if (userRole === "none" || userRole === "client") {
+          navigate(userRoutes.HOME, { replace: true });
+        } else if (userRole === "freelancer") {
+          try {
+            const profileRes = await getFreelancerFullProfile();
+            if (profileRes.data.fullProfile.isSeller) {
+              navigate(userRoutes.FREELANCER_DASH, { replace: true });
+            } else {
+              navigate(userRoutes.FREELANCER_ONBOARDING, { replace: true });
+            }
+          } catch (profileError) {
+            console.error("Error fetching freelancer profile:", profileError);
+            navigate(userRoutes.FREELANCER_DASH, { replace: true });
           }
-        }, 1500);
+        } else {
+          navigate(userRoutes.LOGIN, { replace: true });
+        }
       } else {
         setLoading(false);
-        toast.error("Something went wrong")
+        toast.error("Something went wrong");
         setError({ field: "form", message: response.data.error });
       }
     } catch (error) {
       console.log(error);
-      setError({ field: "form", message: "Invalid email" });
+      setError({ field: "form", message: "Invalid email or password" });
       setLoading(false);
     }
   };
+
 
   const googleSignin = useGoogleLogin({
     onSuccess: async (tokenResponse) => {
       try {
         const decoded = await decodeToken(tokenResponse.access_token);
-        console.log("DECODED >> ? >>>>> : ",decoded)
 
         const response = await googleAuth({
           email: decoded.email,
           name: decoded.given_name,
           profilePicture: decoded.picture
         });
-        console.log("Response ?? : ",response);
 
         if (response.success) {
-          const {accessToken , user} = response.data
+          const { user} = response.data
           dispatch(
             setUser({
               _id: user._id,
               name: user.name,
               email: response.data.user.email,
               role: user.role,
-              accessToken: accessToken,
             })
           );
           setTimeout(() => {
             switch(user.role){
               case "none" : 
               case "client" :
-              navigate(userRoutes.HOME)
+              navigate(userRoutes.HOME, {replace: true})
               break;
-              case "freelacer" : 
-              navigate(userRoutes.FREELANCER_DASH)
+              case "freelancer" : 
+              navigate(userRoutes.FREELANCER_DASH, {replace: true})
               break;
-              default : navigate(userRoutes.SIGNUP)
+              default : navigate(userRoutes.SIGNUP, {replace: true})
             }
           },2000)
         } else {
@@ -132,10 +133,11 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
     },
   });
 
+
   return (
     <>
       <h1 className="text-center font-bold text-3xl text-black mb-6">
-        HireXpert
+        Hire<span className="text-blue-600">Xpert</span>
       </h1>
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div>

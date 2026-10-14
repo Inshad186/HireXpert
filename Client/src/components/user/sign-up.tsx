@@ -27,16 +27,11 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
 
   const reducer = (state: UserSignUpType, action: UserSignupAction) => {
     switch (action.type) {
-      case "SET_NAME":
-        return { ...state, name: action.payload };
-      case "SET_EMAIL":
-        return { ...state, email: action.payload };
-      case "SET_PASSWORD":
-        return { ...state, password: action.payload };
-      case "SET_CONFIRM_PASSWORD":
-        return { ...state, confirmPassword: action.payload };
-      default:
-        return state;
+      case "SET_NAME": return { ...state, name: action.payload };
+      case "SET_EMAIL": return { ...state, email: action.payload };
+      case "SET_PASSWORD": return { ...state, password: action.payload };
+      case "SET_CONFIRM_PASSWORD": return { ...state, confirmPassword: action.payload };
+      default: return state;
     }
   };
 
@@ -86,7 +81,6 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
     onSuccess: async (tokenResponse) => {
       try {
         const decoded = await decodeToken(tokenResponse.access_token);
-        console.log("DECODED >> ? >>>>> : ",decoded)
 
         const response = await googleAuth({
           email: decoded.email,
@@ -103,7 +97,7 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
               name: user.name,
               email: response.data.user.email,
               role: user.role,
-              accessToken: accessToken,
+              // accessToken: accessToken,
             })
           );
           setTimeout(() => {
@@ -136,7 +130,9 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
 
   return (
     <>
-        <h1 className="text-center font-bold text-3xl text-black mb-6">HireXpert</h1>
+        <h1 className="text-center font-bold text-3xl text-black mb-6">
+          Hire<span className="text-blue-500">Xpert</span>
+          </h1>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">Name</label>

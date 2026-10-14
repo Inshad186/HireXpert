@@ -32,6 +32,7 @@ const handleSubmit = async (e: React.FormEvent) => {
 
     if (response.success) {
       const userRole = response.data?.admin?.role;
+      console.log("USER ROLE: ",userRole)
 
       if (userRole === "admin") {
         toast.success("Login successful!");

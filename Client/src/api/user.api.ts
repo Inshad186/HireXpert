@@ -57,7 +57,7 @@ export const assignRole = async(role:string, email:string) => {
     }
 }
 
-export const changeProfile = async (formData: FormData) => {
+export const changeProfileImg = async (formData: FormData) => {
     try {
         const { data } = await Api.post(endpointUrl.CHANGE_PROFILE, formData, {
             headers: {
@@ -94,7 +94,7 @@ export const editUserName = async(name:string) => {
     }
 }
 
-export const getFreelancer = async() =>{
+export const getFreelancerDetail = async() =>{
     try {
         const {data} = await Api.get(endpointUrl.GET_FREELANCER, )
         return {success : true, data}
@@ -149,16 +149,28 @@ export const resetPassword = async (email: string, password: string) => {
     }
 }
 
-export const updateUserDetails = async(data: any) => {
+export const getClientFullProfile = async() => {
     try {
-        const response = await Api.post(endpointUrl.UPDATE_USERDETAILS, data)
-        return { success: true, data: response.data };
+        const {data} = await Api.get(endpointUrl.GET_CLIENT_FULLPROFILE)
+        return {success : true, data}
     } catch (error) {
         const err = error as any
         const message = err.respose?.data?.error || "Something went wrong"
-        return { success:false, error:message };        
+        return { success:false, error:message };  
     }
 }
+
+export const getFreelancerFullProfile = async() => {
+    try {
+        const {data} = await Api.get(endpointUrl.GET_FREELANCER_FULLPROFILE)
+        return {success : true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.respose?.data?.error || "Something went wrong"
+        return { success:false, error:message };  
+    }
+}
+
 
 export const userLogout = async() => {
     try {

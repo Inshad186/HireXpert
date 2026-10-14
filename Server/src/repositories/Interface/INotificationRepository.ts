@@ -1,0 +1,9 @@
+import { NotificationType } from "@/types/Type";
+import { IBaseRepository } from "../BaseRepository/interface";
+
+export interface INotificationRepository extends IBaseRepository<NotificationType>{
+    create(data: Partial<NotificationType>): Promise<NotificationType>;
+    findNotify(freelancerId: string): Promise<NotificationType[]>
+    deleteNotify(notificationId: string): Promise<void>
+    markOrderNotificationsRead(orderId: string, freelancerId: string): Promise<void>;
+}

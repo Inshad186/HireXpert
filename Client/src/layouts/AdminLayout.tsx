@@ -4,7 +4,7 @@ import SideBar from '@/components/admin/common/SideBar';
 
 function AdminLayout() {
   return (
-    <div className="flex h-screen bg-[#2d2d2d] text-white">
+    <div className="flex h-screen bg-gray-950 text-white">
       <SideBar />
       <div className="flex-1 overflow-y-auto p-6">
         <Outlet />

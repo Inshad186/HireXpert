@@ -30,4 +30,7 @@ lerna-debug.log*
 *.ntvs*
 *.njsproj
 *.sln
-*.sw?
+*.sw*
+
+# OS
+Thumbs.db

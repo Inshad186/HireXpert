@@ -1,20 +1,33 @@
-
+import "reflect-metadata"
 import dotenv from "dotenv"               
 dotenv.config()
 
 import express from "express"
 import cors from "cors"
-import userRouter from "./routes/UserRouter";
-import adminRouter from "./routes/AdminRouter"
+import cookieParser from "cookie-parser"
 import morgan from "morgan";
+import { createServer } from "http"
+
+import userRouter from "./routes/UserRouter";
+import clientRouter from "./routes/ClientRouter";
+import freelancerRouter from "./routes/FreelancerRouter"
+import adminRouter from "./routes/AdminRouter"
+import notificationRouter from "./routes/NotificationRouter"
+import messageRouter from "./routes/MessageRouter"
+import webhookRouter from "./routes/WebhookRouter"
+
 import { connectDB } from "./config/mongo.config";
 import { verifyTokenMiddleware } from "./middlewares/verifyToken.middleware";
 import { corsMiddleware } from "./middlewares/cors.middleware";
+import { gigMapper } from "./mappings/gig.mapper";
 
-
+import { initSocket } from "./socket/socket"
 
 const app = express()
 const PORT = process.env.PORT
+
+const server = createServer(app)
+initSocket(server)
 
 app.use(
   cors({
@@ -25,19 +38,27 @@ app.use(
   })
 )
 
+app.use("/api/auth/webhook", webhookRouter)
+
 app.use(express.json())
 app.use(express.urlencoded({ extended : true }))
+app.use(cookieParser())
 app.use(morgan("dev"))
 connectDB()
+gigMapper()
 
 app.use(corsMiddleware)
 app.use("/api/auth", userRouter)
+app.use("/api/auth/client", clientRouter)
+app.use("/api/auth/freelancer", freelancerRouter)
 app.use("/api/auth/admin", adminRouter)
+app.use("/api/auth/notification", notificationRouter)
+app.use("/api/auth/message" ,messageRouter)
+
 app.use((req, res, next) =>{
   verifyTokenMiddleware(req, res, next)
 })
 
-
-app.listen(PORT, () => {
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 })

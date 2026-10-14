@@ -1,4 +1,4 @@
-import { UserType } from "@/types/Type";
+import { CategoryType, OrderType, SkillType, UserType } from "@/types/Type";
 import { IAdminService } from "../Interface/IAdminService";
 import { generateHttpError } from "@/utils/http-error.util";
 import { HttpStatus } from "@/constants/status.constant";
@@ -12,22 +12,18 @@ import { env } from "@/config/env.config";
 export class AdminService implements IAdminService {
   constructor(private adminRepository: IAdminRepository) {}
 
-  async login(email: string, password: string ): Promise<{ accessToken: string; refreshToken: string; admin: UserType }> {
+  async login( email: string, password: string ): Promise<{ accessToken: string; refreshToken: string; admin: UserType }> {
     if (!email || !password) {
       throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.INVALID_EMAIL);
     }
-
     const admin = await this.adminRepository.findByEmail(email);
 
     if (!admin) {
-      throw generateHttpError(
-        HttpStatus.BAD_REQUEST,
-        HttpResponse.INVALID_CREDENTIALS
-      );
+      throw generateHttpError( HttpStatus.BAD_REQUEST, HttpResponse.INVALID_CREDENTIALS );
     }
 
     if (admin.email !== env.ADMIN_EMAIL || admin.role !== "admin") {
-      throw generateHttpError( HttpStatus.UNAUTHORIZED, "Access denied. Not an admin." );
+      throw generateHttpError( HttpStatus.UNAUTHORIZED, "Access denied. Not an admin.");
     }
 
     const isPasswordValid = await bcrypt.compare(password, admin.password!);
@@ -35,25 +31,32 @@ export class AdminService implements IAdminService {
       throw generateHttpError( HttpStatus.BAD_REQUEST, HttpResponse.INVALID_CREDENTIALS );
     }
 
-    const accessToken = await generateAccessToken( admin._id as ObjectId, admin.role as string );
-    const refreshToken = await generateRefreshToken( admin._id as ObjectId, admin.role as string );
+    const accessToken = await generateAccessToken(
+      admin._id as ObjectId,
+      admin.role as string
+    );
+    const refreshToken = await generateRefreshToken(
+      admin._id as ObjectId,
+      admin.role as string
+    );
 
     return { accessToken, refreshToken, admin };
   }
 
-  async getDashboardStats(): Promise<{ totalUsers: number; totalFreelancers: number; totalClients: number; }> {
+  async getDashboardStats(): Promise<{totalUsers: number; totalFreelancers: number; totalClients: number; totalGigs: number }> {
     try {
-      const { totalUsers, totalFreelancers, totalClients } = await this.adminRepository.countTotalDashboardStats();
-      return { totalUsers, totalFreelancers, totalClients };
+      const { totalUsers, totalFreelancers, totalClients, totalGigs } = await this.adminRepository.countTotalDashboardStats();
+      return { totalUsers, totalFreelancers, totalClients, totalGigs };
     } catch (err) {
       console.error("Failed to get dashboard stats:", err);
       throw err;
     }
   }
 
-  async getUsersList(): Promise<any[]> {
-    return await this.adminRepository.getAllUsers();
+  async getUsersList(page: number, limit: number, role: string, search: string, status: string): Promise<{ users: any[]; totalUsers: number }> {
+    return await this.adminRepository.getAllUsers(page, limit, role, search, status);
   }
+
 
   async blockUser(userId: string): Promise<void> {
     const user = await this.adminRepository.findById(userId);
@@ -61,18 +64,43 @@ export class AdminService implements IAdminService {
     if (!user) {
       throw generateHttpError( HttpStatus.BAD_REQUEST, HttpResponse.INVALID_CREDENTIALS);
     }
-
     user.isBlocked = !user.isBlocked;
 
     const saved = await this.adminRepository.save(user);
 
     if (!saved) {
-      throw generateHttpError( HttpStatus.INTERNAL_SERVER_ERROR, "Failed to update user");
+      throw generateHttpError(
+        HttpStatus.INTERNAL_SERVER_ERROR,
+        "Failed to update user"
+      );
     }
   }
 
-  async getSkills(): Promise<string[]> {
+  async addCategories(name : string): Promise<CategoryType> {
+    return await this.adminRepository.createCategory(name)
+  }
+
+  async getCategories(): Promise<any> {
+    return await this.adminRepository.getAllCategories()
+  }
+
+  async addSkills(name: string, category: string): Promise<SkillType> {
+    return await this.adminRepository.createSkill(name, category)
+  }
+
+  async getSkills(): Promise<{ [category: string]: { _id: string; name: string }[] }> {
     return await this.adminRepository.getAllSkills();
   }
 
+  async editSkills(skillId: string, skillName: string): Promise<void> {
+    await this.adminRepository.updateAllSkills(skillId, skillName);
+  }
+
+  async getOrdersList(page: number, limit: number): Promise<{orders: OrderType[]; total: number}> {
+    return await this.adminRepository.getAllOrders(page, limit)
+  }
+
+  async deleteCategoryAndSkill(categoryId: string): Promise<void> {
+    await this.adminRepository.deleteCategoryAndSkills(categoryId);
+  }
 }

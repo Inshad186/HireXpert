@@ -2,45 +2,49 @@ import { forgetPassword } from '@/api/user.api';
 import { emailRegex } from '@/utils/validation/regex.util';
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 function ForgotPassword() {
   const [email, setEmail] = useState("");
   const [error, setError] = useState({ field: "", message: "" });
+  const [loading, setLoading] = useState(false)
 
   const navigate = useNavigate()
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const email = event.target.value
     setEmail(email);
-
-    if(email.trim() == "" || !emailRegex.test(email.trim())){
-      setError({field : "email", message : "Enter a valid Email"})
-    }else{
-      setError({field : "", message : ""})
-    }
-  };
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault(); 
+
     if (!email) {
       setError({ field: "email", message: "Email is required" });
       return;
     }
-    try {
-      const response = await forgetPassword(email);
-      console.log("Forget Password Response > ", response);
 
+    if(!emailRegex.test(email.trim())){
+      setError({field : "email", message : "Enter a valid Email"})
+    }else{
+      setError({field : "", message : ""})
+    }
+
+    try {
+      setLoading(true);
+      const response = await forgetPassword(email);
+      if(!response.success){
+        toast.error("Unable to send reset link")
+      }
       if(response?.success){
+        toast.success("Reset link sent! Please check your email.")
         localStorage.setItem("email",email)
         localStorage.setItem("apiType","forgot-Password")
         navigate("/otp")
       }
     } catch (err : any) {
       console.error(err);
-      setError({
-        field: "email",
-        message: err?.response?.data?.error || "Something went wrong",
-      });
+      setError({field: "email", message: err?.response?.data?.error || "Something went wrong" });
     }
   };
 
@@ -65,7 +69,7 @@ function ForgotPassword() {
           <button
             type="submit"
             className="w-full bg-black hover:bg-gray-800 text-white font-semibold py-2 rounded-md transition-colors">
-            Send code
+            {loading ? "Sending.." : "Send Code"}
           </button>
         </form>
       </div>

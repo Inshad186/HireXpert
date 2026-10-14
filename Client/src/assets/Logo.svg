@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+  <!-- Rounded Indigo Background Badge -->
+  <rect width="100" height="100" rx="28" fill="#4F46E5" />
+  
+  <!-- Bold White 'H' Character -->
+  <path 
+    d="M30 25v50h12V56h16v19h12V25H58v19H42V25H30z" 
+    fill="#FFFFFF" 
+  />
+</svg>

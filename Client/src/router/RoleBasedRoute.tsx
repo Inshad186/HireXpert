@@ -1,4 +1,3 @@
-// src/routes/RoleBasedRoute.tsx
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
 import { Navigate } from "react-router-dom";
@@ -12,7 +11,7 @@ interface RoleBasedRouteProps {
 export const RoleBasedRoute = ({ allowedRoles, children }: RoleBasedRouteProps) => {
   const user = useSelector((state: RootState) => state.user);
 
-  if (!user?.accessToken) {
+  if (!sessionStorage.getItem("accessToken")) {
     return <Navigate to="/login" />;
   }
 

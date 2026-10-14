@@ -7,14 +7,12 @@ import jwt from 'jsonwebtoken';
 export async function verifyTokenMiddleware(req: Request, res: Response, next: NextFunction):Promise<void>{
     try {
       const authHeader = req.headers.authorization;
-
       if (!authHeader || !authHeader.startsWith("Bearer")) {
         res.status(HttpStatus.UNAUTHORIZED).json({ error: HttpResponse.NO_TOKEN });
         return
       }
 
       const token = authHeader.split(" ")[1];
-      console.log("token ??? >>>> ", token)
       if (!token) {
         res.status(HttpStatus.UNAUTHORIZED).json({ error: HttpResponse.NO_TOKEN });
         return
@@ -25,7 +23,6 @@ export async function verifyTokenMiddleware(req: Request, res: Response, next: N
       id: payload.userId,
       role: payload.role,
     };
-      console.log("PAYLOAD >>>>>>>>> : ",payload)
 
       req.headers["x-user-payload"] = JSON.stringify(payload);
       next();

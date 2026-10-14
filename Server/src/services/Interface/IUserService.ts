@@ -1,4 +1,6 @@
 import { UserType, FileType, GoogleAuthUserType } from "@/types/Type";
+import { ClientProfileType } from "@/types/Type";
+import { FreelancerProfileType } from "@/types/Type";
 
 export interface IUserService {
   signup(user: UserType): Promise<string>;
@@ -6,7 +8,7 @@ export interface IUserService {
   googleAuth(user:GoogleAuthUserType) : Promise<{accessToken: string, refreshToken: string, user:UserType}>;
   verifyOtp(otp: string, email: string, apiType: string) : Promise<{accessToken?:string, refreshToken?:string, user: UserType}>;
   assignRole(role:string, email:string) : Promise<{userRole:string}>
-  updateProfile(id: string, profileImage: FileType | undefined): Promise<{user: UserType}>;
+  updateProfileImage(id: string, profileImage: FileType | undefined): Promise<{user: UserType}>;
   updateUserName(userId: string, name: string) : Promise<{newName:string}>;
   getFreelancer() : Promise<{name:string, email:string}[]>;
   refreshToken(token:string) : Promise<string>;
@@ -14,5 +16,7 @@ export interface IUserService {
   resendOtp(email: string) : Promise<void>;
   resetPassword(email: string, password: string) : Promise<{user:UserType}>
   updateUserDetails(userId:string, userData:Partial<UserType>) : Promise<{userDetails:UserType}>
+  getClientFullProfile(userId:string) : Promise<ClientProfileType>
+  getFreelancerFullProfile(userId:string) : Promise<FreelancerProfileType>
   forgetPassword(email:string) : Promise<{user:UserType}>
 }
