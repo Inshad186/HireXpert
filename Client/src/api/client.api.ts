@@ -1,5 +1,6 @@
 import Api from "@/services/axios";
 import { clientEndpointUrl } from "@/constants/endpointUrl";
+import { Filters } from "@/types/user.type";
 
 export const updateClientProfile = async(data: any) => {
     try {
@@ -12,9 +13,15 @@ export const updateClientProfile = async(data: any) => {
     }
 }
 
-export const getProjects = async() => {
+export const getProjects = async(filters: Partial<Filters> = {}) => {
     try {
-        const {data} = await Api.get(clientEndpointUrl.GET_GIGS)
+        const params: Record<string, string> = {};
+        if (filters.search) params.search = filters.search;
+        if (filters.category) params.category = filters.category;
+        if (filters.minPrice) params.minPrice = filters.minPrice;
+        if (filters.maxPrice) params.maxPrice = filters.maxPrice;
+        if (filters.minRating) params.minRating = filters.minRating;
+        const {data} = await Api.get(clientEndpointUrl.GET_GIGS, {params})
         return { success: true, data}
     } catch (error) {
         const err = error as any
@@ -45,9 +52,9 @@ export const getFreelancerReviews = async(projectId: string) => {
     }
 }
 
-export const createPaymentIntent = async(gigId: string, freelancerId: string, price: number) => {
+export const createPaymentIntent = async(gigId: string, plan: string) => {
     try {
-        const {data} = await Api.post(clientEndpointUrl.CREATE_PAYMENT_INTENT, {gigId, freelancerId, price})
+        const {data} = await Api.post(clientEndpointUrl.CREATE_PAYMENT_INTENT, {gigId, plan})
         return {success: true, data}
     } catch (error) {
         const err = error as any
@@ -56,9 +63,9 @@ export const createPaymentIntent = async(gigId: string, freelancerId: string, pr
     }
 }
 
-export const createOrder = async(freelancerId:string, gigId:string, requirements:string, selectedPlan:string, paymentIntentId: string, price: number) => {
+export const createOrder = async( gigId:string, requirements:string, selectedPlan:string, paymentIntentId: string ) => {
     try {
-        const {data} = await Api.post(clientEndpointUrl.CREATE_ORDER, {freelancerId, gigId, requirements, selectedPlan, paymentIntentId, price})
+        const {data} = await Api.post(clientEndpointUrl.CREATE_ORDER, {gigId, requirements, selectedPlan, paymentIntentId })
         return {success: true, data}
     } catch (error) {
         const err = error as any
@@ -89,9 +96,9 @@ export const accept_Delivery = async(orderId: string, feedback: string, rating: 
     }
 }
 
-export const request_Revision = async(orderId: string, revisionReason: string, revisionCount: number) => {
+export const request_Revision = async(orderId: string, revisionReason: string ) => {
     try {
-        const { data } = await Api.patch(`${clientEndpointUrl.REQUEST_REVISION}/${orderId}`, {revisionReason, revisionCount})
+        const { data } = await Api.patch(`${clientEndpointUrl.REQUEST_REVISION}/${orderId}`, {revisionReason})
         return { success: true, data}
     } catch (error) {
         const err = error as any

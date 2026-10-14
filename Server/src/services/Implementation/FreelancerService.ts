@@ -1,6 +1,7 @@
 import { FileType, FreelancerProfileType, GigType, OrderType } from "@/types/Type";
 import { IFreelancerService } from "../Interface/IFreelancerService";
 import { IFreelancerRepository } from "@/repositories/Interface/IFreelancerRepository";
+import { INotificationRepository } from "@/repositories/Interface/INotificationRepository";
 import { HttpStatus } from "@/constants/status.constant";
 import { HttpResponse } from "@/constants/response.constant";
 import { generateHttpError } from "@/utils/http-error.util";
@@ -15,58 +16,77 @@ import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 import { stripe } from "@/config/stripe.config";
 import { env } from "@/config/env.config";
 
+const PROFILE_FIELDS = [
+  "profession", "company", "qualification", "bio", "work_experience",
+  "proficient_languages", "profileSkills", "working_days", "active_hours", "portfolio",
+] as const;
+
 export class FreelancerService implements IFreelancerService {
   constructor(
     private freelanceRepository: IFreelancerRepository,
     private gigRepository: IGigRepository,
     private OrderRepository: IOrderRepository,
-    private userRepository: IUserRepository
+    private userRepository: IUserRepository,
+    private notificationRepository: INotificationRepository
   ) {}
 
   async updateProfile( userId: string, userData: FreelancerProfileType ): Promise<{ userDetails: FreelancerProfileType }> {
     try {
-      const user = await this.freelanceRepository.findById(userId)
-      if (!user) {
-        throw generateHttpError( HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND );
+      const profile = await this.freelanceRepository.findById(userId);
+      if (!profile) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
       }
-      Object.assign(user, userData);
-      await this.freelanceRepository.findByIdAndUpdate(userId, user);
-      return { userDetails: user };
+
+      const updates: Record<string, unknown> = {};
+      for (const key of PROFILE_FIELDS) {
+        if (userData[key] !== undefined) updates[key] = userData[key];
+      }
+      Object.assign(profile, updates);
+      const isProfileComplete = Boolean(
+        profile.profession && profile.bio && profile.profileSkills?.length
+      );
+      profile.isProfileComplete = isProfileComplete;
+
+      await this.freelanceRepository.findByIdAndUpdate(userId, {...updates, isProfileComplete });
+
+      return { userDetails: profile };
     } catch (error) {
       console.error(error);
       throw error;
     }
   }
 
-async createGig(gigData: any, gallery: FileType[]): Promise<string> {
-  try {
-    if (!gallery || gallery.length === 0) {
-      throw generateHttpError(HttpStatus.BAD_REQUEST, "Service images are required");
+  async createGig(gigData: any, gallery: FileType[]): Promise<string> {
+    try {
+      const freelancer = await this.freelanceRepository.findById(gigData.freelancer);
+      
+      if (!freelancer?.isProfileComplete) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Please complete your profile first");
+      }
+      if (!gallery || gallery.length === 0) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Service images are required");
+      }
+
+      const imageURLs = await Promise.all(
+        gallery.map((file) => handleProfileImageUpload(file.buffer, "service_images"))
+      );
+
+      const dto = Object.assign(new CreateGigDTO(), {...gigData, gallery: imageURLs, });
+
+      const mappedEntity = mapper.map(dto, CreateGigDTO, GigEntity);
+
+      const createdGig = await this.gigRepository.create(mappedEntity);
+      
+      if (!createdGig?.id) {
+        throw new Error("Failed to create gig");
+      }
+
+      return createdGig?.id;
+    } catch (error) {
+      console.error(error);
+      throw error
     }
-
-    const imageURLs = await Promise.all(
-      gallery.map((file) => handleProfileImageUpload(file.buffer, "service_images"))
-    );
-
-    const dto = Object.assign(new CreateGigDTO(), {...gigData, gallery: imageURLs, });
-    console.log("DTO : ",dto)
-
-    const mappedEntity = mapper.map(dto, CreateGigDTO, GigEntity);
-    console.log("Mapped Entity : ",mappedEntity)
-
-    const createdGig = await this.gigRepository.create(mappedEntity);
-    
-    if (!createdGig?.id) {
-      throw new Error("Failed to create gig");
-    }
-    await this.freelanceRepository.findByIdAndUpdate( gigData.freelancer, {isSeller: true})
-
-    return createdGig?.id;
-  } catch (error) {
-    console.error(error);
-    throw error
   }
-}
 
   async getGigList(freelancerId: string): Promise<GigType[]> {
     try {
@@ -116,71 +136,147 @@ async createGig(gigData: any, gallery: FileType[]): Promise<string> {
     }
   }
 
-  async acceptOrder(id: string): Promise<OrderType | null> {
+  async acceptOrder(orderId: string, freelancerId: string): Promise<OrderType | null> {
     try {
-      const order = await this.OrderRepository.findById(id)
-      if(!order){
-        throw new Error("Failed to get order")
+      const order = await this.OrderRepository.findById(orderId);
+
+      if (!order) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Order not found");
       }
-      if(order.status !== OrderStatus.PENDING){
-        throw new Error("Failed")
+      if (order.freelancer.toString() !== freelancerId) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This order does not belong to you");
       }
-      return await this.OrderRepository.findByIdAndUpdate(id, {status: OrderStatus.ACCEPTED })
+      if (order.status !== OrderStatus.PENDING) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This order cannot be accepted");
+      }
+
+      // The money can be released later only if a payout account exists
+      const stripeStatus = await this.getStripeStatus(freelancerId);
+      if (stripeStatus.status !== "connected") {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Please connect your payout account before accepting orders");
+      }
+
+      const updated = await this.OrderRepository.updateStatus(
+        orderId,
+        OrderStatus.PENDING,
+        OrderStatus.ACCEPTED,
+        "freelancer",
+        { acceptedAt: new Date() }
+      );
+      if (!updated) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This order was already updated");
+      }
+      await this.notificationRepository.markOrderNotificationsRead(orderId, freelancerId);
+      return updated;
     } catch (error) {
-      console.error(error)
-      throw new Error("Error in accept Order")
+      console.error(error);
+      throw error;
     }
   }
 
-  async rejectOrder(orderId: string, reason: string): Promise<void> {
+  async rejectOrder(orderId: string, freelancerId: string, reason: string): Promise<void> {
     try {
-      await this.OrderRepository.findByIdAndUpdate(orderId,{cancellationReason: reason, status: OrderStatus.CANCELLED})
+      const order = await this.OrderRepository.findById(orderId);
+      if (!order) throw generateHttpError(HttpStatus.BAD_REQUEST, "Order not found");
+      if (order.freelancer.toString() !== freelancerId) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This order does not belong to you");
+      }
+      if (order.status !== OrderStatus.PENDING) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This order cannot be rejected");
+      }
+      if (!reason?.trim()) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Please give a reason");
+      }
+
+      // Refund first. If this fails, the order stays PENDING and nothing is lost.
+      const paymentIntentId = order.paymentDetails?.stripePaymentIntentId;
+      if (!paymentIntentId) throw generateHttpError(HttpStatus.BAD_REQUEST, "No payment found for this order");
+
+      await stripe.refunds.create(
+        { payment_intent: paymentIntentId },
+        { idempotencyKey: `refund_${orderId}` } // a retry cannot refund twice
+      );
+
+      await this.OrderRepository.updateOrder(orderId, {
+        $set: {
+          status: OrderStatus.REJECTED,
+          cancellationReason: reason.trim(),
+          cancelledAt: new Date(),
+          cancelledBy: "freelancer",
+          "escrowDetails.escrowStatus": "REFUNDED",
+          "escrowDetails.releasedAt": new Date(),
+          "escrowDetails.releaseReason": "Rejected by freelancer",
+        },
+        $push: {
+          statusHistory: { status: OrderStatus.REJECTED, timestamp: new Date(), changedBy: "freelancer", reason: reason.trim() },
+        },
+      });
+      await this.notificationRepository.markOrderNotificationsRead(orderId, freelancerId);
     } catch (error) {
-      console.error(error)
-      throw error
+      console.error(error);
+      throw error;
     }
   }
 
-  async inprogressOrder(orderId: string): Promise<OrderType | null> {
+  async inprogressOrder(orderId: string, freelancerId: string): Promise<OrderType | null> {
     try {
-      const order = await this.OrderRepository.findById(orderId)
-      if(!order){
-        throw new Error("Failed to get Order")
+      const order = await this.OrderRepository.findById(orderId);
+      if (!order) throw generateHttpError(HttpStatus.BAD_REQUEST, "Order not found");
+      if (order.freelancer.toString() !== freelancerId) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This order does not belong to you");
       }
-      if(order.status !== OrderStatus.ACCEPTED){
-        throw new Error("Failed")
+      if (order.status !== OrderStatus.ACCEPTED) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This order cannot be started");
       }
-      return await this.OrderRepository.findByIdAndUpdate(orderId, {status: OrderStatus.IN_PROGRESS})
+
+      const updated = await this.OrderRepository.updateOrder(orderId, {
+        $set: { status: OrderStatus.IN_PROGRESS, startedAt: new Date() },
+        $push: {
+          statusHistory: { status: OrderStatus.IN_PROGRESS, timestamp: new Date(), changedBy: "freelancer" },
+        },
+      });
+      await this.notificationRepository.markOrderNotificationsRead(orderId, freelancerId);
+      return updated;
     } catch (error) {
-      console.error(error)
-      throw new Error("Error in inProgress Order")
+      console.error(error);
+      throw error;
     }
   }
 
-  async deliveryOrder(orderId: string, freelancerId : string, deliveryFiles: FileType[], deliveryNotes: string): Promise<OrderType[]> {
+  async deliveryOrder( orderId: string, freelancerId: string, deliveryFiles: FileType[], deliveryNotes: string ): Promise<OrderType | null> {
     try {
-      const order = await this.OrderRepository.findById(orderId)
-      if(!order){
-        throw new Error("Failed to get Order")
+      const order = await this.OrderRepository.findById(orderId);
+      if (!order) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Order not found");
       }
-      if(order.freelancer.toString() !== freelancerId){
-        throw new Error("Failed")
+      if (order.freelancer.toString() !== freelancerId) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This order does not belong to you");
       }
-      if(order.status !== "IN_PROGRESS"){
-        throw new Error("Failed")
+      if (order.status !== "IN_PROGRESS" && order.status !== "REVISION") {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This order is not ready for delivery");
+      }
+      if (!deliveryFiles || deliveryFiles.length === 0) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Please upload at least one file");
+      }
+      if (!deliveryNotes?.trim()) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Please add delivery notes");
       }
 
-      let deliveryFileURLs: string[] = []
-      if(deliveryFiles && deliveryFiles.length > 0){
-        deliveryFileURLs = await Promise.all(
-          deliveryFiles.map((file) => handleProfileImageUpload(file.buffer, "delivery_files"))
-        )
-      }
+      const deliveryFileURLs = await Promise.all(
+        deliveryFiles.map((file) => handleProfileImageUpload(file.buffer, "delivery_files"))
+      );
+
+      // The client now has 5 days to review. After that, the money is released automatically.
+      const holdUntilDate = new Date(Date.now() + 5 * 24 * 60 * 60 * 1000);
+
       const updatedOrder = await this.OrderRepository.updateOrder(orderId, {
-        status: "DELIVERED",
-        deliveryFiles: deliveryFileURLs,
-        deliveryNotes: deliveryNotes,
-        deliveredAt: new Date(),
+        $set: {
+          status: "DELIVERED",
+          deliveryFiles: deliveryFileURLs,
+          deliveryNotes: deliveryNotes.trim(),
+          deliveredAt: new Date(),
+          "escrowDetails.holdUntilDate": holdUntilDate,
+        },
         $push: {
           statusHistory: {
             status: "DELIVERED",
@@ -190,16 +286,28 @@ async createGig(gigData: any, gallery: FileType[]): Promise<string> {
           },
         },
       });
-      return updatedOrder
+
+      // Step 2: clear the freelancer's old notifications for this order
+      await this.notificationRepository.markOrderNotificationsRead(orderId, freelancerId);
+
+      await this.notificationRepository.create({
+      client: order.client,
+      orderId: order._id,
+      gigTitle: updatedOrder?.gig?.title,
+      type: "work_delivered",
+      message: "Your work has been delivered. Please review it.",
+      isRead: false,
+    });
+
+      return updatedOrder;
     } catch (error) {
-      console.error(error)
-      throw new Error("Error in inProgress Order")
+      console.error(error);
+      throw error; // keep the original message and status
     }
   }
 
   async startStripeOnboarding(freelancerId: string): Promise<{ onboardingUrl: string; accountId: string; }> {
     try {
-      console.log("💳💳💳")
       const user = await this.userRepository.findById(freelancerId)
 
       if(!user?.email) throw new Error("Email not found")
@@ -252,6 +360,14 @@ async createGig(gigData: any, gallery: FileType[]): Promise<string> {
       console.error(error);
       throw error;
     }
+  }
+
+  async getEarnings(freelancerId: string) {
+    const [summary, recent] = await Promise.all([
+      this.freelanceRepository.getEarnings(freelancerId),
+      this.freelanceRepository.getRecentEarnings(freelancerId),
+    ]);
+    return { ...summary, recent };
   }
 
 }

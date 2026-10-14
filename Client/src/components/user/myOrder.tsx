@@ -178,7 +178,7 @@ function MyOrders() {
                   <p className="text-gray-600 text-sm">Order ID: {order._id}</p>
                 </div>
                 <div className="text-right ml-4">
-                  <p className="text-2xl font-bold text-green-600">₹{order.gig?.pricing?.basic?.price}</p>
+                  <p className="text-2xl font-bold text-green-600">${order.gig?.pricing?.basic?.price}</p>
                   <p className="text-sm text-gray-600">Freelancer: {order.freelancer?.name}</p>
                 </div>
               </div>
@@ -244,7 +244,7 @@ function MyOrders() {
                     </div>
                     <div>
                         <p className="text-gray-600 text-sm">Amount</p>
-                        <p className="text-xl font-bold text-green-600">₹{selectedOrder.gig?.pricing.basic?.price}</p>
+                        <p className="text-xl font-bold text-green-600">${selectedOrder.gig?.pricing.basic?.price}</p>
                     </div>
                     <div>
                         <p className="text-gray-600 text-sm">Status</p>

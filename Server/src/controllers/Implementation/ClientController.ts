@@ -3,6 +3,7 @@ import { HttpStatus } from "@/constants/status.constant";
 import { HttpResponse } from "@/constants/response.constant";
 import { IClientController } from "../Interface/IClientController";
 import { IClientService } from "@/services/Interface/IClientService";
+import { GigFilters } from "@/types/Type";
 
 export class ClientController implements IClientController {
     constructor(private clientService : IClientService){}
@@ -20,12 +21,29 @@ export class ClientController implements IClientController {
         }
     }
 
+
     async getGigs(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const gigs = await this.clientService.getGigs()
-            res.status(HttpStatus.OK).json({success: true, gigs})
+            const toNumber = (v: unknown): number | undefined => {
+                if (v === undefined || v === "") return undefined;
+                const n = Number(v);
+                return Number.isNaN(n) ? undefined : n;
+            };
+            const { search, category, skills, minPrice, maxPrice, minRating } = req.query;
+
+            const filters: GigFilters = {
+                search: (search as string | undefined)?.trim() || undefined,
+                category: (category as string | undefined) || undefined,
+                skills: skills ? (skills as string).split(",") : undefined,
+                minPrice: toNumber(minPrice),
+                maxPrice: toNumber(maxPrice),
+                minRating: toNumber(minRating),
+            };
+
+            const gigs = await this.clientService.getGigs(filters);
+            res.status(HttpStatus.OK).json({ success: true, gigs });
         } catch (error) {
-            next(error)
+            next(error);
         }
     }
 
@@ -54,13 +72,13 @@ export class ClientController implements IClientController {
 
     async createPaymentIntent(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const { gigId, freelancerId, price } = req.body;
+            const { gigId, plan } = req.body;
             const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
-            if(!gigId || !freelancerId || !price){
+            if(!gigId || !plan){
                 res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Missing required fields"})
                 return;
             }
-            const {clientSecret, paymentIntentId} = await this.clientService.createPaymentIntent(userId, freelancerId, gigId, price)
+            const {clientSecret, paymentIntentId} = await this.clientService.createPaymentIntent(userId, gigId, plan)
             res.status(HttpStatus.OK).json({success: true, clientSecret, paymentIntentId})
         } catch (error) {
             next()
@@ -69,8 +87,9 @@ export class ClientController implements IClientController {
 
     async createOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
-            const {freelancerId, gigId, requirements, selectedPlan:plan, paymentIntentId, price } = req.body
-            if(!gigId || !freelancerId || !requirements || !plan){
+            const {gigId, requirements, selectedPlan:plan, paymentIntentId } = req.body
+
+            if(!gigId || !requirements || !plan){
                 res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Missing required fields"})
                 return;
             }
@@ -79,7 +98,7 @@ export class ClientController implements IClientController {
                 res.status(HttpStatus.BAD_REQUEST).json({ success: false, message: "Invalid plan selected"})
             }
             const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
-            const order = await this.clientService.createOrder(userId, freelancerId, gigId, requirements, plan, paymentIntentId, price)
+            const order = await this.clientService.createOrder(userId, gigId, requirements, plan, paymentIntentId)
             res.status(HttpStatus.CREATED).json({ success: true, order})
         } catch (error) {
             next(error)
@@ -100,7 +119,8 @@ export class ClientController implements IClientController {
         try {
             const { orderId } = req.params;
             const {feedback, rating} = req.body
-            await this.clientService.acceptOrders(orderId, feedback, rating)
+            const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+            await this.clientService.acceptOrders(orderId, userId, feedback, rating)
             res.status(HttpStatus.OK).json({ success: true})
         } catch (error) {
             next()
@@ -110,11 +130,9 @@ export class ClientController implements IClientController {
     async requestRevision(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const { orderId } = req.params
-            const { revisionReason, revisionCount } = req.body
-            console.log("ORDER : ", orderId)
-            console.log("REQUEST REVISION : ", revisionReason)
-            console.log("REVISION COUNT : ", revisionCount)
-            await this.clientService.requestRivision(orderId, revisionReason, revisionCount)
+            const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+            const { revisionReason } = req.body
+            await this.clientService.requestRivision(orderId, userId, revisionReason)
             res.status(HttpStatus.OK).json({ success: true })
         } catch (error) {
             next();

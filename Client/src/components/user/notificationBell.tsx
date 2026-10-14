@@ -11,14 +11,13 @@ interface NotificationBellProps {
 }
 
 export function NotificationBell({ userId }: NotificationBellProps) {
-  const { notifications, loading, markasRead, unreadCount, deletenotification, clearAll } = useNotifications(userId);
+  const { notifications, loading, markasRead, unreadCount, deletenotification, clearAll, refetch } = useNotifications(userId);
   const { acceptOrders, actionLoading, startWork, submitDelivery  } = useOrderTracking(userId as string);
   const [isOpen, setIsOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [modalType, setModalType] = useState<"action" | "delivery" | null>(null)
 
   const handleNotificationClick = (notificationId: string, read: boolean, orderId?: string) => {
-    console.log("Notification clicked - ID:", notificationId, "Read:", read);
     
     if (!read) {
       markasRead(notificationId);
@@ -48,10 +47,8 @@ export function NotificationBell({ userId }: NotificationBellProps) {
   };
 
   const handleRejectOrder = async (orderId: string, reason: string) => {
-    // TODO: Create a rejectOrder function in your hook similar to acceptOrders
     try {
       const response = await rejectOrder(orderId, reason)
-      console.log("Rejection Response : ",response)
       if (response.success) {
         return { success: true, message: 'Order rejected successfully' };
       } else {
@@ -62,6 +59,12 @@ export function NotificationBell({ userId }: NotificationBellProps) {
       return { success: false, message: 'Failed to reject order' };
     }
   };
+
+  const closeModal = () => {
+    setSelectedOrder(null)
+    setModalType(null)
+    refetch();
+  }
 
   const statusColor = (type: string) => {
     switch(type){
@@ -169,10 +172,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         <OrderActionModal
         order={selectedOrder}
         isOpen={!!selectedOrder}
-        onClose={() => {
-          setSelectedOrder(null)
-          setModalType(null)
-        }}
+        onClose={closeModal}
         onAccept={acceptOrders}
         onReject={handleRejectOrder}
         isLoading={actionLoading === selectedOrder?._id}/>
@@ -182,10 +182,7 @@ export function NotificationBell({ userId }: NotificationBellProps) {
         <WorkDeliveryModal
         order={selectedOrder}
         isOpen={!!selectedOrder}
-        onClose={() => {
-          setSelectedOrder(null)
-          setModalType(null)
-        }}
+        onClose={closeModal}
         onStartWork={startWork}
         onSubmitDelivery={submitDelivery}
         isLoading={ actionLoading === selectedOrder?._id}/>

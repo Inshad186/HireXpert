@@ -130,7 +130,9 @@ export function SignupForm({ className, ...props }: React.ComponentPropsWithoutR
 
   return (
     <>
-        <h1 className="text-center font-bold text-3xl text-black mb-6">HireXpert</h1>
+        <h1 className="text-center font-bold text-3xl text-black mb-6">
+          Hire<span className="text-blue-500">Xpert</span>
+          </h1>
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div>
             <label className="block mb-1 text-sm font-medium text-gray-700">Name</label>

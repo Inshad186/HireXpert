@@ -3,7 +3,7 @@ import { userRoutes } from "@/constants/routeUrl";
 
 function RequirementComp() {
 
-    const navigate = useNavigate()
+  const navigate = useNavigate()
 
   return (
     <div className="bg-white text-white min-h-screen flex items-center justify-center px-4">

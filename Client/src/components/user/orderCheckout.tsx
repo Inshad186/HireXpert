@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { createPaymentIntent, getProjectDetails, createOrder } from "@/api/client.api";
 import { ProjectDetail } from "@/types/user.type";
@@ -60,7 +60,7 @@ function OrderCheckout() {
       setPaymentProcessing(true);
       setError(null);
 
-      const res = await createPaymentIntent( projectId as string, project?.freelancer?.toString() as string, planPrice as number);
+      const res = await createPaymentIntent( projectId as string, selectedPlan as string);
 
       if (res.success) {
         setClientSecret(res.data.clientSecret);
@@ -85,14 +85,7 @@ function OrderCheckout() {
       setPaymentIntentId(intentId);
 
       // Create order with payment confirmation
-      const res = await createOrder(
-        project?.freelancer?.toString() as string,
-        projectId as string,
-        requirements,
-        selectedPlan as string,
-        intentId,
-        planPrice as number
-      );
+      const res = await createOrder( projectId as string, requirements, selectedPlan as string, intentId );
 
       if (res.success) {
         toast.success("Order placed successfully!");

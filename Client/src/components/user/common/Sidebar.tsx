@@ -18,7 +18,7 @@ function Sidebar() {
     { name: "Dashboard", icon: <LayoutDashboard size={20} />, path: "/freelancer-dashboard" },
     { name: "My Gigs", icon: <Briefcase size={20} />, path: "/listed-gig" },
     { name: "Orders", icon: <ShoppingBag size={20} />, path: "/listed-order" },
-    { name: "Earnings", icon: <Wallet size={20} />, path: "/freelancer/earnings" },
+    { name: "Earnings", icon: <Wallet size={20} />, path: "/freelancer-earnings" },
     { name: "Profile", icon: <User size={20} />, path: "/complete-profile" },
   ];
 

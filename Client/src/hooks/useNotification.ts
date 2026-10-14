@@ -10,20 +10,18 @@ export const useNotifications = (userId: string | undefined) => {
   const [unreadCount, setUnreadCount] = useState(0)
 
   // Fetch existing notifications from database
-  const fetchNotifications = useCallback(async () => {
+  const fetchNotifications = useCallback(async (silent = false) => {
     try {
-      setLoading(true);
+      if (!silent) setLoading(true);
       const res = await getNotification();
-      console.log("Notification Hook:", res);
       if (res.success) {
         setNotifications(res.data.notifications);
-        const unread = res.data.notifications.filter((x: NotificationType) => !x.isRead).length
-        setUnreadCount(unread)
+        setUnreadCount(res.data.notifications.filter((x: NotificationType) => !x.isRead).length);
       }
     } catch (error) {
       console.error("Failed to fetch notifications:", error);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   }, []);
 
@@ -154,6 +152,6 @@ export const useNotifications = (userId: string | undefined) => {
     markasRead,
     deletenotification,
     clearAll,
-    refetch: fetchNotifications,
+    refetch: () => fetchNotifications(true)
   };
 };

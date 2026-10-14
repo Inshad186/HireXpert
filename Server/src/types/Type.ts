@@ -47,7 +47,8 @@ export interface FreelancerProfileType extends Document {
   rating: {
     average: number,
     count: number
-  }
+  },
+  isProfileComplete?: boolean;
   stripeConnectedAccountId?: string;
   stripeOnboardingComplete?: boolean;
   isSeller: boolean;
@@ -96,16 +97,16 @@ export interface NotificationType {
   id?: Types.ObjectId;
   orderId: Types.ObjectId;
   clientName: string;
+  client?: Types.ObjectId;
   freelancer: Types.ObjectId;
   gigTitle: string;
-  type: "new_order" | "order_completed" | "message" | "review"
+  type: "new_order" | "order_completed" | "message" | "review" | "work_delivered" | "revision_requested";
   message: string;
   plan: string;
   isRead: boolean;
   createdAt?: Date;
   updatedAt?: Date;
 }
-
 
 export enum OrderStatus {
   PAYMENT_PENDING = "PAYMENT_PENDING",
@@ -116,14 +117,17 @@ export enum OrderStatus {
   DELIVERED = "DELIVERED",
   COMPLETED = "COMPLETED",
   REVISION = "REVISION",
+  DISPUTED = "DISPUTED",
   REJECTED = "REJECTED",
   CANCELLED = "CANCELLED",
 }
 
+type Actor = "freelancer" | "client" | "system" | "admin";
+
 interface StatusHistory {
   status: OrderStatus
   timestamp: Date;
-  changedBy: 'freelancer' | 'client';
+  changedBy: Actor
   reason?: string; // for revisions
 }
 
@@ -138,6 +142,8 @@ interface PaymentDetails {
   stripePlatformChargeId?: string;
   stripeTransferId?: string;
   amount?: number;
+  platformFee?: number;
+  freelancerAmount?: number;
   currency?: string;
   status?: "PENDING" | "SUCCEEDED" | "PROCESSING" | "FAILED";
   paidAt?: Date;
@@ -158,10 +164,11 @@ export interface OrderType {
   gig: Types.ObjectId;
   price?: number;
   deliveryTime?: number;
+  deliveryNotes?: string;
   plan: string
   requirements: string;
   status: OrderStatus
-  revisionsRequested?: number;
+  revisionsRequested: number;
   revisionReason?: string;
   statusHistory?: StatusHistory[];
   paymentDetails?: PaymentDetails;
@@ -198,4 +205,13 @@ export interface ReviewType {
   order: Types.ObjectId,
   rating: number,
   feedback: string
+}
+
+export interface GigFilters {
+  search?: string;
+  category?: string;
+  skills?: string[];
+  minPrice?: number;
+  maxPrice?: number;
+  minRating?: number;
 }

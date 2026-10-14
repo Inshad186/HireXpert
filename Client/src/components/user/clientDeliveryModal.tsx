@@ -7,7 +7,7 @@ interface ClientDeliveryModalProps {
   isOpen: boolean;
   onClose: () => void;
   onAccept: (orderId: string, feedback: string, rating: number) => Promise<{ success: boolean; message: string }>;
-  onRequestRevision: (orderId: string, revisionReason: string, revisionCount: number ) => Promise<{ success: boolean; message: string }>
+  onRequestRevision: (orderId: string, revisionReason: string ) => Promise<{ success: boolean; message: string }>
   isLoading: boolean;
 }
 
@@ -16,68 +16,61 @@ export function ClientDeliveryModal({ order, isOpen, onClose, onAccept, onReques
   const [rating, setRating] = useState<number>(0);
   const [feedback, setFeedback] = useState('');
   const [revisionReason, setRevisionReason] = useState('')
-  const [revisionCount, setRevisionCount] = useState<number>(0)
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
   if (!isOpen || !order) return null;
 
+  const MAX_REVISIONS = 2;
+  const isDelivered = order.status === 'DELIVERED';
+  const revisionsUsed = order.revisionsRequested ?? 0;
+  const revisionsLeft = Math.max(0, MAX_REVISIONS - revisionsUsed);
+  const canRequestRevision = isDelivered && revisionsLeft > 0;
+
+  const resetAndClose = () => {
+    setStep('view');
+    setRating(0);
+    setFeedback('');
+    setRevisionReason('');
+    setError(null);
+    setSuccess(null);
+    onClose();
+  };
+
+  const STATUS_STYLES: Record<string, string> = {
+    DELIVERED: 'bg-green-100 text-green-800',
+    REVISION: 'bg-orange-100 text-orange-800',
+    COMPLETED: 'bg-blue-100 text-blue-800',
+  };
+
   const handleAcceptDelivery = async () => {
-    if (rating === 0) {
-      setError('Please provide a rating');
-      return;
-    }
-    if (!feedback.trim()) {
-      setError('Please provide feedback');
-      return;
-    }
+    if (rating === 0) return setError('Please provide a rating');
+    if (!feedback.trim()) return setError('Please provide feedback');
+
     setError(null);
     setSuccess(null);
 
     const result = await onAccept(order?._id as string, feedback, rating);
-    console.log("Result from Cleint Delivery Modal🦑🦑 :",result)
     if (result.success) {
       setSuccess('Order completed! Thank you for your feedback.');
-      setTimeout(() => {
-        onClose();
-        setSuccess(null);
-        setRating(0);
-        setFeedback('');
-        setStep('view');
-      }, 2000);
+      setTimeout(resetAndClose, 2000);
     } else {
       setError(result.message);
     }
   };
-
-  const currentRequestRevision = order.revisionsRequested || 0
   
   const handleRequestRevision = async () => {
-    if (!revisionReason.trim()) {
-      setError('Please provide a reason for revision');
-      return;
-    }
+  if (!revisionReason.trim()) return setError("Please provide a reason for revision");
+  if (!canRequestRevision) return setError(`Maximum revisions (${MAX_REVISIONS}) reached`);
 
-    if(currentRequestRevision >= 2){
-      setError('Maximum revisions (2) reached')
-      return;
-    }
-
-    const newRevisionCount = currentRequestRevision + 1
     setError(null);
     setSuccess(null);
 
-    const result = await onRequestRevision(order._id as string, revisionReason, newRevisionCount);
+    const result = await onRequestRevision(order._id as string, revisionReason);
 
     if (result.success) {
       setSuccess('Revision requested! Freelancer will re-submit the work.');
-      setTimeout(() => {
-        onClose();
-        setRevisionCount(newRevisionCount)
-        setSuccess(null);
-        setRevisionReason('');
-        setStep('view');
-      }, 2000);
+      setTimeout(resetAndClose, 2000);
     } else {
       setError(result.message);
     }
@@ -125,7 +118,9 @@ export function ClientDeliveryModal({ order, isOpen, onClose, onAccept, onReques
             </div>
             <div>
               <p className="text-xs text-gray-500 font-semibold uppercase">Amount Paid</p>
-              <p className="text-gray-800 font-medium">₹{order.gig?.pricing?.basic?.price}</p>
+              <p className="text-gray-800 font-medium">
+                {order.paymentDetails ? `$${order.paymentDetails.amount.toFixed(2)}` : '—'}
+              </p>
             </div>
             <div>
               <p className="text-xs text-gray-500 font-semibold uppercase">Plan</p>
@@ -133,8 +128,8 @@ export function ClientDeliveryModal({ order, isOpen, onClose, onAccept, onReques
             </div>
             <div>
               <p className="text-xs text-gray-500 font-semibold uppercase">Status</p>
-              <span className="inline-block px-3 py-1 bg-green-100 text-green-800 text-xs font-semibold rounded-full">
-                DELIVERED
+              <span className={`inline-block px-3 py-1 text-xs font-semibold rounded-full ${STATUS_STYLES[order.status ?? ""] ?? 'bg-gray-100 text-gray-800'}`}>
+                {order.status}
               </span>
             </div>
           </div>
@@ -148,21 +143,20 @@ export function ClientDeliveryModal({ order, isOpen, onClose, onAccept, onReques
               <div>
                 <h3 className="text-lg font-semibold text-gray-800 mb-3">Delivery Files</h3>
                 <div className="bg-gray-50 rounded-lg p-4 space-y-2">
-                  {order.deliveryFiles.map((file, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200"
-                    >
-                      <span className="text-sm text-gray-700">{file}</span>
-                      <a
-                        href={file}
-                        download
-                        className="text-blue-600 hover:text-blue-700 transition-colors"
-                      >
-                        <Download size={18} />
-                      </a>
-                    </div>
-                  ))}
+                  {order.deliveryFiles.map((file, index) => {
+                    const isImage = /\.(png|jpe?g|gif|webp)$/i.test(file);
+                    return (
+                      <div key={file} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200 gap-3">
+                        <div className="flex items-center gap-3 min-w-0">
+                          {isImage && <img src={file} alt={`Delivery ${index + 1}`} className="w-12 h-12 object-cover rounded" />}
+                          <span className="text-sm text-gray-700 truncate">File {index + 1}</span>
+                        </div>
+                        <a href={file} target="_blank" rel="noreferrer" className="text-blue-600 hover:text-blue-700" aria-label={`Open file ${index + 1}`}>
+                          <Download size={18} />
+                        </a>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
             )}
@@ -177,33 +171,53 @@ export function ClientDeliveryModal({ order, isOpen, onClose, onAccept, onReques
               </div>
             )}
 
-            {/* Revision Count Info */}
-            <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-              <p className="text-sm text-blue-900">
-                ℹ️ You can request up to <strong>2 revisions</strong>
-                {currentRequestRevision > 0 && (
-                  <span className='ml-1'>({currentRequestRevision} used)</span>
-                )}
+            {/* Escrow information */}
+            <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+              <p className="text-sm text-gray-700">
+                🔒 Your payment is held safely. It is released to the freelancer only when you accept the delivery.
               </p>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex gap-3">
-              <button
-                onClick={() => setStep('revision')}
-                disabled={isLoading}
-                className="flex-1 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
-              >
-                Request Revision
-              </button>
-              <button
-                onClick={() => setStep('accept')}
-                disabled={isLoading}
-                className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2">
-                <CheckCircle size={20} />
-                Accept Delivery
-              </button>
-            </div>
+            {isDelivered ? (
+              <>
+                <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                  <p className="text-sm text-blue-900">
+                    You can request up to <strong>{MAX_REVISIONS} revisions</strong>.{' '}
+                    {revisionsUsed} used, {revisionsLeft} left.
+                  </p>
+                </div>
+
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setStep('revision')}
+                    disabled={isLoading || !canRequestRevision}
+                    title={!canRequestRevision ? 'No revisions left' : undefined}
+                    className="flex-1 bg-yellow-600 hover:bg-yellow-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200"
+                  >
+                    Request Revision
+                  </button>
+                  <button
+                    onClick={() => setStep('accept')}
+                    disabled={isLoading}
+                    className="flex-1 bg-green-600 hover:bg-green-700 disabled:bg-gray-400 text-white font-semibold py-3 px-4 rounded-lg transition-all duration-200 flex items-center justify-center gap-2"
+                  >
+                    <CheckCircle size={20} />
+                    Accept Delivery
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+                <p className="text-sm text-orange-900">
+                  {order.status === 'REVISION' && order.revisionReason && (
+                    <div className="bg-gray-50 border border-gray-200 rounded-lg p-4">
+                      <p className="text-xs font-semibold text-gray-500 uppercase">Your revision request</p>
+                      <p className="text-sm text-gray-700 mt-1">{order.revisionReason}</p>
+                    </div>
+                  )}
+                </p>
+              </div>
+            )}
           </div>
         )}
 
@@ -311,7 +325,7 @@ export function ClientDeliveryModal({ order, isOpen, onClose, onAccept, onReques
 
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
               <p className="text-xs text-blue-900">
-                💡 <strong>Tip:</strong> The freelancer can submit up to 2 revisions. Be clear about your requirements.
+                💡 <strong>Tip:</strong> You can request up to {MAX_REVISIONS} revisions. Be clear about what you want changed.
               </p>
             </div>
 

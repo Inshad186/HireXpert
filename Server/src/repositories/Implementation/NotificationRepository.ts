@@ -16,6 +16,12 @@ export class NotificationRepository extends BaseRepository<NotificationType> imp
     async findNotify(freelancerId: string): Promise<NotificationType[]> {
         return await Notification.find({freelancer: freelancerId}).sort({ createdAt: -1 })
     }
+    
+    async markOrderNotificationsRead(orderId: string, freelancerId: string): Promise<void> {
+        await Notification.updateMany(
+            { orderId, freelancer: freelancerId, isRead: { $ne: true }},
+            { $set: { isRead: true } });
+    }
 
     async deleteNotify(notificationId: string): Promise<void> {
         await Notification.findByIdAndDelete(notificationId)

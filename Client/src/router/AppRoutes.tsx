@@ -26,6 +26,7 @@ import ListedGig from "@/pages/user/ListedGig";
 import FreelancerOnboardingPage from "@/pages/user/FreelancerOnboardingPage";
 import FreelancerDashboardPage from "@/pages/user/FreelancerDashboardPage";
 import ListedOrder from "@/pages/user/ListedOrder";
+import EarningsCards from "@/pages/user/EarningCards";
 
 
 //! Admin
@@ -56,6 +57,7 @@ export const router = createBrowserRouter([
   {path: "listed-order", element: <PrivateRoute><ListedOrder/></PrivateRoute>},
   {path: "freelancer-dashboard", element: <PrivateRoute><FreelancerDashboardPage/></PrivateRoute>},
   {path: "freelancer-onboarding", element: <PrivateRoute><FreelancerOnboardingPage/></PrivateRoute>},
+  {path: "freelancer-earnings", element: <PrivateRoute><EarningsCards/></PrivateRoute>},
 
   //! Main app
   {element: <AppLayout/>,

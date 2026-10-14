@@ -14,4 +14,5 @@ export interface IFreelancerController {
     deliveryOrder(req: Request, res: Response, next: NextFunction): Promise<void>
     startStripeOnboarding(req: Request, res: Response, next: NextFunction): Promise<void>
     getStripeStatus(req: Request, res: Response, next: NextFunction): Promise<void>
+    getEarnings(req: Request, res: Response, next: NextFunction): Promise<void>
 }

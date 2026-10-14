@@ -137,7 +137,7 @@ export function LoginForm({className, ...prop }: React.ComponentPropsWithoutRef<
   return (
     <>
       <h1 className="text-center font-bold text-3xl text-black mb-6">
-        HireXpert
+        Hire<span className="text-blue-600">Xpert</span>
       </h1>
       <form className="space-y-6" onSubmit={handleSubmit}>
         <div>

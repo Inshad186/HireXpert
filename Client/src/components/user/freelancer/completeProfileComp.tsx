@@ -6,7 +6,7 @@ import { getFreelancerFullProfile, changeProfileImg, getProfileImage } from "@/a
 import { updateFreelancerProfile } from "@/api/freelancer.api";
 import { getSkills } from "@/api/admin.api";
 import { setUser } from "@/redux/slices/userSlice";
-import { data, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import ProfileImageUploader from "../profile/ProfileImageUploader";
 import EditableName from "../profile/EditableName";
 import ProfileForm from "../profile/ProfileForm";
@@ -21,6 +21,7 @@ export default function CompleteFreelancerProfile() {
   const [form, setForm] = useState<any>({});
   const [profileImage, setProfileImage] = useState("");
   const [adminSkills, setAdminSkills] = useState<{ [category: string]: { _id: string; name: string }[] }>({});
+  const [wasComplete, setWasComplete] = useState(false);
 
   const fields = [
     { name: "profession", placeholder: "Profession" },
@@ -28,8 +29,8 @@ export default function CompleteFreelancerProfile() {
     { name: "qualification", placeholder: "Qualification" },
     { name: "bio", placeholder: "Bio" },
     { name: "work_experience", placeholder: "Work Experience" },
-    { name: "proficient_languages", placeholder: "Languages (comma-separated)" },
-    { name: "skills", type: "multiselect", placeholder: "Skills", options: adminSkills },
+    { name: "proficient_languages", placeholder: "Languages" },
+    { name: "profileSkills", type: "multiselect", placeholder: "Skills", options: adminSkills },
     { name: "working_days", placeholder: "Working Days" },
     { name: "active_hours", placeholder: "Active Hours" },
     { name: "portfolio", placeholder: "Portfolio URL" }
@@ -46,10 +47,10 @@ export default function CompleteFreelancerProfile() {
         const response = await getFreelancerFullProfile();
         if (response.success) {
           setForm(response.data.fullProfile);
+          setWasComplete(Boolean(response.data.fullProfile.isProfileComplete));
         }
 
         const imageRes = await changeProfileImg(new FormData());
-        console.log("Image Respond >>>>> : ",imageRes)
         if (imageRes.success) {
           setProfileImage(imageRes.data.user.profilePicture);
         }
@@ -84,9 +85,14 @@ export default function CompleteFreelancerProfile() {
   const handleSave = async () => {
     const response = await updateFreelancerProfile(form);
     if (response.success) {
-      toast.success("Updated Successfully")
+      toast.success("Updated Successfully");
       dispatch(setUser(response.data.userDetails));
-      navigate(userRoutes.CREATE_GIG); 
+
+      if (wasComplete) {
+        navigate(userRoutes.FREELANCER_DASH);
+      } else {
+        navigate(userRoutes.CREATE_GIG);
+      }
     } else {
       console.error("Failed to update profile", response);
     }

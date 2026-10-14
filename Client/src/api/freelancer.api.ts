@@ -161,3 +161,14 @@ export const getStripeStatus = async() => {
     }
 }
 
+export const getEarnings = async() => {
+    try {
+        const { data } = await Api.get(freelancerEndpointUrl.GET_EARNINGS);
+        return { success: true, data };
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error
+        return { success: false, error: message}  
+    }
+}
+

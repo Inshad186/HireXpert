@@ -5,4 +5,5 @@ export interface INotificationRepository extends IBaseRepository<NotificationTyp
     create(data: Partial<NotificationType>): Promise<NotificationType>;
     findNotify(freelancerId: string): Promise<NotificationType[]>
     deleteNotify(notificationId: string): Promise<void>
+    markOrderNotificationsRead(orderId: string, freelancerId: string): Promise<void>;
 }

@@ -22,11 +22,11 @@ export const useClientOrderAction = () => {
         }
     },[])
 
-    const requestRevision = useCallback(async(orderId: string, revisionReason: string, revisionCount: number) => {
+    const requestRevision = useCallback(async(orderId: string, revisionReason: string) => {
         setActionLoading(orderId)
 
         try {
-            const response = await request_Revision(orderId, revisionReason, revisionCount)
+            const response = await request_Revision(orderId, revisionReason)
             if(response.success){
                 return { success: true, message: "Order cancelled successfully!"}
             }else{

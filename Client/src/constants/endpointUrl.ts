@@ -45,7 +45,8 @@ export const freelancerEndpointUrl = {
   DELIVERY_ORDER : "/auth/freelancer/delivery-order",
   STRIPE_ONBOARDING : "/auth/freelancer/stripe-onboarding",
   STRIPE_STATUS : "/auth/freelancer/stripe-status",
-  TRACK_ORDERS : "/auth/freelancer/track-Orders"
+  TRACK_ORDERS : "/auth/freelancer/track-Orders",
+  GET_EARNINGS : "/auth/freelancer/freelancer-earnings"
 }
 
 export const notificationEndpointUrl = {

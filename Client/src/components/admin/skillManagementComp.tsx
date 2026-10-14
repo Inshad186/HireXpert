@@ -1,5 +1,5 @@
 import { addCategories, addSkills, deleteCategoryAndSkills, editSkills, getCategories, getSkills } from '@/api/admin.api'
-import React, {useEffect, useState} from 'react'
+import {useEffect, useState} from 'react'
 import toast from 'react-hot-toast'
 
 function SkillManagementComp() {
@@ -40,7 +40,6 @@ const fetchSkills = async () => {
 const fetchCategories = async () => {
   try {
     const response = await getCategories();
-    console.log("Get Categories >> : ",response.data)
     if (response.success) {
       setCategories(response.data.categories); 
     } else {
@@ -172,7 +171,6 @@ const fetchCategories = async () => {
             </div>
           </div>
         )}
-
         {/* {Add new Skill Modal } */}
 
         {showAddModal && (

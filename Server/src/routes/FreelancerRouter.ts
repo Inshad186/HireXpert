@@ -2,6 +2,7 @@ import express from "express";
 import { FreelancerController } from "@/controllers/Implementation/FreelancerController";
 import { FreelancerService } from "@/services/Implementation/FreelancerService";
 import { FreelancerRepository } from "@/repositories/Implementation/FreelancerRepository";
+import { NotificationRepository } from "@/repositories/Implementation/NotificationRepository";
 import { authMiddleware } from "@/middlewares/auth.middleware";
 import { signupValidation } from "@/utils/validation.util";
 import { loginValidation } from "@/utils/validation.util";
@@ -17,8 +18,9 @@ const gigRepo = new GigRepository()
 const freelancerRepo = new FreelancerRepository();
 const OrderRepo = new OrderRepository()
 const userRepo = new UserRepository()
+const notifyRepo = new NotificationRepository()
 
-const freelancerService = new FreelancerService(freelancerRepo, gigRepo, OrderRepo, userRepo);
+const freelancerService = new FreelancerService(freelancerRepo, gigRepo, OrderRepo, userRepo, notifyRepo);
 const freelancerController = new FreelancerController(freelancerService);
 
 const router = express.Router();
@@ -36,5 +38,6 @@ router.patch("/inProgress-order/:orderId", verifyTokenMiddleware, freelancerCont
 router.patch("/delivery-order/:orderId", verifyTokenMiddleware, uploadDeliveryFiles.array("files",3), freelancerController.deliveryOrder.bind(freelancerController))
 router.post("/stripe-onboarding", verifyTokenMiddleware, freelancerController.startStripeOnboarding.bind(freelancerController))
 router.get("/stripe-status", verifyTokenMiddleware, freelancerController.getStripeStatus.bind(freelancerController))
+router.get("/freelancer-earnings", verifyTokenMiddleware, freelancerController.getEarnings.bind(freelancerController));
 
 export default router

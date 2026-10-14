@@ -1,4 +1,3 @@
-import React from 'react'
 import { Clock, ClipboardCheck, Truck, CheckCircle, XCircle, X } from 'lucide-react';
 
 interface OrderModalProps {
@@ -12,16 +11,7 @@ interface OrderModalProps {
     requirements: string;
 }
 
-function OrderModal ({
-    isOpen,
-    onClose,
-    orderId,
-    title,
-    client,
-    amount,
-    status,
-    requirements
-}: OrderModalProps) {
+function OrderModal ({ isOpen, onClose, orderId, title, client, amount, status, requirements }: OrderModalProps) {
 
   const getStatusColor = (status: string = '') => {
     switch(status) {

@@ -132,6 +132,8 @@ export interface OrderDetail {
   deliveryNotes?: string;
   revisionReason?: string;
   revisionsRequested?: number;
+  paymentDetails?: { amount: number; currency: string };
+  escrowDetails?: { escrowStatus?: string; holdUntilDate?: string };
   statusHistory?: [
     {changedBy?: string},
     {reason?: string},
@@ -158,4 +160,14 @@ export interface NotificationType {
   clientName?: string;
   createdAt: string;
   isRead: boolean;
+}
+
+//! FilterType
+export interface Filters {
+  search: string;
+  category: string;
+  skills: string[];
+  minPrice: string;
+  maxPrice: string;
+  minRating: string;
 }

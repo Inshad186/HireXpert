@@ -1,6 +1,6 @@
 import { OrderType } from "@/types/Type";
 import { BaseRepository } from "../BaseRepository/implementation";
-import Order from "@/models/orderModel";
+import Order, {OrderStatus, Actor} from "@/models/orderModel";
 import { IOrderRepository } from "../Interface/IOrderRepository";
 
 export class OrderRepository extends BaseRepository<OrderType> implements IOrderRepository{
@@ -34,10 +34,35 @@ export class OrderRepository extends BaseRepository<OrderType> implements IOrder
     }
 
     async updateOrder(orderId: string, updatedData: any): Promise<any> {
-        await Order.findByIdAndUpdate(orderId, updatedData, { new: true})
+        return await Order.findByIdAndUpdate(orderId, updatedData, { new: true})
         .populate("client", "name")
         .populate("freelancer", "name")
         .populate("gig", "title pricing.basic.price")
+    }
+
+    async updateStatus( orderId: string, from: OrderStatus | OrderStatus[], to: OrderStatus, changedBy: Actor, extra: Record<string, 
+        unknown> = {}, reason?: string ): Promise<any> {
+
+    const allowedFrom = Array.isArray(from) ? from : [from];
+
+    return await Order.findOneAndUpdate(
+        { _id: orderId, status: { $in: allowedFrom } },
+        {
+        $set: { status: to, ...extra },
+        $push: {
+            statusHistory: {
+            status: to,
+            timestamp: new Date(),
+            changedBy,
+            ...(reason ? { reason } : {}),
+            },
+        },
+        },
+        { new: true }
+    )
+        .populate("client", "name")
+        .populate("freelancer", "name")
+        .populate("gig", "title pricing.basic.price");
     }
 
     async deleteOrder(orderId: string): Promise<void> {

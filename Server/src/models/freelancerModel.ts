@@ -18,7 +18,8 @@ export interface IFreelancerProfile extends Document {
   rating?:{
     average: number,
     count: number
-  }
+  },
+  isProfileComplete: boolean;
   stripeConnectedAccountId?: string;
   stripeOnboardingComplete?: { type: Boolean, default: false}
   isSeller?: string;
@@ -43,6 +44,7 @@ const freelancerProfileSchema = new Schema<IFreelancerProfile>({
     average: {type: Number, default: 0},
     count: {type: Number, default: 0},
   },
+  isProfileComplete: { type: Boolean, default: false },
   stripeConnectedAccountId: {type: String},
   stripeOnboardingComplete: {type: Boolean},
   isSeller: {type: Boolean, default: false},

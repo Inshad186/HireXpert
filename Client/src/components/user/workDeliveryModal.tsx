@@ -64,6 +64,8 @@ export function WorkDeliveryModal({order, isOpen, onClose, onStartWork, onSubmit
 
     const result = await onSubmitDelivery(order._id, deliveryFiles, deliveryNotes);
 
+    console.log("RESULT:: ",result)
+
     if (result.success) {
       setSuccess('Delivery submitted successfully!');
       setTimeout(() => {

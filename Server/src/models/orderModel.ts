@@ -9,6 +9,7 @@ export enum OrderStatus {
   DELIVERED = "DELIVERED",
   COMPLETED = "COMPLETED",
   REVISION = "REVISION",
+  DISPUTED = "DISPUTED",
   REJECTED = "REJECTED",
   CANCELLED = "CANCELLED",
 }
@@ -18,6 +19,8 @@ interface PaymentDetails {
   stripePlatformChargeId?: string;
   stripeTransferId?: string;
   amount: number;
+  platformFee?: number;
+  freelancerAmount?: number;
   currency: string;
   status: "PENDING" | "SUCCEEDED" | "PROCESSING" | "FAILED";
   paidAt?: Date;
@@ -31,11 +34,13 @@ interface EscrowDetails {
   releaseReason?: string;
 }
 
+export type Actor = "freelancer" | "client" | "system" | "admin";
+
 interface StatusHistory {
   status: OrderStatus;
   timestamp: Date;
-  changedBy: 'freelancer' | 'client';
-  reason?: string; // for revisions
+  changedBy: Actor
+  reason?: string;
 }
 
 interface ClientFeedback {
@@ -51,6 +56,7 @@ interface OrderDocument extends Document {
   gig: mongoose.Types.ObjectId;
   price: number;
   deliveryTime: number;
+  deliveryNotes?: string;
   plan: "basic" | "standard" | "premium";
   requirements: string;
   status: OrderStatus;
@@ -86,6 +92,7 @@ const orderSchema = new Schema<OrderDocument>(
     plan: {  type: String,  enum: ["basic", "standard", "premium"]},
     price: { type: Number },
     deliveryTime: { type: Number },
+    deliveryNotes: { type: String },
     requirements: { type: String },
     status: { type: String, enum: Object.values(OrderStatus), default: OrderStatus.PENDING },
     revisionsRequested: { type: Number, default: 0, max: 2 },
@@ -94,8 +101,8 @@ const orderSchema = new Schema<OrderDocument>(
       {
         status: { type: String, enum: Object.values(OrderStatus)},
         timestamp: { type: Date, default: Date.now },
-        changedBy: { type: String, enum: ["freelancer", "client"]},
-        reason: { type: String }, // for revisions
+        changedBy: { type: String, enum: ["freelancer", "client", "system", "admin"]},
+        reason: { type: String }
       },
     ],
     paymentDetails: {
@@ -103,6 +110,8 @@ const orderSchema = new Schema<OrderDocument>(
       stripePlatformChargeId: { type: String },
       stripeTransferId: { type: String },
       amount: { type: Number },
+      platformFee: {type: Number},
+      freelancerAmount: {type: Number },
       currency: { type: String, default: "inr" },
       status: { 
         type: String, 
@@ -115,11 +124,7 @@ const orderSchema = new Schema<OrderDocument>(
 
     escrowDetails: {
       holdUntilDate: { type: Date },
-      escrowStatus: { 
-        type: String, 
-        enum: ["HELD", "RELEASED", "REFUNDED"],
-        default: "HELD" 
-      },
+      escrowStatus: { type: String, enum: ["HELD", "RELEASED", "REFUNDED"]},
       releasedAt: { type: Date },
       releaseReason: { type: String },
     },
@@ -141,7 +146,7 @@ const orderSchema = new Schema<OrderDocument>(
 
     cancellationReason: { type: String },
     cancelledAt: { type: Date },
-    cancelledBy: { type: String, enum: ["freelancer", "client"]},
+    cancelledBy: { type: String, enum: ["freelancer", "client", "system", "admin"]},
   },
   { timestamps: true }
 );
@@ -151,5 +156,7 @@ orderSchema.index({ client: 1, status: 1 });
 orderSchema.index({ freelancer: 1, status: 1 });
 orderSchema.index({ createdAt: -1 });
 orderSchema.index({ status: 1 });
+orderSchema.index({ status: 1, "escrowDetails.escrowStatus": 1, "escrowDetails.holdUntilDate": 1 });
+orderSchema.index({ "paymentDetails.stripePaymentIntentId": 1 }, { unique: true, sparse: true });
 
 export default mongoose.model<OrderDocument>("Order", orderSchema);

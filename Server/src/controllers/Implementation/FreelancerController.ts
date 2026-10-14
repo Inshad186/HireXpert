@@ -80,7 +80,6 @@ export class FreelancerController implements IFreelancerController {
   async getOrders(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { orderId } = req.params;
-      console.log("getOrders from Freelancer Controller: ",orderId)
       const orders = await this.freelancerService.getOrders(orderId)
       res.status(HttpStatus.OK).json({ success: true, message: "Get orders Successfully", orders})
     } catch (error) {
@@ -91,8 +90,8 @@ export class FreelancerController implements IFreelancerController {
   async acceptOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const {orderId} = req.params;
-      console.log("accept orders from Freelancer Controller: ",orderId)
-      const orderAccepted = await this.freelancerService.acceptOrder(orderId)
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+      const orderAccepted = await this.freelancerService.acceptOrder(orderId, userId)
       res.status(HttpStatus.OK).json({ success: true, orderAccepted})
     } catch (error) {
       next(error)
@@ -102,8 +101,8 @@ export class FreelancerController implements IFreelancerController {
   async rejectOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { orderId, reason } = req.params;
-      console.log(orderId)
-      await this.freelancerService.rejectOrder(orderId, reason)
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+      await this.freelancerService.rejectOrder(orderId, userId, reason)
       res.status(HttpStatus.OK).json({ success: true})
     } catch (error) {
       next(error)
@@ -113,7 +112,8 @@ export class FreelancerController implements IFreelancerController {
   async inprogressOrder(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { orderId } = req.params;
-      const orderInprogress = await this.freelancerService.inprogressOrder(orderId)
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+      const orderInprogress = await this.freelancerService.inprogressOrder(orderId, userId)
       res.status(HttpStatus.OK).json({ success: true, orderInprogress})
     } catch (error) {
       next()
@@ -152,6 +152,16 @@ async deliveryOrder(req: Request, res: Response, next: NextFunction): Promise<vo
       res.status(HttpStatus.OK).json({ success: true, status: result.status, message: result.message })
     } catch (error) {
       next()
+    }
+  }
+
+  async getEarnings(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+      const earnings = await this.freelancerService.getEarnings(userId);
+      res.status(HttpStatus.OK).json({ success: true, earnings });
+    } catch (error) {
+      next(error);
     }
   }
 }
