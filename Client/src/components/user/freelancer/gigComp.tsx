@@ -3,7 +3,6 @@ import { getSkills } from "@/api/admin.api";
 import { createGig } from "@/api/freelancer.api";
 import { useNavigate } from "react-router-dom";
 import { userRoutes } from "@/constants/routeUrl";
-import { ProjectDetail } from "@/types/user.type";
 import toast from "react-hot-toast";
 
 function GigComp() {
@@ -24,25 +23,33 @@ function GigComp() {
 
     const [adminSkills, setAdminSkills] = useState<{ [category: string]: { _id: string; name: string }[] }>({});
     const [loading, setLoading] = useState(false)
+    const MAX_IMAGES = 3;
+    const MAX_IMAGE_SIZE = 3 * 1024 * 1024;
 
 
     const validateForm = (): string | null => {
-      if(!form.title.trim()) return "Title is required";
-      if(!form.description.trim()) return "Description is required";
-      if(!form.category) return "Category is required";
-      if(form.skills.length === 0) return "Select atleast one skill";
-      if(form.gallery.length === 0) return "Uploaad atleast one Image"
+      if (!form.title.trim()) return "Title is required";
+      if (!form.description.trim()) return "Description is required";
+      if (!form.category) return "Category is required";
+      if (form.skills.length === 0) return "Select at least one skill";
+      if (form.gallery.length === 0) return "Upload at least one image";
 
-      const {basic, standard, premium} = form.pricing
-      if(basic.price <= 0) return "Basic package is required"
+      const { basic, standard, premium } = form.pricing;
+
+      if (basic.price <= 0) return "Basic package price is required";
       if (!basic.description.trim()) return "Basic package description is required";
       if (basic.deliveryTime <= 0) return "Basic package delivery time is required";
 
-      if(standard.price > 0 && standard.pricing.deliveryTime > 0) {
-        
+      const optionalPlans = { standard, premium };
+      for (const [name, plan] of Object.entries(optionalPlans)) {
+        const filled = [plan.price > 0, plan.description.trim() !== "", plan.deliveryTime > 0];
+        const count = filled.filter(Boolean).length;
+        if (count > 0 && count < 3) {
+          return `Please fill price, description and delivery time for the ${name} package, or leave it empty`;
+        }
       }
-      return null
-    }
+      return null;
+    };
 
     useEffect(() => {
       const fetchSkills = async() => {
@@ -55,9 +62,13 @@ function GigComp() {
     },[])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-      const {name, value} = e.target
-        setForm({...form,[name]: value})
-    }
+      const { name, value } = e.target;
+      setForm((prev: any) => ({
+        ...prev,
+        [name]: value,
+        ...(name === "category" ? { skills: [] } : {}),
+      }));
+    };
 
     const handlePricingChange = (level: "basic" | "standard" | "premium", field: "price" | "description" | "deliveryTime", value: string) => {
       setForm((prev: any) => ({
@@ -82,95 +93,104 @@ function GigComp() {
 
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      setForm((prev: any) => ({
-        ...prev, 
-        gallery: [...prev.gallery, ...Array.from(e.target.files || [])],
-      }));
+    const files = Array.from(e.target.files ?? []);
+    e.target.value = ""; // lets the user choose the same file again
+
+    const tooBig = files.find((f) => f.size > MAX_IMAGE_SIZE);
+    if (tooBig) return toast.error(`${tooBig.name} is larger than 5 MB`);
+    if (form.gallery.length + files.length > MAX_IMAGES) {
+      return toast.error(`You can upload up to ${MAX_IMAGES} images`);
     }
+
+    setForm((prev: any) => ({ ...prev, gallery: [...prev.gallery, ...files] }));
   };
 
-const handleSubmit = async () => {
-  const validationError = validateForm();
-  if (validationError) {
-    toast.error(validationError);
-    return;
-  }
+  const handleRemoveImage = (index: number) =>
+    setForm((prev: any) => ({
+      ...prev,
+      gallery: prev.gallery.filter((_: File, i: number) => i !== index),
+  }));
 
-  setLoading(true);
-  try {
-    const gigForm = new FormData();
-    gigForm.append("title", form.title);
-    gigForm.append("description", form.description);
-    gigForm.append("category", form.category);
-    gigForm.append("skills", JSON.stringify(form.skills));
-    
-    form.gallery.forEach((file: File) => {
-      gigForm.append("gallery", file);
-    });
-
-    const pricingObj: any = {
-      basic: {
-        price: form.pricing.basic.price,
-        description: form.pricing.basic.description,
-        deliveryTime: form.pricing.basic.deliveryTime
-      }
-    };
-
-    if (
-      form.pricing.standard.price > 0 &&
-      form.pricing.standard.deliveryTime > 0 &&
-      form.pricing.standard.description.trim()
-    ) {
-      pricingObj.standard = {
-        price: form.pricing.standard.price,
-        description: form.pricing.standard.description,
-        deliveryTime: form.pricing.standard.deliveryTime
-      };
+  const handleSubmit = async () => {
+    const validationError = validateForm();
+    if (validationError) {
+      toast.error(validationError);
+      return;
     }
 
-    if (
-      form.pricing.premium.price > 0 &&
-      form.pricing.premium.deliveryTime > 0 &&
-      form.pricing.premium.description.trim()
-    ) {
-      pricingObj.premium = {
-        price: form.pricing.premium.price,
-        description: form.pricing.premium.description,
-        deliveryTime: form.pricing.premium.deliveryTime
-      };
-    }
-
-    gigForm.append("pricing", JSON.stringify(pricingObj));
-
-    const res = await createGig(gigForm);
-    console.log("Create Gig !!", res);
-    
-    if (res.success) {
-      toast.success("Gig Created Successfully!");
-      setForm({
-        title: "",
-        description: "",
-        category: "",
-        skills: [],
-        pricing: {
-          basic: { price: 0, description: "", deliveryTime: 0 },
-          standard: { price: 0, description: "", deliveryTime: 0 },
-          premium: { price: 0, description: "", deliveryTime: 0 }
-        },
-        gallery: []
+    setLoading(true);
+    try {
+      const gigForm = new FormData();
+      gigForm.append("title", form.title);
+      gigForm.append("description", form.description);
+      gigForm.append("category", form.category);
+      gigForm.append("skills", JSON.stringify(form.skills));
+      
+      form.gallery.forEach((file: File) => {
+        gigForm.append("gallery", file);
       });
-      navigate(userRoutes.LISTED_GIG);
-    } else {
-      toast.error("Gig creation failed");
+
+      const pricingObj: any = {
+        basic: {
+          price: form.pricing.basic.price,
+          description: form.pricing.basic.description,
+          deliveryTime: form.pricing.basic.deliveryTime
+        }
+      };
+
+      if (
+        form.pricing.standard.price > 0 &&
+        form.pricing.standard.deliveryTime > 0 &&
+        form.pricing.standard.description.trim()
+      ) {
+        pricingObj.standard = {
+          price: form.pricing.standard.price,
+          description: form.pricing.standard.description,
+          deliveryTime: form.pricing.standard.deliveryTime
+        };
+      }
+
+      if (
+        form.pricing.premium.price > 0 &&
+        form.pricing.premium.deliveryTime > 0 &&
+        form.pricing.premium.description.trim()
+      ) {
+        pricingObj.premium = {
+          price: form.pricing.premium.price,
+          description: form.pricing.premium.description,
+          deliveryTime: form.pricing.premium.deliveryTime
+        };
+      }
+
+      gigForm.append("pricing", JSON.stringify(pricingObj));
+
+      const res = await createGig(gigForm);
+      console.log("Create Gig !!", res);
+      if (res.success) {
+        toast.success("Gig Created Successfully!");
+        setForm({
+          title: "",
+          description: "",
+          category: "",
+          skills: [],
+          pricing: {
+            basic: { price: 0, description: "", deliveryTime: 0 },
+            standard: { price: 0, description: "", deliveryTime: 0 },
+            premium: { price: 0, description: "", deliveryTime: 0 }
+          },
+          gallery: []
+        });
+        navigate(userRoutes.LISTED_GIG);
+      } else {
+        toast.error(res.error || "Gig creation failed");
+      }
+    } catch (error) {
+      console.error("Error creating gig:", error);
+      toast.error("An error occurred while creating the gig");
+    } finally {
+      setLoading(false);
     }
-  } catch (error) {
-    console.error("Error creating gig:", error);
-    toast.error("An error occurred while creating the gig");
-  } finally {
-    setLoading(false);
-  }
-};
+  };
 
   return (
     <div className="p-6 max-w-4xl mx-auto bg-white shadow rounded-lg space-y-6 mt-7">
@@ -263,7 +283,21 @@ const handleSubmit = async () => {
       type="file" 
       accept="image/*" 
       multiple onChange={handleImageUpload}
-      className="w-full border p-2 rounded" />
+      className="w-full border p-2 rounded" 
+      />
+
+      {form.gallery.length > 0 && (
+        <ul className="space-y-1 text-sm">
+          {form.gallery.map((file: File, index: number) => (
+            <li key={`${file.name}-${index}`} className="flex justify-between bg-gray-50 rounded px-3 py-1">
+              <span className="truncate">{file.name}</span>
+              <button type="button" onClick={() => handleRemoveImage(index)} className="text-red-500">
+                Remove
+              </button>
+            </li>
+          ))}
+        </ul>
+      )}
 
       <button
       onClick={handleSubmit} 

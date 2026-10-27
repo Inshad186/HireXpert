@@ -1,20 +1,59 @@
-import React, { useRef } from "react";
-import DefaultImage from "@/assets/userProfile.png";
 
-export default function ProfileImageUploader({ image, onChange }: { image: string; onChange: (file: File) => void }) {
-  const inputRef = useRef<HTMLInputElement | null>(null);
+import { useRef, useState } from "react";
+
+interface ProfileImageProps {
+  image: string;
+  onImageChange: (file: File) => Promise<void>;
+}
+
+function ProfileImage({ image, onImageChange }: ProfileImageProps) {
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [uploading, setUploading] = useState(false);
+
+  const handleFileChange = async ( event: React.ChangeEvent<HTMLInputElement> ) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      event.target.value = "";
+      return;
+    }
+
+    try {
+      setUploading(true);
+      await onImageChange(file);
+    } finally {
+      setUploading(false);
+      event.target.value = "";
+    }
+  };
 
   return (
-    <div className="relative w-32 h-32 mb-2">
-      <img src={image || DefaultImage} alt="User" className="w-full h-full rounded-full object-cover border-4 border-white shadow-md" />
-      <input type="file" accept=".jpg,.jpeg,.png,.webp" style={{ display: "none" }} ref={inputRef} onChange={(e) => {
-        if (e.target.files?.length) onChange(e.target.files[0]);
-      }} />
+    <div className="flex flex-col items-center">
+      <img
+        src={image || "/default-avatar.png"}
+        alt="Profile"
+        className="h-28 w-28 rounded-full object-cover border-4 border-white shadow-md"
+      />
+
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileChange}
+        className="hidden"
+      />
+
       <button
-        className="absolute bottom-0 right-0 bg-blue-600 text-white text-xs px-2 py-1 rounded hover:bg-blue-700"
-        onClick={() => inputRef.current?.click()}>
-        Update
+        type="button"
+        onClick={() => fileInputRef.current?.click()}
+        disabled={uploading}
+        className="mt-3 rounded-lg bg-indigo-600 px-4 py-2 text-sm text-white hover:bg-indigo-700 disabled:opacity-50"
+      >
+        {uploading ? "Uploading..." : "Change Profile Photo"}
       </button>
     </div>
   );
 }
+
+export default ProfileImage;

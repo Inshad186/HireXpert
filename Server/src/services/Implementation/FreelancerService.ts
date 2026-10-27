@@ -15,6 +15,7 @@ import { OrderStatus } from "@/models/orderModel";
 import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 import { stripe } from "@/config/stripe.config";
 import { env } from "@/config/env.config";
+import { MAX_ACTIVE_GIGS } from "@/constants/gig.constants";
 
 const PROFILE_FIELDS = [
   "profession", "company", "qualification", "bio", "work_experience",
@@ -67,6 +68,11 @@ export class FreelancerService implements IFreelancerService {
         throw generateHttpError(HttpStatus.BAD_REQUEST, "Service images are required");
       }
 
+      const activeCount = await this.gigRepository.countActiveGigs(gigData.freelancer);
+      if (activeCount >= MAX_ACTIVE_GIGS) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST,`You can have up to ${MAX_ACTIVE_GIGS} active gigs. Pause one to create a new gig.`);
+      }
+
       const imageURLs = await Promise.all(
         gallery.map((file) => handleProfileImageUpload(file.buffer, "service_images"))
       );
@@ -98,19 +104,37 @@ export class FreelancerService implements IFreelancerService {
     }
   }
 
-  async updateGigStatus(id: string, currentStatus: boolean): Promise<void> {
+  async updateGigStatus(id: string, freelancerId: string, isActive: boolean): Promise<void> {
     try {
-      await this.gigRepository.findByIdAndUpdate(id, {isActive: currentStatus})
+      const gig = await this.gigRepository.findById(id);
+      if (!gig) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Gig not found");
+      }
+      if (gig.freelancer?.toString() !== freelancerId) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "This gig does not belong to you");
+      }
+
+      // Turning a paused gig on counts like creating a new active gig
+      if (isActive && !gig.isActive) {
+        const activeCount = await this.gigRepository.countActiveGigs(freelancerId);
+        if (activeCount >= MAX_ACTIVE_GIGS) {
+          throw generateHttpError(
+            HttpStatus.BAD_REQUEST,
+            `You can have up to ${MAX_ACTIVE_GIGS} active gigs. Pause one first.`
+          );
+        }
+      }
+
+      await this.gigRepository.findByIdAndUpdate(id, { isActive });
     } catch (error) {
-      console.error(error)
-      throw new Error("Error Creating gigList")
+      console.error(error);
+      throw error;
     }
   }
 
   async getFreelancerDashStats(freelancer: string): Promise<{ totalOrders: number; myGigs: number; activeOrders: number; }> {
     try {
-      const {totalOrders, myGigs, activeOrders } = await this.freelanceRepository.countFreelancerDashStats(freelancer)
-      return {totalOrders, myGigs, activeOrders}
+      return await this.freelanceRepository.countFreelancerDashStats(freelancer)
     } catch (error) {
       throw error
     }

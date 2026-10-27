@@ -75,10 +75,11 @@ export interface InitialProjectDetail {
     _id:string;
     title?: string;
     category?: string;
+    isActive?: boolean;
     pricing: {
         basic: { price: number, description: string, deliveryTime: number },
-        standard: { price: number, description: string, deliveryTime: number },
-        premium: { price: number, description: string, deliveryTime: number }
+        standard?: { price: number, description: string, deliveryTime: number },
+        premium?: { price: number, description: string, deliveryTime: number }
         };
     freelancer: {
       rating: {

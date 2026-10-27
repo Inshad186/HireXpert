@@ -40,4 +40,8 @@ export class GigRepository extends BaseRepository<GigType> implements IGigReposi
     return await Gig.find(query).populate("freelancer", "rating");
   }
 
+  async countActiveGigs(freelancerId: string): Promise<number> {
+    return await Gig.countDocuments({ freelancer: freelancerId, isActive: true });
+  }
+
 }

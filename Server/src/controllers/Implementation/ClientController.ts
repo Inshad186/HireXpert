@@ -11,8 +11,6 @@ export class ClientController implements IClientController {
     async updateProfile(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const userData = req.body;
-            if(!userData) res.status(HttpStatus.BAD_REQUEST).json({success: false, message: "Missing required field"})
-
             const { userId } = JSON.parse(req.headers['x-user-payload'] as string);
             const updatedUser = await this.clientService.updateProfile(userId, userData);
             res.status(HttpStatus.OK).json({ success: true, userDetails : updatedUser });
@@ -58,17 +56,6 @@ export class ClientController implements IClientController {
             next(error)
         }
     }
-
-    // async getFreelancerReviews(req: Request, res: Response, next: NextFunction): Promise<void> {
-    //     try {
-    //         const { projectId } = req.params
-    //         console.log("Gig IDDD : ", projectId)
-    //         const gigDetails = await this.clientService.getFreelancerReviews(projectId)
-    //         console.log("Gig Detailsssss : ", gigDetails)
-    //     } catch (error) {
-
-    //     }
-    // }
 
     async createPaymentIntent(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {

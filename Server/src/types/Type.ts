@@ -19,20 +19,23 @@ export interface ClientProfileType extends Document {
   name?: string;
   email?: string;
   role?: string;
+  accountType: "individual" | "company";
   companyName?: string;
+  companySize?: "1" | "2-10" | "11-50" | "51-200" | "200+";
+  about?: string;
   website?: string;
   industry?: string;
   address?: string;
   country?: string;
-  workType?: string[];
+  workType?: "Short-term" | "Long-term" | "Both";
   budgetRange?: string;
   preferredTechStack?: string;
 }
 
-
 export interface FreelancerProfileType extends Document {
   user: Types.ObjectId;
   name: string,
+  email?: string,
   role: string,
   profession: string;
   company: string;
@@ -214,4 +217,24 @@ export interface GigFilters {
   minPrice?: number;
   maxPrice?: number;
   minRating?: number;
+}
+
+export type ContactSubject = "" | "hiring" | "freelancer" | "billing" | "other";
+export type ContactStatus = "NEW" | "READ" | "RESOLVED";
+
+export interface ContactType {
+  _id: string;
+  name: string;
+  email: string;
+  subject?: ContactSubject;
+  message: string;
+  status?: ContactStatus;
+  createdAt?: Date;
+}
+
+export interface CreateContactInput {
+  name: string;
+  email: string;
+  subject?: string;
+  message: string;
 }

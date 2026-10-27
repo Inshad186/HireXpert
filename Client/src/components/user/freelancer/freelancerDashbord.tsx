@@ -20,7 +20,15 @@ function FreelancerDashboard() {
   status: string
 }
 
-  const [dashboardStats, setDashboardStats] = useState({ totalOrders: 0, myGigs:0, activeOrders:0 })
+interface DashStats {
+  totalOrders: number;
+  myGigs: number;
+  activeOrders: number;
+  totalEarned: number;
+  inEscrow: number;
+}
+
+  const [dashboardStats, setDashboardStats] = useState<DashStats>({ totalOrders: 0, myGigs:0, activeOrders:0, totalEarned: 0, inEscrow: 0 })
   const [profile, setProfile] = useState("")
   const [orderList, setOrderList] = useState<Order[]>([])
   const [userId, setUserId] = useState<string | null>(null)
@@ -35,31 +43,46 @@ function FreelancerDashboard() {
       if (persistuser) {
         const user = JSON.parse(persistuser)
         setUserId(user._id)
-        console.log("User ID from localStorage:", user._id)
       }
     } catch (error) {
       console.error("Error parsing persistuser:", error)
     }
   }, [])
 
-  useEffect(() => {
-    const freelancerStats = async() =>{
-      const dashRes = await freelancerDashStats()
-      if(dashRes.success){
-        setDashboardStats(dashRes.data)
-      }
-      const profileRes = await getProfileImage()
-      if(profileRes.success){
-        setProfile(profileRes.data.user.profilePicture)
-      }
-      const orderRes = await getOrderList()
-      if(orderRes.success){
-        setOrderList(orderRes.data.orderDetails)
-      }
-      await checkStripeStatus()
+  const loadDashboard = async () => {
+    try {
+      const [dashRes, profileRes, orderRes] = await Promise.all([
+        freelancerDashStats(),
+        getProfileImage(),
+        getOrderList(),
+      ])
+      if (dashRes.success) setDashboardStats((prev) => ({ ...prev, ...dashRes.data }))
+      if (profileRes.success) setProfile(profileRes.data.user.profilePicture)
+      if (orderRes.success) setOrderList(orderRes.data.orderDetails)
+    } catch (error) {
+      console.error("Failed to load dashboard", error)
+      toast.error("Could not load the dashboard")
     }
-    freelancerStats()
-  },[])
+  }
+
+  useEffect(() => {
+    loadDashboard()
+    checkStripeStatus()
+  }, [])
+
+  const money = (n: number) =>
+    n.toLocaleString("en-US", { style: "currency", currency: "USD" })
+
+  const statCards = [
+    { title: "Total Orders", value: dashboardStats.totalOrders },
+    { title: "My Gigs", value: dashboardStats.myGigs },
+    { title: "Active Orders", value: dashboardStats.activeOrders },
+    {
+      title: "Total Earned",
+      value: money(dashboardStats.totalEarned),
+      note: `${money(dashboardStats.inEscrow)} in escrow`,
+    },
+  ]
 
   const checkStripeStatus = async() => {
     try {
@@ -80,7 +103,6 @@ function FreelancerDashboard() {
     try {
       setStripeLoading(true)
       const response = await startStripeOnboarding()
-      console.log("Stripe Connect Response",response.data)
       if(response.success && response.data.result.onboardingUrl){
         window.location.href = response.data.result.onboardingUrl
       }else{
@@ -172,29 +194,22 @@ function FreelancerDashboard() {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-          {[
-            { title: "Total Orders", value: dashboardStats.totalOrders },
-            { title: "My Gigs", value: dashboardStats.myGigs },
-            { title: "Active Orders", value: dashboardStats.activeOrders },
-            { title: "Earnings", value: "₹1,240" },
-          ].map((item, index) => (
-            <div
-              key={index}
-              className="bg-white shadow-lg rounded-xl p-6 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300"
-            >
+          {statCards.map((item) => (
+            <div key={item.title} className="bg-white shadow-lg rounded-xl p-6 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300">
               <p className="text-gray-500 font-medium">{item.title}</p>
               <p className="text-3xl font-semibold text-gray-800 mt-2">{item.value}</p>
+              {item.note && <p className="text-xs text-gray-400 mt-1">{item.note}</p>}
             </div>
           ))}
         </div>
-
+        
         {/* Orders Table */}
         <div className="bg-white rounded-xl shadow-lg p-6">
           <h2 className="text-xl font-semibold mb-4 text-gray-700">Recent Orders</h2>
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-500 border-b border-gray-300 text-white text-sm">
+                <tr className="bg-gray-600 border-b border-gray-300 text-white text-sm">
                   <th className="text-left p-4 font-semibold">Order ID</th>
                   <th className="text-left p-4 font-semibold">Client</th>
                   <th className="text-left p-4 px-28 font-semibold">Gig</th>

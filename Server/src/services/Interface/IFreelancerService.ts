@@ -3,9 +3,9 @@ import { GigType, FileType, OrderType } from "@/types/Type"
 
 export interface IFreelancerService {
     updateProfile(userId:string, userData : Partial<FreelancerProfileType>) : Promise<{userDetails : FreelancerProfileType}>
-    createGig(gig:GigType, serviceImages:FileType[] | undefined) : Promise<string>;
+    createGig(gigData: any, gallery: FileType[]): Promise<string>;
     getGigList(freelancerId: string): Promise<GigType[]>
-    updateGigStatus(id:string, currentStatus:boolean) : Promise<void>
+    updateGigStatus(id: string, freelancerId: string, isActive: boolean): Promise<void>;
     getFreelancerDashStats(freelancer: string) : Promise<{totalOrders:number, myGigs:number, activeOrders:number}>
     getOrderList(freelancer: string): Promise<OrderType[]>
     getOrders(orderId: string): Promise<OrderType | null>

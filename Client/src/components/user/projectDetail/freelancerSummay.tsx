@@ -42,9 +42,9 @@ export default function FreelancerSummary({ freelancer, profileImage }: Props) {
         </div>
       </div>
 
-      <p className="text-sm text-slate-600 leading-relaxed">{freelancer.bio}</p>
+      <p className="text-md text-slate-600 leading-relaxed">{freelancer.bio}</p>
 
-      <div className="grid sm:grid-cols-2 gap-2 pt-4 border-t border-slate-100 text-xs text-slate-600">
+      <div className="grid sm:grid-cols-2 gap-2 pt-4 border-t border-slate-100 text-sm text-slate-600">
         {details.map(([label, value]) => (
           <p key={label}>
             <strong className="text-slate-800">{label}:</strong> {value}

@@ -31,7 +31,7 @@ export interface IGig extends Document {
 const gigSchema = new Schema<IGig>({
   freelancer: { type: Schema.Types.ObjectId, ref: "FreelancerProfile", required: false },
   title: { type: String, required: false, maxlength:100 },
-  description: {type: String, required: false, maxlength:100 },
+  description: {type: String, required: false, maxlength:300 },
   category: { type: String, required: false },
   skills: [{ type: Schema.Types.ObjectId, ref: "Skill" }],
   pricing: {

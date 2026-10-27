@@ -40,12 +40,12 @@ export default function PricingCard({ pricing, selectedPlan, onSelectPlan, onCon
           <div className="flex items-baseline justify-between border-b border-slate-100 pb-4">
             <div>
               <h4 className="text-lg font-bold text-slate-900 capitalize">{selectedPlan} Package</h4>
-              <p className="text-xs text-slate-500 mt-0.5">Delivery in {current.deliveryTime} days</p>
+              <p className="text-sm text-slate-500 mt-0.5">Delivery in {current.deliveryTime} days</p>
             </div>
             <span className="text-3xl font-extrabold text-indigo-600">${current.price}</span>
           </div>
 
-          <p className="text-sm text-slate-600 leading-relaxed">{current.description}</p>
+          <p className="text-md text-slate-600 leading-relaxed">{current.description}</p>
 
           <button
             onClick={onContinue}

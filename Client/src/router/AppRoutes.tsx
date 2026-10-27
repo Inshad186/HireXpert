@@ -2,20 +2,22 @@
 import LandingPage from "@/pages/user/LandingPage";
 import { createBrowserRouter } from "react-router-dom";
 import AppLayout from "@/layouts/AppLayout";
-import Login from "@/pages/user/Login";
-import SignUp from "@/pages/user/SignUp";
-import { InputOTPDemo } from "@/components/user/Otp-Modal";
-import ForgotPassword from "@/pages/user/ForgotPassword";
+import Login from "@/pages/user/auth/Login";
+import SignUp from "@/pages/user/auth/SignUp";
+import Otp from "@/pages/user/auth/Otp";
+import ForgotPassword from "@/pages/user/auth/ForgotPassword";
 import Home from "@/pages/user/Home";
-import Profile from "@/components/user/profile/Profile";
+import Profile from "@/pages/user/Profile";
 import { PrivateRoute } from "./PrivateRoute";
 import { PublicRoute } from "./PublicRoute";
 import { RoleBasedRoute } from "./RoleBasedRoute";
-import ResetPassword from "@/components/user/resetPassword";
+import ResetPassword from "@/pages/user/auth/ResetPassword";
 import Projects from "@/pages/user/Projects";
 import ProjectDetail from "@/pages/user/ProjectDetail";
 import OrderCheckoutPage from "@/pages/user/OrderCheckout";
 import NotFoundPage from "@/pages/user/NotFoundPage";
+import ContactUs from "@/pages/user/ContactUs";
+import AboutUs from "@/pages/user/AboutUs";
 
 
 //! Freelancer
@@ -45,7 +47,7 @@ export const router = createBrowserRouter([
   //! Auth routes (public)
   {path: "login", element: <PublicRoute><Login/></PublicRoute>},
   {path: "signup", element: <PublicRoute><SignUp/></PublicRoute>},
-  {path: "otp", element: <PublicRoute><InputOTPDemo/></PublicRoute>},
+  {path: "otp", element: <PublicRoute><Otp/></PublicRoute>},
   {path: "forgotPassword", element: <PublicRoute><ForgotPassword/></PublicRoute>},
   {path: "resetPassword", element: <PublicRoute><ResetPassword/></PublicRoute>},
 
@@ -82,6 +84,14 @@ export const router = createBrowserRouter([
       {path: "freelancers", element: <FreelancerListPage/>},
       {path: "skills", element: <SkillManagement/>},
       {path: "orders", element: <OrderPage/>},
+    ]
+  },
+
+  //! Open Pages
+  {element: <AppLayout/>,
+    children: [
+      {path: "/contact", element: <ContactUs/>},
+      {path: "/about", element: <AboutUs/>},
     ]
   },
 

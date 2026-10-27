@@ -15,6 +15,7 @@ import { handleProfileImageUpload } from "@/config/cloudinary.config";
 import { verifyToken } from "@/utils/jwt.util";
 import { IClientRepository } from "@/repositories/Interface/IClientRepository";
 import { IFreelancerRepository } from "@/repositories/Interface/IFreelancerRepository";
+import { Types } from "mongoose";
 
 export class UserService implements IUserService {
   constructor(
@@ -189,49 +190,43 @@ async verifyOtp(otp: string, email: string, apiType: string): Promise<{accessTok
   }
 
 async assignRole(role: string, email: string): Promise<{ userRole: string }> {
+  // Only these two roles are allowed
+  if (role !== "client" && role !== "freelancer") {
+    throw generateHttpError(HttpStatus.BAD_REQUEST, "Invalid role");
+  }
+
   const user = await this.userRepository.findByEmail(email);
   if (!user) {
     throw generateHttpError(HttpStatus.NOT_FOUND, HttpResponse.USER_NOT_FOUND);
   }
-  await this.userRepository.updateUserRole(user.email, role);
+
+  const userObjectId = new Types.ObjectId(String(user._id));
 
   if (role === "client") {
     const existingClient = await this.clientRepository.findById(String(user._id));
     if (!existingClient) {
       await this.clientRepository.create({
-        _id: user._id,
+        _id: userObjectId,
+        user: userObjectId,
         name: user.name,
+        email: user.email,
         role,
-        companyName: "",
-        website: "",
-        industry: "",
-        address: "",
-        country: "",
-        workType: [],
-        budgetRange: "",
-        preferredTechStack: "",
       });
     }
-  }else if(role === "freelancer"){
-    const existingFreelancer = await this.freelancerRepository.findById(String(user._id))
-    if(!existingFreelancer){
+  } else {
+    const existingFreelancer = await this.freelancerRepository.findById(String(user._id));
+    if (!existingFreelancer) {
       await this.freelancerRepository.create({
-        _id: user._id,
+        _id: userObjectId,
+        user: userObjectId,
         name: user.name,
+        email: user.email,
         role,
-        profession: "",
-        company: "",
-        qualification: "",
-        bio: "",
-        work_experience:"",
-        proficient_languages: [],
-        profileSkills: [],
-        working_days: "",
-        active_hours: "",
-        portfolio: "",
-      })
+      });
     }
   }
+
+  await this.userRepository.updateUserRole(user.email, role);
   return { userRole: role };
 }
 

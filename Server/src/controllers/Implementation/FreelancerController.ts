@@ -47,11 +47,13 @@ export class FreelancerController implements IFreelancerController {
     }
   }
 
-  async updateGigStatus( req: Request, res: Response, next: NextFunction): Promise<void> {
+  async updateGigStatus(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
-      const { id, currentStatus } = req.body;
-      const gigStatus = await this.freelancerService.updateGigStatus( id, currentStatus);
-      res.status(HttpStatus.OK).json({ success: true, message: "Gig Status Updated", gigStatus });
+      const { id, isActive } = req.body;
+      const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+
+      await this.freelancerService.updateGigStatus(id, userId, Boolean(isActive));
+      res.status(HttpStatus.OK).json({ success: true, message: "Gig Status Updated" });
     } catch (error) {
       next(error);
     }
@@ -60,8 +62,8 @@ export class FreelancerController implements IFreelancerController {
   async getFreelancerDashStats(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
       const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
-      const {totalOrders, myGigs, activeOrders} = await this.freelancerService.getFreelancerDashStats(userId)
-      res.status(HttpStatus.OK).json({ success: true, message: "Gig Status Updated", totalOrders, myGigs, activeOrders});
+      const {...stats} = await this.freelancerService.getFreelancerDashStats(userId)
+      res.status(HttpStatus.OK).json({ success: true, message: "Gig Status Updated", ...stats});
     } catch (error) {
       next(error)
     }

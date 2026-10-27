@@ -15,6 +15,16 @@ import { stripe } from "@/config/stripe.config";
 
 const PLATFORM_FEE_RATE = 0.2;
 
+const CLIENT_FIELDS = [
+  "name", "accountType", "companyName", "companySize", "about", "website",
+  "industry", "address", "country", "workType", "budgetRange", "preferredTechStack",
+] as const;
+
+const MAX_LENGTH: Record<string, number> = { about: 500, website: 200, address: 200, preferredTechStack: 200, budgetRange: 50 };
+const ACCOUNT_TYPES = ["individual", "company"];
+const COMPANY_SIZES = ["1", "2-10", "11-50", "51-200", "200+"];
+const WORK_TYPES = ["Short-term", "Long-term", "Both"];
+
 export class ClientService implements IClientService {
   constructor(
     private clientRepository: IClientRepository,
@@ -25,15 +35,57 @@ export class ClientService implements IClientService {
     private notificationService: NotificationService
   ) {}
 
-  async updateProfile( userId: string, userData: ClientProfileType ): Promise<ClientProfileType> {
+  async updateProfile(userId: string, userData: ClientProfileType): Promise<ClientProfileType> {
     try {
-      const user = await this.clientRepository.findById(userId)
-      if (!user) {
-        throw generateHttpError( HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND );
+      const profile = await this.clientRepository.findById(userId);
+      if (!profile) throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
+
+      // 1. Copy only the allowed fields, and only text values
+      const updates: Record<string, string> = {};
+      for (const key of CLIENT_FIELDS) {
+        const value = (userData as any)?.[key];
+        if (value === undefined) continue;
+        if (typeof value !== "string") {
+          throw generateHttpError(HttpStatus.BAD_REQUEST, `${key} must be text`);
+        }
+        const text = value.trim();
+        if (text.length > (MAX_LENGTH[key] ?? 100)) {
+          throw generateHttpError(HttpStatus.BAD_REQUEST, `${key} is too long`);
+        }
+        updates[key] = text;
       }
-      Object.assign(user, userData);
-      await this.clientRepository.findByIdAndUpdate(userId, user);
-      return user 
+
+      // 2. Check the values
+      if ("name" in updates && !updates.name) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Name cannot be empty");
+      }
+      if (updates.accountType && !ACCOUNT_TYPES.includes(updates.accountType)) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Invalid account type");
+      }
+      if (updates.companySize && !COMPANY_SIZES.includes(updates.companySize)) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Invalid company size");
+      }
+      if (updates.workType && !WORK_TYPES.includes(updates.workType)) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Invalid work type");
+      }
+      if (updates.website) {
+        try {
+          const url = new URL(updates.website);
+          if (!["http:", "https:"].includes(url.protocol)) throw new Error();
+        } catch {
+          throw generateHttpError(HttpStatus.BAD_REQUEST, "Website must start with http:// or https://");
+        }
+      }
+
+      // 3. A company account needs a company name
+      const accountType = updates.accountType ?? profile.accountType;
+      const companyName = updates.companyName ?? profile.companyName;
+      if (accountType === "company" && !companyName) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Company name is required for a company account");
+      }
+
+      const updated = await this.clientRepository.findByIdAndUpdate(userId, updates);
+      return (updated ?? profile) as ClientProfileType;
     } catch (error) {
       console.error(error);
       throw error;

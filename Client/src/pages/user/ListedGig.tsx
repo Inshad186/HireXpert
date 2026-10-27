@@ -48,7 +48,6 @@ function ListedGig() {
 
   return (
     <div>
-      <SimpleNavbar />
       <ListedGigsComp 
         list={list}
         loading={loading}

@@ -11,17 +11,43 @@ export class FreelancerRepository extends BaseRepository <FreelancerProfileType>
     constructor() {
         super(Freelancer)
     }
-    async countFreelancerDashStats(freelancer: string): Promise<{ totalOrders: number; myGigs: number; activeOrders: number }> {
+    async countFreelancerDashStats(freelancer: string): Promise<{ totalOrders: number; myGigs: number; activeOrders: number; totalEarned: number; inEscrow: number }> {
         try {
-            const totalOrders = await Order.countDocuments({freelancer})
-            const myGigs = await Gig.countDocuments({freelancer})
-            const activeOrders = await Order.countDocuments({freelancer, status:"accepted"})
-            return {totalOrders, myGigs, activeOrders}
+            const id = new Types.ObjectId(freelancer);
+            const ACTIVE = [OrderStatus.ACCEPTED, OrderStatus.IN_PROGRESS, OrderStatus.DELIVERED, OrderStatus.REVISION];
+
+            const [totalOrders, myGigs, activeOrders, released, held] = await Promise.all([
+            Order.countDocuments({
+                freelancer: id,
+                status: { $nin: [OrderStatus.PAYMENT_PENDING, OrderStatus.PAYMENT_FAILED] },
+            }),
+            Gig.countDocuments({ freelancer: id, isActive: true }),
+            Order.countDocuments({ freelancer: id, status: { $in: ACTIVE } }),
+            Order.aggregate([
+                { $match: { freelancer: id, "escrowDetails.escrowStatus": "RELEASED" } },
+                { $group: { _id: null, total: { $sum: "$paymentDetails.freelancerAmount" } } },
+            ]),
+            Order.aggregate([
+                { $match: { freelancer: id, "escrowDetails.escrowStatus": "HELD", status: { $in: ACTIVE } } },
+                { $group: { _id: null, total: { $sum: "$paymentDetails.amount" } } },
+            ]),
+            ]);
+
+            const heldTotal = held[0]?.total ?? 0;
+            return {
+            totalOrders,
+            myGigs,
+            activeOrders,
+            totalEarned: released[0]?.total ?? 0,
+            inEscrow: Math.round(heldTotal * (1 - PLATFORM_FEE_RATE) * 100) / 100,
+            };
         } catch (error) {
-            throw new Error("Error to getting the counts");
+            console.error(error);
+            throw new Error("Error getting the dashboard stats");
         }
     }
 
+    
     async getEarnings(freelancerId: string): Promise<{ totalEarned: number; inEscrow: number; completedOrders: number }> {
     const id = new Types.ObjectId(freelancerId);
 

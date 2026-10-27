@@ -6,8 +6,21 @@ import { userRoutes } from "@/constants/routeUrl";
 
 function ProjectComponent() {
   const [gigs, setGigs] = useState<InitialProjectDetail[]>([]);
-  const CATEGORIES = [ "Web Development", "UI/UX Design", "Graphic Design", "Digital Marketing" ];
-  const emptyFilters: Filters = { search: "", category: "", skills: [], minPrice: "", maxPrice: "", minRating: "" };
+  const CATEGORIES = [
+    "Web Development",
+    "UI/UX Design",
+    "Graphic Design",
+    "Digital Marketing",
+    "Video Editing",
+  ];
+  const emptyFilters: Filters = {
+    search: "",
+    category: "",
+    skills: [],
+    minPrice: "",
+    maxPrice: "",
+    minRating: "",
+  };
 
   const [filters, setFilters] = useState<Filters>(emptyFilters);
   const [debouncedFilters, setDebouncedFilters] = useState<Filters>(emptyFilters);
@@ -32,13 +45,82 @@ function ProjectComponent() {
     };
   }, [debouncedFilters]);
 
+  // Chunk array into groups of 6 (2 rows of 3 columns)
+  const chunkedGigs = [];
+  for (let i = 0; i < gigs.length; i += 6) {
+    chunkedGigs.push(gigs.slice(i, i + 6));
+  }
+
+  // Decorative banners to render between chunks
+  const renderBanner = (index: number) => {
+    if (index % 2 === 0) {
+      return (
+        <div key={`banner-${index}`} className="my-10 bg-gradient-to-r from-indigo-900 via-indigo-950 to-slate-900 rounded-2xl p-8 text-white shadow-xl relative overflow-hidden">
+          <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:16px_16px]" />
+          <div className="relative z-10 flex flex-col md:flex-row items-center justify-between gap-6 text-center md:text-left">
+            <div className="space-y-2 max-w-2xl">
+              <span className="inline-block px-3 py-1 rounded-full text-sm font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30">
+                Quality Guaranteed
+              </span>
+              <h3 className="text-xl md:text-2xl font-bold tracking-tight">
+                Need Custom Work Done for Your Business?
+              </h3>
+              <p className="text-sm md:text-sm text-indigo-200 leading-relaxed">
+                Connect with verified professionals across design, development, and marketing. Every project is backed by buyer protection and secure escrow payments.
+              </p>
+            </div>
+            <div className="flex gap-6 items-center flex-shrink-0 text-center">
+              <div>
+                <p className="text-2xl font-black text-indigo-400">99.8%</p>
+                <p className="text-[11px] text-slate-300">Satisfaction Rate</p>
+              </div>
+              <div className="w-px h-10 bg-white/10" />
+              <div>
+                <p className="text-2xl font-black text-indigo-400">24/7</p>
+                <p className="text-[11px] text-slate-300">Order Support</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      );
+    }
+
+    return (
+      <div key={`banner-${index}`} className="my-10 bg-indigo-50 border border-indigo-100 rounded-2xl p-8 text-slate-800 shadow-sm">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div className="space-y-1">
+            <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center mx-auto mb-2 font-bold text-sm">
+              1
+            </div>
+            <h4 className="text-sm font-bold text-slate-900">Transparent Pricing</h4>
+            <p className="text-sm text-slate-500">Fixed tier pricing with clear deliverable timelines.</p>
+          </div>
+          <div className="space-y-1">
+            <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center mx-auto mb-2 font-bold text-sm">
+              2
+            </div>
+            <h4 className="text-sm font-bold text-slate-900">Protected Payments</h4>
+            <p className="text-sm text-slate-500">Funds are held safely in escrow until you approve the work.</p>
+          </div>
+          <div className="space-y-1">
+            <div className="w-10 h-10 bg-indigo-600 text-white rounded-xl flex items-center justify-center mx-auto mb-2 font-bold text-sm">
+              3
+            </div>
+            <h4 className="text-sm font-bold text-slate-900">Vetted Experts</h4>
+            <p className="text-sm text-slate-500">Work directly with skilled freelancers who deliver results.</p>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
   return (
     <div className="bg-slate-50/50 min-h-screen pb-20">
       {/* Hero Section */}
       <section className="relative overflow-hidden bg-gradient-to-b from-indigo-900 via-indigo-950 to-slate-900 text-white py-20 px-6">
         <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff0a_1px,transparent_1px),linear-gradient(to_bottom,#ffffff0a_1px,transparent_1px)] bg-[size:24px_24px]" />
         <div className="relative max-w-4xl mx-auto text-center space-y-4">
-          <span className="inline-block px-4 py-1.5 rounded-full text-xs font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 backdrop-blur-md">
+          <span className="inline-block px-4 py-1.5 rounded-full text-sm font-semibold bg-indigo-500/20 text-indigo-300 border border-indigo-500/30 backdrop-blur-md">
             Professional Marketplace
           </span>
           <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight">
@@ -96,13 +178,13 @@ function ProjectComponent() {
           {/* Secondary Filters */}
           <div className="flex flex-wrap items-center justify-between gap-4 pt-4 border-t border-slate-100">
             <div className="flex flex-wrap items-center gap-3">
-              <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">
+              <span className="text-sm font-semibold text-slate-400 uppercase tracking-wider">
                 Filters:
               </span>
 
               {/* Price inputs */}
               <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-1.5">
-                <span className="text-xs text-slate-500 font-medium">$</span>
+                <span className="text-sm text-slate-500 font-medium">$</span>
                 <input
                   type="number"
                   min={0}
@@ -111,7 +193,7 @@ function ProjectComponent() {
                   onChange={(e) => updateFilter("minPrice", e.target.value)}
                   className="w-16 bg-transparent text-sm focus:outline-none text-slate-800 placeholder-slate-400"
                 />
-                <span className="text-xs text-slate-300">-</span>
+                <span className="text-sm text-slate-300">-</span>
                 <input
                   type="number"
                   min={0}
@@ -137,7 +219,7 @@ function ProjectComponent() {
             {/* Clear Filters Button */}
             <button
               onClick={() => setFilters(emptyFilters)}
-              className="text-xs font-semibold text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-1.5 py-1 px-3 rounded-lg hover:bg-indigo-50"
+              className="text-sm font-semibold text-slate-500 hover:text-indigo-600 transition-colors flex items-center gap-1.5 py-1 px-3 rounded-lg hover:bg-indigo-50"
             >
               <svg
                 className="w-4 h-4"
@@ -169,95 +251,104 @@ function ProjectComponent() {
           </div>
         </div>
 
-        {/* Gigs Grid */}
-        {gigs.length > 0 ? (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {gigs.map((gig) => (
-              <Link
-                to={`${userRoutes.PROJECT_DETAILS}/${gig._id}`}
-                key={gig._id}
-                className="group flex flex-col bg-white rounded-2xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all duration-200 overflow-hidden"
-              >
-                {/* Thumbnail Image Container */}
-                <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
-                  <img
-                    src={
-                      gig.gallery && gig.gallery.length > 0
-                        ? gig.gallery[0]
-                        : "/placeholder.jpg"
-                    }
-                    alt={gig.title}
-                    className="w-full h-full object-cover"
-                  />
-                  {gig.pricing?.basic?.price && (
-                    <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-200/50">
-                      <span className="text-xs text-slate-500 font-medium">From </span>
-                      <span className="text-sm font-bold text-indigo-600">
-                        ${gig.pricing.basic.price}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Content */}
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div>
-                    {/* Title */}
-                    <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
-                      {gig.title}
-                    </h3>
-
-                    {/* Short Description */}
-                    <p className="text-xs text-slate-500 mt-2 line-clamp-2 leading-relaxed">
-                      {gig.pricing?.basic?.description}
-                    </p>
-                  </div>
-
-                  {/* Rating & Footer info */}
-                  <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
-                    <div className="flex items-center gap-1.5">
-                      <div className="flex text-amber-400">
-                        {[1, 2, 3, 4, 5].map((s) => (
-                          <svg
-                            key={s}
-                            className={`w-4 h-4 ${
-                              s <= Math.round(gig.freelancer?.rating?.average ?? 0)
-                                ? "fill-current"
-                                : "text-slate-200 fill-current"
-                            }`}
-                            viewBox="0 0 20 20"
-                          >
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95 4.146.018c.958.004 1.355 1.226.584 1.818l-3.36 2.455 1.287 3.951c.3.922-.756 1.688-1.541 1.125L10 13.011l-3.353 2.333c-.785.563-1.841-.203-1.541-1.125l1.287-3.951-3.36-2.455c-.77-.592-.374-1.814.584-1.818l4.146-.018 1.286-3.95z" />
-                          </svg>
-                        ))}
-                      </div>
-                      <span className="text-xs font-bold text-slate-800">
-                        {gig.freelancer?.rating?.average?.toFixed(1) ?? "—"}
-                      </span>
-                      <span className="text-xs text-slate-400">
-                        ({gig.freelancer?.rating?.count ?? 0})
-                      </span>
-                    </div>
-
-                    <span className="text-xs font-semibold text-slate-600 group-hover:text-indigo-600 transition-colors flex items-center gap-0.5">
-                      View details
-                      <svg
-                        className="w-3.5 h-3.5"
-                        fill="none"
-                        stroke="currentColor"
-                        viewBox="0 0 24 24"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth="2"
-                          d="M9 5l7 7-7 7"
+        {/* Gigs Grid Chunked in 6 (2 rows) with Banners */}
+        {chunkedGigs.length > 0 ? (
+          <div>
+            {chunkedGigs.map((group, chunkIndex) => (
+              <div key={chunkIndex}>
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {group.map((gig) => (
+                    <Link
+                      to={`${userRoutes.PROJECT_DETAILS}/${gig._id}`}
+                      key={gig._id}
+                      className="group flex flex-col bg-white rounded-2xl border border-slate-200 hover:border-indigo-300 hover:shadow-md transition-all duration-200 overflow-hidden"
+                    >
+                      {/* Thumbnail Image Container */}
+                      <div className="relative aspect-[16/10] overflow-hidden bg-slate-100">
+                        <img
+                          src={
+                            gig.gallery && gig.gallery.length > 0
+                              ? gig.gallery[0]
+                              : "/placeholder.jpg"
+                          }
+                          alt={gig.title}
+                          className="w-full h-full object-cover"
                         />
-                      </svg>
-                    </span>
-                  </div>
+                        {gig.pricing?.basic?.price && (
+                          <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-200/50">
+                            <span className="text-sm text-slate-500 font-medium">From </span>
+                            <span className="text-sm font-bold text-indigo-600">
+                              ${gig.pricing.basic.price}
+                            </span>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-5 flex-1 flex flex-col justify-between">
+                        <div>
+                          {/* Title */}
+                          <h3 className="text-base font-bold text-slate-900 group-hover:text-indigo-600 transition-colors line-clamp-1">
+                            {gig.title}
+                          </h3>
+
+                          {/* Short Description */}
+                          <p className="text-sm text-slate-500 mt-2 line-clamp-2 leading-relaxed">
+                            {gig.pricing?.basic?.description}
+                          </p>
+                        </div>
+
+                        {/* Rating & Footer info */}
+                        <div className="mt-5 pt-4 border-t border-slate-100 flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <div className="flex text-amber-400">
+                              {[1, 2, 3, 4, 5].map((s) => (
+                                <svg
+                                  key={s}
+                                  className={`w-4 h-4 ${
+                                    s <= Math.round(gig.freelancer?.rating?.average ?? 0)
+                                      ? "fill-current"
+                                      : "text-slate-200 fill-current"
+                                  }`}
+                                  viewBox="0 0 20 20"
+                                >
+                                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.286 3.95 4.146.018c.958.004 1.355 1.226.584 1.818l-3.36 2.455 1.287 3.951c.3.922-.756 1.688-1.541 1.125L10 13.011l-3.353 2.333c-.785.563-1.841-.203-1.541-1.125l1.287-3.951-3.36-2.455c-.77-.592-.374-1.814.584-1.818l4.146-.018 1.286-3.95z" />
+                                </svg>
+                              ))}
+                            </div>
+                            <span className="text-sm font-bold text-slate-800">
+                              {gig.freelancer?.rating?.average?.toFixed(1) ?? "—"}
+                            </span>
+                            <span className="text-sm text-slate-400">
+                              ({gig.freelancer?.rating?.count ?? 0})
+                            </span>
+                          </div>
+
+                          <span className="text-sm font-semibold text-slate-600 group-hover:text-indigo-600 transition-colors flex items-center gap-0.5">
+                            View details
+                            <svg
+                              className="w-3.5 h-3.5"
+                              fill="none"
+                              stroke="currentColor"
+                              viewBox="0 0 24 24"
+                            >
+                              <path
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                                strokeWidth="2"
+                                d="M9 5l7 7-7 7"
+                              />
+                            </svg>
+                          </span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
-              </Link>
+
+                {/* Render Banner between chunks (not after the final chunk) */}
+                {chunkIndex < chunkedGigs.length - 1 && renderBanner(chunkIndex)}
+              </div>
             ))}
           </div>
         ) : (
@@ -281,12 +372,12 @@ function ProjectComponent() {
             <h3 className="text-base font-bold text-slate-800">
               No services found
             </h3>
-            <p className="text-xs text-slate-500 mt-1">
+            <p className="text-sm text-slate-500 mt-1">
               Try adjusting your search criteria or clearing filters.
             </p>
             <button
               onClick={() => setFilters(emptyFilters)}
-              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-xs font-semibold hover:bg-indigo-700 transition-colors"
+              className="mt-4 px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-semibold hover:bg-indigo-700 transition-colors"
             >
               Clear All Filters
             </button>
