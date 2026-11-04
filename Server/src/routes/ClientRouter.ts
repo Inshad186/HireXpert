@@ -36,6 +36,7 @@ router.get("/my-orders", verifyTokenMiddleware, clientController.getMyOrders.bin
 router.patch("/accept-orders/:orderId", verifyTokenMiddleware, clientController.acceptOrders.bind(clientController))
 router.patch("/request-revision/:orderId", verifyTokenMiddleware, clientController.requestRevision.bind(clientController))
 router.post("/create-payment-intent", verifyTokenMiddleware, clientController.createPaymentIntent.bind(clientController))
-// router.get("/get-freelancer-reviews/:projectId", verifyTokenMiddleware, clientController.getFreelancerReviews.bind(clientController))
+router.get("/summary", verifyTokenMiddleware, clientController.getMySummary.bind(clientController));
+router.get("/clients/:clientId/summary", verifyTokenMiddleware, clientController.getPublicSummary.bind(clientController));
 
 export default router

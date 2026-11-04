@@ -4,9 +4,8 @@ import { useEffect, useState } from "react";
 import { getOrderList } from "@/api/freelancer.api";
 import { OrderDetail } from "@/types/user.type";
 import OrderModal from "./orderModal";
-// import { useMessaging } from "@/hooks/useMessaging";
 import { useMessagingContext } from "@/context/messagingContext";
-import { MessageSquare } from "lucide-react";
+import { MessageSquare, ShoppingBag, ArrowLeft, RefreshCw, Eye, CheckCircle2, Clock, AlertCircle } from "lucide-react";
 import { ChatModal } from "../chatModal";
 import { useSelector } from "react-redux";
 import { RootState } from "@/redux/store";
@@ -18,15 +17,14 @@ function ListedOrdersComp() {
   const [showModal, setShowModal] = useState(false);
   const [localError, setLocalError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [showChatModal, setShowChatModal] = useState(false)
+  const [showChatModal, setShowChatModal] = useState(false);
 
-  const freelancerId = useSelector((state: RootState) => state.user._id)
-  const freelancerName = useSelector((state: RootState) => state.user.name)
-  const {isConnected, isTyping, messages, sendMessage, markAsRead} = useMessagingContext()
+  const freelancerId = useSelector((state: RootState) => state.user._id);
+  const freelancerName = useSelector((state: RootState) => state.user.name);
+  const { isConnected, messages, markAsRead } = useMessagingContext();
 
-  const currentUserId = freelancerId
-  const currentUserName = freelancerName
-  
+  const currentUserId = freelancerId;
+  const currentUserName = freelancerName;
 
   useEffect(() => {
     const trackingOrders = async () => {
@@ -51,21 +49,21 @@ function ListedOrdersComp() {
 
   const getUnreadCount = (orderId: string) => {
     return messages.filter((msg) => 
-    msg.orderId === orderId &&
-    msg.senderId !== currentUserId &&
-    !msg.read
-    ).length
-  }
+      msg.orderId === orderId &&
+      msg.senderId !== currentUserId &&
+      !msg.read
+    ).length;
+  };
 
   const getStatusStyle = (status: string) => {
     switch (status) {
-      case "PENDING": return "bg-yellow-100 text-yellow-800 border-yellow-300";
-      case "ACCEPTED": return "bg-blue-100 text-blue-800 border-blue-300";
-      case "IN_PROGRESS": return "bg-blue-100 text-blue-800 border-blue-300";
-      case "DELIVERED": return "bg-green-100 text-green-800 border-green-300";
-      case "COMPLETED": return "bg-green-300 text-green-900 border-green-300";
-      case "CANCELLED": return "bg-red-100 text-red-800 border-red-300";
-      default: return "bg-gray-100 text-gray-800 border-gray-300";
+      case "PENDING": return "bg-amber-50 text-amber-700 border-amber-200/60";
+      case "ACCEPTED": return "bg-sky-50 text-sky-700 border-sky-200/60";
+      case "IN_PROGRESS": return "bg-indigo-50 text-indigo-700 border-indigo-200/60";
+      case "DELIVERED": return "bg-teal-50 text-teal-700 border-teal-200/60";
+      case "COMPLETED": return "bg-emerald-50 text-emerald-700 border-emerald-200/60";
+      case "CANCELLED": return "bg-rose-50 text-rose-700 border-rose-200/60";
+      default: return "bg-slate-100 text-slate-700 border-slate-200/60";
     }
   };
 
@@ -79,15 +77,15 @@ function ListedOrdersComp() {
   };
 
   const handleMessageClick = (order: OrderDetail) => {
-  setSelectedOrder(order);
-  setShowChatModal(true);
-  markAsRead(order._id as string);
+    setSelectedOrder(order);
+    setShowChatModal(true);
+    markAsRead(order._id as string);
   };
 
   const handleOrderModal = (order: OrderDetail) => {
     setSelectedOrder(order);
     setShowModal(true);
-    markAsRead(order._id as string)
+    markAsRead(order._id as string);
   };
 
   const handleRetry = () => {
@@ -98,182 +96,195 @@ function ListedOrdersComp() {
   // Loading state
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-100 py-10 px-4">
-        <div className="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl p-8">
-          <div className="text-center text-gray-600 py-20">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-gray-800 mx-auto mb-4"></div>
-            <p className="text-lg font-medium">Loading orders...</p>
-          </div>
+      <div className="min-h-screen bg-slate-50/60 py-10 px-4 sm:px-6 lg:px-8 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-3 text-slate-500 font-medium">
+          <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-indigo-600"></div>
+          <p>Loading your orders...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 py-10 px-4">
-      <div className="max-w-7xl mx-auto bg-white shadow-xl rounded-2xl p-8 border border-gray-200">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
+    <div className="min-h-screen bg-slate-100 py-10 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-6">
+        
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white p-6 rounded-3xl shadow-xs border border-slate-200/60 gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-800">My Orders</h1>
-            <p className="text-gray-600 mt-1">Manage and track all your orders</p>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">My Orders</h1>
+            <p className="text-sm font-medium text-slate-500 mt-0.5">Manage and track all client workflows and deliverables</p>
           </div>
-          <button
-            onClick={() => navigate(userRoutes.FREELANCER_DASH)}
-            className="bg-gray-800 hover:bg-gray-900 transition-colors text-white font-medium px-6 py-2 rounded-lg shadow-md flex items-center gap-2"
-          >
-            Back to Dashboard
-          </button>
+          
+          <div className="flex items-center gap-3">
+            {/* Live Connection Badge */}
+            <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-slate-50 border border-slate-200/60 text-xs font-bold text-slate-600">
+              <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+              {isConnected ? 'Live Connected' : 'Connecting...'}
+            </div>
+
+            <button
+              onClick={() => navigate(userRoutes.FREELANCER_DASH)}
+              className="inline-flex items-center gap-2 bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 font-bold px-4 py-2.5 rounded-2xl text-sm transition-all shadow-xs"
+            >
+              <ArrowLeft size={16} />
+              Dashboard
+            </button>
+          </div>
         </div>
 
         {/* Error State */}
         {localError && (
-          <div className="text-center bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-800">{localError}</p>
-            <div className="flex justify-center items-center mt-6">
-              <button
-                onClick={handleRetry}
-                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition"
-              >
-                Try Again
-              </button>
+          <div className="bg-rose-50 border border-rose-200 rounded-3xl p-6 text-center">
+            <p className="text-rose-800 font-semibold">{localError}</p>
+            <button
+              onClick={handleRetry}
+              className="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-rose-600 text-white text-xs font-bold rounded-xl hover:bg-rose-700 transition"
+            >
+              <RefreshCw size={14} /> Try Again
+            </button>
+          </div>
+        )}
+
+        {/* Stats Grid - 2 Rows (4 on top, 3 on bottom) */}
+        <div className="space-y-3">
+          {/* Top Row: 4 Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
+            <div className="bg-white p-4 rounded-2xl shadow-xs border border-slate-200/60">
+              <p className="text-slate-400 text-sm font-bold uppercase tracking-wider">Total Orders</p>
+              <p className="text-2xl font-black text-slate-900 mt-1">{ordersList.length}</p>
+            </div>
+            <div className="bg-white  p-4 rounded-2xl shadow-xs border border-slate-200/60">
+              <p className="text-amber-600 text-sm font-bold uppercase tracking-wider">Pending</p>
+              <p className="text-2xl font-black text-amber-700 mt-1">
+                {ordersList.filter((order) => order?.status === "PENDING").length}
+              </p>
+            </div>
+            <div className="bg-white  p-4 rounded-2xl shadow-xs border border-slate-200/60">
+              <p className="text-sky-600 text-sm font-bold uppercase tracking-wider">Accepted</p>
+              <p className="text-2xl font-black text-sky-700 mt-1">
+                {ordersList.filter((order) => order.status === "ACCEPTED").length}
+              </p>
+            </div>
+            <div className="bg-white  p-4 rounded-2xl shadow-xs border border-slate-200/60">
+              <p className="text-indigo-600 text-sm font-bold uppercase tracking-wider">In Progress</p>
+              <p className="text-2xl font-black text-indigo-700 mt-1">
+                {ordersList.filter((order) => order.status === "IN_PROGRESS").length}
+              </p>
             </div>
           </div>
-        )}
 
-        {/* Connection Status Indicator */}
-        <div className="mb-6 flex items-center gap-2">
-          <div className={`w-3 h-3 rounded-full ${isConnected ? 'bg-green-500' : 'bg-red-500'}`} />
-          <span className="text-sm text-gray-600">
-            {isConnected ? 'Connected' : 'Connecting...'}
-          </span>
-        </div>
-
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-          <div className="bg-gradient-to-br from-blue-100 to-blue-200 p-4 rounded-lg border border-blue-200">
-            <p className="text-blue-600 text-sm font-medium">Total Orders</p>
-            <p className="text-2xl font-bold text-blue-900">{ordersList.length}</p>
-          </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 p-4 rounded-lg border border-yellow-200">
-            <p className="text-yellow-600 text-sm font-medium">Pending</p>
-            <p className="text-2xl font-bold text-yellow-900">
-              {ordersList.filter((order) => order?.status === "PENDING").length}
-            </p>
-          </div>
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 p-4 rounded-lg border border-blue-200">
-            <p className="text-blue-600 text-sm font-medium">Accepted</p>
-            <p className="text-2xl font-bold text-blue-700">
-              {ordersList.filter((order) => order.status === "ACCEPTED").length}
-            </p>
-          </div>
-          <div className="bg-gradient-to-br from-purple-100 to-purple-200 p-4 rounded-lg border border-purple-200">
-            <p className="text-purple-600 text-sm font-medium">In Progress</p>
-            <p className="text-2xl font-bold text-purple-900">
-              {ordersList.filter((order) => order.status === "IN_PROGRESS")
-                .length}
-            </p>
-          </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 p-4 rounded-lg border border-green-200">
-            <p className="text-green-600 text-sm font-medium">Delivered</p>
-            <p className="text-2xl font-bold text-green-700">
-              {ordersList.filter((order) => order.status === "DELIVERED").length}
-            </p>
-          </div>
-          <div className="bg-gradient-to-br from-green-200 to-green-300 p-4 rounded-lg border border-green-200">
-            <p className="text-green-600 text-sm font-medium">Completed</p>
-            <p className="text-2xl font-bold text-green-900">
-              {ordersList.filter((order) => order.status === "COMPLETED").length}
-            </p>
-          </div>
-          <div className="bg-gradient-to-br from-red-50 to-red-100 p-4 rounded-lg border border-red-200">
-            <p className="text-red-600 text-sm font-medium">Cancelled</p>
-            <p className="text-2xl font-bold text-red-900">
-              {ordersList.filter((order) => order.status === "CANCELLED").length}
-            </p>
+          {/* Bottom Row: 3 Cards */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="bg-white  p-4 rounded-2xl shadow-xs border border-slate-200/60">
+              <p className="text-teal-600 text-sm font-bold uppercase tracking-wider">Delivered</p>
+              <p className="text-2xl font-black text-teal-700 mt-1">
+                {ordersList.filter((order) => order.status === "DELIVERED").length}
+              </p>
+            </div>
+            <div className="bg-white  p-4 rounded-2xl shadow-xs border border-slate-200/60">
+              <p className="text-emerald-600 text-sm font-bold uppercase tracking-wider">Completed</p>
+              <p className="text-2xl font-black text-emerald-700 mt-1">
+                {ordersList.filter((order) => order.status === "COMPLETED").length}
+              </p>
+            </div>
+            <div className="bg-white  p-4 rounded-2xl shadow-xs border border-slate-200/60">
+              <p className="text-rose-600 text-sm font-bold uppercase tracking-wider">Cancelled</p>
+              <p className="text-2xl font-black text-rose-700 mt-1">
+                {ordersList.filter((order) => order.status === "CANCELLED").length}
+              </p>
+            </div>
           </div>
         </div>
 
-        {/* Orders Table or Empty State */}
-        {ordersList.length === 0 ? (
-          <div className="text-center text-gray-600 py-20">
-            <p className="text-lg font-medium mb-3">No orders found yet.</p>
-            <p className="text-gray-500">Orders from clients will appear here.</p>
-          </div>
-        ) : (
-          <div className="overflow-x-auto rounded-lg border border-gray-300">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="bg-gray-800 text-white text-sm uppercase tracking-wider">
-                  <th className="p-4">#</th>
-                  <th className="p-4">Gig Title</th>
-                  <th className="p-4">Client</th>
-                  <th className="p-4">Amount</th>
-                  <th className="p-4">Order Date</th>
-                  <th className="p-4">Delivery Date</th>
-                  <th className="p-4 text-center">Status</th>
-                  <th className="p-4 text-center">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {ordersList.map((order, index) => (
-                  
-                  <tr
-                    key={order._id}
-                    className="border-t border-gray-200 hover:bg-gray-50 transition duration-200"
-                  >
-                    <td className="p-4 font-medium text-gray-700">{index + 1}</td>
-                    <td className="p-4 text-gray-800 font-medium">
-                      {order.gig?.title || "—"}
-                    </td>
-                    <td className="p-4 text-gray-600">{order.client?.name || "—"}</td>
-                    <td className="p-4 text-gray-800 font-semibold text-green-700">
-                      ₹{order.gig?.pricing.basic?.price.toFixed(2)}
-                    </td>
-                    <td className="p-4 text-center text-gray-600">
-                      {formatDate(order?.acceptedAt)}
-                    </td>
-                    <td className="p-4 text-center text-gray-600">
-                      {formatDate(order?.deliveredAt)}
-                    </td>
-                    <td className="p-4">
-                      <span
-                        className={`px-3 py-1 rounded-full text-xs font-semibold border ${getStatusStyle(
-                          order.status as string
-                        )}`}
-                      >
-                        {order.status}
-                      </span>
-                    </td>
-                    <td className="p-4 text-center">
-                      <div className="flex gap-2 justify-center">
-                      <button
-                        onClick={() => handleMessageClick(order)}
-                        className="hover:text-purple-800 text-purple-600 px-3 py-2 text-sm font-medium transition-colors flex items-center gap-1 relative"
-                        title="Message Client">
-                        <MessageSquare size={16} />
-                        {getUnreadCount(order._id as string) > 0 && (
-                          <span className="absolute -top-1 -left-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold">
-                            {getUnreadCount(order._id as string)}
-                          </span>
-                        )}
-                        Message
-                      </button>
-                        <button
-                          onClick={() => handleOrderModal(order)}
-                          className="bg-green-500 hover:bg-green-700 text-white px-3 py-2 rounded-lg text-sm font-medium transition-colors"
-                        >
-                          Details
-                        </button>
-                      </div>
-                    </td>
+        {/* Orders Table Container */}
+        <div className="bg-white rounded-3xl shadow-xs border border-slate-200/60 overflow-hidden">
+          {ordersList.length === 0 ? (
+            <div className="py-20 px-6 text-center">
+              <div className="w-16 h-16 bg-indigo-50 text-indigo-600 rounded-3xl flex items-center justify-center mx-auto mb-4">
+                <ShoppingBag size={28} />
+              </div>
+              <h3 className="text-lg font-bold text-slate-900 mb-1">No orders found yet</h3>
+              <p className="text-sm text-slate-500 max-w-sm mx-auto">Orders from clients will appear here once booked.</p>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse bg-white border">
+                <thead>
+                  <tr className="bg-indigo-700 border-b border-slate-200/60 text-white text-xs uppercase tracking-wider font-extrabold">
+                    <th className="py-4 px-6">#</th>
+                    <th className="py-4 px-6">Gig Title</th>
+                    <th className="py-4 px-6">Client</th>
+                    <th className="py-4 px-6">Amount</th>
+                    <th className="py-4 px-6 text-center">Order Date</th>
+                    <th className="py-4 px-6 text-center">Delivery Date</th>
+                    <th className="py-4 px-6">Status</th>
+                    <th className="py-4 px-6 text-center">Actions</th>
                   </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
+                </thead>
+                <tbody className="divide-y divide-slate-100 text-sm">
+                  {ordersList.map((order, index) => (
+                    <tr
+                      key={order._id}
+                      className="hover:bg-slate-50/50 transition-colors duration-150"
+                    >
+                      <td className="py-4 px-6 text-slate-500 font-bold">#{index + 1}</td>
+                      <td className="py-4 px-6 text-slate-800 font-semibold max-w-xs truncate">
+                        {order.gig?.title || "—"}
+                      </td>
+                      <td className="py-4 px-6 font-medium text-slate-600">{order.client?.name || "—"}</td>
+                      <td className="py-4 px-6 font-black text-emerald-600">
+                        ₹{order.gig?.pricing?.basic?.price?.toFixed(2) || "0.00"}
+                      </td>
+                      <td className="py-4 px-6 text-center text-slate-500 font-medium">
+                        {formatDate(order?.acceptedAt)}
+                      </td>
+                      <td className="py-4 px-6 text-center text-slate-500 font-medium">
+                        {formatDate(order?.deliveredAt)}
+                      </td>
+                      <td className="py-4 px-6">
+                        <span
+                          className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-bold border ${getStatusStyle(
+                            order.status as string
+                          )}`}
+                        >
+                          {order.status}
+                        </span>
+                      </td>
+                      <td className="py-4 px-6 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            onClick={() => handleMessageClick(order)}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 rounded-xl transition-colors relative"
+                            title="Message Client"
+                          >
+                            <MessageSquare size={14} />
+                            <span>Chat</span>
+                            {getUnreadCount(order._id as string) > 0 && (
+                              <span className="absolute -top-1 -right-1 bg-rose-500 text-white text-[10px] rounded-full w-4 h-4 flex items-center justify-center font-bold">
+                                {getUnreadCount(order._id as string)}
+                              </span>
+                            )}
+                          </button>
+                          
+                          <button
+                            onClick={() => handleOrderModal(order)}
+                            className="inline-flex items-center gap-1.5 px-3 py-2 text-xs font-bold text-white bg-indigo-600 hover:bg-indigo-700 rounded-xl transition-colors shadow-xs"
+                          >
+                            <Eye size={14} />
+                            <span>Details</span>
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
 
+        {/* Order Modal */}
         {selectedOrder && (
           <OrderModal
             isOpen={showModal}
@@ -284,7 +295,7 @@ function ListedOrdersComp() {
             orderId={selectedOrder._id as string}
             title={selectedOrder.gig?.title as string}
             client={selectedOrder.client?.name as string}
-            amount={selectedOrder.gig?.pricing.basic?.price as number}
+            amount={selectedOrder.gig?.pricing?.basic?.price as number}
             status={selectedOrder.status as string}
             requirements={selectedOrder.requirements as string}
           />

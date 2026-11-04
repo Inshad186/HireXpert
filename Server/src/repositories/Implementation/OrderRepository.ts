@@ -85,4 +85,8 @@ export class OrderRepository extends BaseRepository<OrderType> implements IOrder
         .sort({createdAt: -1})
     }
 
+    async existsOrderBetween(clientId: string, freelancerId: string): Promise<boolean> {
+    return !!(await Order.exists({ client: clientId, freelancer: freelancerId }));
+    }
+
 }

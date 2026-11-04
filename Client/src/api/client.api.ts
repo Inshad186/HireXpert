@@ -106,3 +106,25 @@ export const request_Revision = async(orderId: string, revisionReason: string ) 
         return { success: false, error: message}
     }    
 }
+
+export const getMySummary = async() => {
+    try {
+        const { data } = await Api.get(clientEndpointUrl.GET_MY_SUMMARY);
+        return { success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return { success: false, error: message}
+    }
+}
+
+export const getClientSummary = async(clientId: string) => {
+    try {
+        const {data} = await Api.get(`${clientEndpointUrl.GET_CLIENT_SUMMARY}/${clientId}/summary`)
+        return {success: true, data}
+    } catch (error) {
+        const err = error as any
+        const message = err.response?.data?.error || "Something went wrong"
+        return { success: false, error: message}
+    }
+}

@@ -28,7 +28,7 @@ import ListedGig from "@/pages/user/ListedGig";
 import FreelancerOnboardingPage from "@/pages/user/FreelancerOnboardingPage";
 import FreelancerDashboardPage from "@/pages/user/FreelancerDashboardPage";
 import ListedOrder from "@/pages/user/ListedOrder";
-import EarningsCards from "@/pages/user/EarningCards";
+import EarningsCards from "@/pages/user/FreelancerEarnings";
 
 
 //! Admin
@@ -52,14 +52,18 @@ export const router = createBrowserRouter([
   {path: "resetPassword", element: <PublicRoute><ResetPassword/></PublicRoute>},
 
   //! Freelancer onboarding
-  {path: "freelancer-requirements", element: <PrivateRoute><FreelancerRequirements/></PrivateRoute>},
-  {path: "complete-profile", element: <PrivateRoute><CompleteFreelancerProfile/></PrivateRoute>},
-  {path: "create-gig", element: <PrivateRoute><Gig/></PrivateRoute>},
-  {path: "listed-gig", element: <PrivateRoute><ListedGig/></PrivateRoute>},
-  {path: "listed-order", element: <PrivateRoute><ListedOrder/></PrivateRoute>},
-  {path: "freelancer-dashboard", element: <PrivateRoute><FreelancerDashboardPage/></PrivateRoute>},
-  {path: "freelancer-onboarding", element: <PrivateRoute><FreelancerOnboardingPage/></PrivateRoute>},
-  {path: "freelancer-earnings", element: <PrivateRoute><EarningsCards/></PrivateRoute>},
+  {element: <AppLayout/>,
+    children: [
+      {path: "freelancer-requirements", element: <PrivateRoute><FreelancerRequirements/></PrivateRoute>},
+      {path: "complete-profile", element: <PrivateRoute><CompleteFreelancerProfile/></PrivateRoute>},
+      {path: "create-gig", element: <PrivateRoute><Gig/></PrivateRoute>},
+      {path: "listed-gig", element: <PrivateRoute><ListedGig/></PrivateRoute>},
+      {path: "listed-order", element: <PrivateRoute><ListedOrder/></PrivateRoute>},
+      {path: "freelancer-dashboard", element: <PrivateRoute><FreelancerDashboardPage/></PrivateRoute>},
+      {path: "freelancer-onboarding", element: <PrivateRoute><FreelancerOnboardingPage/></PrivateRoute>},
+      {path: "freelancer-earnings", element: <PrivateRoute><EarningsCards/></PrivateRoute>},
+    ]
+  },
 
   //! Main app
   {element: <AppLayout/>,

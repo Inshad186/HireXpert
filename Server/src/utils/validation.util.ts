@@ -48,3 +48,20 @@ const loginValidation = {
 }
 
 export { signupValidation, loginValidation }
+
+
+
+
+export const isHttpUrl = (value: string, hostEndsWith?: string): boolean => {
+  try {
+    const url = new URL(value);
+    if (!["http:", "https:"].includes(url.protocol)) return false;
+    if (url.username || url.password) return false;
+    if (!hostEndsWith) return true;
+
+    const host = url.hostname;
+    return host === hostEndsWith || host.endsWith(`.${hostEndsWith}`);
+  } catch {
+    return false;
+  }
+};

@@ -1,34 +1,32 @@
-import Sidebar from '../common/Sidebar'
 import { freelancerDashStats, getOrderList, startStripeOnboarding, getStripeStatus } from '@/api/freelancer.api'
 import { useEffect, useState } from 'react'
 import { getProfileImage } from '@/api/user.api'
 import { NotificationBell } from '../notificationBell'
 import toast from 'react-hot-toast'
-import { CheckCircle, AlertCircle, Loader } from 'lucide-react'
+import { CheckCircle2, AlertCircle, Loader2, Wallet, ShoppingBag, Briefcase, ArrowUpRight, ShieldCheck } from 'lucide-react'
 
 function FreelancerDashboard() {
-
   interface Order {
-  _id: string
-  client: {
-    name: string
+    _id: string
+    client: {
+      name: string
+    }
+    gig: {
+      title: string
+    }
+    plan: string
+    status: string
   }
-  gig: {
-    title: string
+
+  interface DashStats {
+    totalOrders: number;
+    myGigs: number;
+    activeOrders: number;
+    totalEarned: number;
+    inEscrow: number;
   }
-  plan: string
-  status: string
-}
 
-interface DashStats {
-  totalOrders: number;
-  myGigs: number;
-  activeOrders: number;
-  totalEarned: number;
-  inEscrow: number;
-}
-
-  const [dashboardStats, setDashboardStats] = useState<DashStats>({ totalOrders: 0, myGigs:0, activeOrders:0, totalEarned: 0, inEscrow: 0 })
+  const [dashboardStats, setDashboardStats] = useState<DashStats>({ totalOrders: 0, myGigs: 0, activeOrders: 0, totalEarned: 0, inEscrow: 0 })
   const [profile, setProfile] = useState("")
   const [orderList, setOrderList] = useState<Order[]>([])
   const [userId, setUserId] = useState<string | null>(null)
@@ -36,8 +34,7 @@ interface DashStats {
   const [stripeLoading, setStripeLoading] = useState(false)
   const [stripeChecking, setStripeChecking] = useState(false)
 
-
-    useEffect(() => {
+  useEffect(() => {
     try {
       const persistuser = localStorage.getItem("persist:user")
       if (persistuser) {
@@ -73,22 +70,11 @@ interface DashStats {
   const money = (n: number) =>
     n.toLocaleString("en-US", { style: "currency", currency: "USD" })
 
-  const statCards = [
-    { title: "Total Orders", value: dashboardStats.totalOrders },
-    { title: "My Gigs", value: dashboardStats.myGigs },
-    { title: "Active Orders", value: dashboardStats.activeOrders },
-    {
-      title: "Total Earned",
-      value: money(dashboardStats.totalEarned),
-      note: `${money(dashboardStats.inEscrow)} in escrow`,
-    },
-  ]
-
-  const checkStripeStatus = async() => {
+  const checkStripeStatus = async () => {
     try {
       setStripeChecking(true)
       const response = await getStripeStatus()
-      if(response.success){
+      if (response.success) {
         setStripeStatus(response.data.status)
       }
     } catch (error) {
@@ -99,13 +85,13 @@ interface DashStats {
     }
   }
 
-  const handleStripeConnect = async() => {
+  const handleStripeConnect = async () => {
     try {
       setStripeLoading(true)
       const response = await startStripeOnboarding()
-      if(response.success && response.data.result.onboardingUrl){
+      if (response.success && response.data.result.onboardingUrl) {
         window.location.href = response.data.result.onboardingUrl
-      }else{
+      } else {
         toast.error(response.error || "Failed to start onboarding")
       }
     } catch (error) {
@@ -118,118 +104,184 @@ interface DashStats {
 
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'PENDING': return 'bg-yellow-100 text-yellow-700';
-      case 'ACCEPTED': return 'bg-blue-100 text-blue-700';
-      case 'IN_PROGRESS': return 'bg-purple-100 text-purple-700';
-      case 'DELIVERED': return 'bg-green-100 text-green-700';
-      case 'COMPLETED': return 'bg-emerald-100 text-emerald-700';
-      default: return 'bg-gray-200 text-gray-700';
+      case 'PENDING': return 'bg-amber-50 text-amber-700 border-amber-200/60';
+      case 'ACCEPTED': return 'bg-sky-50 text-sky-700 border-sky-200/60';
+      case 'IN_PROGRESS': return 'bg-indigo-50 text-indigo-700 border-indigo-200/60';
+      case 'DELIVERED': return 'bg-teal-50 text-teal-700 border-teal-200/60';
+      case 'COMPLETED': return 'bg-emerald-50 text-emerald-700 border-emerald-200/60';
+      default: return 'bg-slate-100 text-slate-700 border-slate-200/60';
     }
   };
 
   return (
-    <div className="flex h-[85vh] mt-16 bg-gradient-to-br from-gray-50 to-gray-100 shadow-xl max-w-7xl mx-auto rounded-2xl overflow-hidden">
-      <Sidebar />
+    <div className="min-h-screen bg-slate-100 py-4 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto space-y-8">
+        
+        {/* Header Section */}
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center bg-white px-6 py-3 rounded-3xl shadow-lg border border-slate-200/60 gap-4">
+          <div>
+            <h1 className="text-2xl font-black text-slate-900 tracking-tight">Freelancer Overview</h1>
+            <p className="text-sm font-medium text-slate-500 mt-0.5">Welcome back! Here's how your business is performing.</p>
+          </div>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col p-8 overflow-auto">
-        {/* Header */}
-        <div className="flex justify-between items-center mb-8">
-          <h1 className="text-2xl font-bold text-gray-800">Freelancer Dashboard</h1>
-
-          {/* Right Section (Bell + Profile Image) */}
           <div className="flex items-center gap-4">
-            {userId && <NotificationBell userId={userId} />}
-
-            <img
-              className="h-10 w-10 rounded-full border-2 shadow-sm hover:scale-150 duration-300"
-              src={profile || "image"}
-              alt="Freelancer"
-            />
+            {userId && (
+              <div className="p-2 bg-slate-50 rounded-2xl border border-slate-100">
+                <NotificationBell userId={userId} />
+              </div>
+            )}
+            <div className="relative group">
+              <img
+                className="h-12 w-12 rounded-2xl object-cover ring-2 ring-indigo-600/20 shadow-sm group-hover:ring-indigo-600 transition-all duration-300"
+                src={profile || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150"}
+                alt="Freelancer Profile"
+              />
+            </div>
           </div>
         </div>
 
-        {/* STRIPE CONNECTION CARD - ADD THIS */}
-        <div className="bg-gradient-to-r from-blue-50 to-indigo-50 border-2 border-blue-200 rounded-xl p-6 mb-8 shadow-md">
-          <div className="flex items-center justify-between">
-            <div className="flex-1">
-              <h3 className="text-lg font-bold text-gray-800 mb-2">💳 Stripe Account</h3>
+        {/* Stripe Connection Card */}
+        <div className="relative overflow-hidden bg-gradient-to-r from-indigo-900 via-indigo-800 to-indigo-950 text-white rounded-3xl p-8 shadow-xl border border-indigo-700/50">
+          <div className="absolute -right-10 -bottom-10 w-64 h-64 bg-indigo-600/20 rounded-full blur-3xl pointer-events-none"></div>
+          
+          <div className="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
+            <div className="space-y-2 max-w-xl">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-200 text-xs font-bold tracking-wider uppercase border border-indigo-400/30">
+                <ShieldCheck size={14} /> Payout Gateway
+              </div>
+              <h3 className="text-2xl font-black tracking-tight">Stripe Payout Account</h3>
               
               {stripeChecking ? (
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Loader size={18} className="animate-spin" />
-                  <p>Checking account status...</p>
+                <div className="flex items-center gap-2.5 text-indigo-200 text-sm">
+                  <Loader2 size={18} className="animate-spin" />
+                  <p>Verifying secure connection status...</p>
                 </div>
               ) : stripeStatus === "connected" ? (
-                <div className="flex items-center gap-2 text-green-600">
-                  <CheckCircle size={20} />
+                <div className="flex items-center gap-3 text-emerald-300">
+                  <CheckCircle2 size={22} className="text-emerald-400 shrink-0" />
                   <div>
-                    <p className="font-semibold">Account Connected ✓</p>
-                    <p className="text-sm">Ready to receive payments!</p>
+                    <p className="font-bold text-base">Account Connected & Verified</p>
+                    <p className="text-xs text-indigo-200">You are fully set up to receive direct payouts from client orders.</p>
                   </div>
                 </div>
               ) : stripeStatus === "pending" ? (
-                <div className="flex items-center gap-2 text-orange-600">
-                  <AlertCircle size={20} />
+                <div className="flex items-center gap-3 text-amber-300">
+                  <AlertCircle size={22} className="text-amber-400 shrink-0" />
                   <div>
-                    <p className="font-semibold">Verification Pending</p>
-                    <p className="text-sm">Stripe is verifying your account (1-3 business days)</p>
+                    <p className="font-bold text-base">Verification In Progress</p>
+                    <p className="text-xs text-indigo-200">Stripe is reviewing your documentation (usually takes 1-3 business days).</p>
                   </div>
                 </div>
               ) : (
-                <div>
-                  <p className="text-gray-700 mb-3">Connect your bank account to receive payments from clients</p>
-                  <button
-                    onClick={handleStripeConnect}
-                    disabled={stripeLoading}
-                    className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:bg-gray-400 font-semibold transition duration-200"
-                  >
-                    {stripeLoading ? "Connecting..." : "Connect Stripe Account"}
-                  </button>
-                </div>
+                <p className="text-indigo-200 text-sm leading-relaxed">
+                  Link your bank account securely with Stripe to enable swift order payments and secure escrow releases.
+                </p>
               )}
             </div>
+
+            {stripeStatus !== "connected" && !stripeChecking && (
+              <button
+                onClick={handleStripeConnect}
+                disabled={stripeLoading}
+                className="inline-flex items-center gap-2 px-6 py-3.5 bg-white text-indigo-950 font-bold text-sm rounded-2xl hover:bg-indigo-50 active:scale-95 disabled:opacity-50 transition-all duration-200 shadow-lg"
+              >
+                {stripeLoading ? (
+                  <>
+                    <Loader2 size={16} className="animate-spin" />
+                    Connecting...
+                  </>
+                ) : (
+                  <>
+                    Connect Stripe Account
+                    <ArrowUpRight size={18} />
+                  </>
+                )}
+              </button>
+            )}
           </div>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-6 mb-10">
-          {statCards.map((item) => (
-            <div key={item.title} className="bg-white shadow-lg rounded-xl p-6 hover:scale-[1.02] hover:shadow-2xl transition-all duration-300">
-              <p className="text-gray-500 font-medium">{item.title}</p>
-              <p className="text-3xl font-semibold text-gray-800 mt-2">{item.value}</p>
-              {item.note && <p className="text-xs text-gray-400 mt-1">{item.note}</p>}
+        {/* Stats Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-200/60 hover:shadow-md transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-bold uppercase tracking-wider text-slate-500">Total Orders</span>
+              <div className="p-2 bg-indigo-50 text-indigo-600 rounded-xl group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                <ShoppingBag size={18} />
+              </div>
             </div>
-          ))}
+            <p className="text-2xl font-black text-slate-900">{dashboardStats.totalOrders}</p>
+          </div>
+
+          <div className="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-200/60 hover:shadow-md transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-bold uppercase tracking-wider text-slate-500">My Gigs</span>
+              <div className="p-2 bg-purple-50 text-purple-600 rounded-xl group-hover:bg-purple-600 group-hover:text-white transition-colors">
+                <Briefcase size={18} />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-slate-900">{dashboardStats.myGigs}</p>
+          </div>
+
+          <div className="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-200/60 hover:shadow-md transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-bold uppercase tracking-wider text-slate-500">Active Orders</span>
+              <div className="p-2 bg-sky-50 text-sky-600 rounded-xl group-hover:bg-sky-600 group-hover:text-white transition-colors">
+                <ShoppingBag size={18} />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-slate-900">{dashboardStats.activeOrders}</p>
+          </div>
+
+          <div className="bg-white px-5 py-4 rounded-2xl shadow-sm border border-slate-200/60 hover:shadow-md transition-all duration-300 group">
+            <div className="flex items-center justify-between mb-1">
+              <span className="text-sm font-bold uppercase tracking-wider text-slate-500">Total Earned</span>
+              <div className="p-2 bg-emerald-50 text-emerald-600 rounded-xl group-hover:bg-emerald-600 group-hover:text-white transition-colors">
+                <Wallet size={18} />
+              </div>
+            </div>
+            <p className="text-2xl font-black text-slate-900">{money(dashboardStats.totalEarned)}</p>
+            {dashboardStats.inEscrow > 0 && (
+              <p className="text-[11px] font-semibold text-emerald-600 mt-0.5">
+                {money(dashboardStats.inEscrow)} in escrow
+              </p>
+            )}
+          </div>
         </div>
         
-        {/* Orders Table */}
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <h2 className="text-xl font-semibold mb-4 text-gray-700">Recent Orders</h2>
+        {/* Recent Orders Table Section */}
+        <div className="bg-white rounded-3xl shadow-lg border border-slate-200/60 overflow-hidden">
+          <div className="px-6 py-3 border-b border-slate-100 flex items-center justify-between">
+            <div>
+              <h2 className="text-lg font-black text-slate-900 tracking-tight">Recent Orders</h2>
+              <p className="text-xs font-medium text-slate-500 mt-0.5">Track and manage your client order workflows</p>
+            </div>
+          </div>
+
           <div className="overflow-x-auto">
             <table className="w-full border-collapse">
               <thead>
-                <tr className="bg-gray-600 border-b border-gray-300 text-white text-sm">
-                  <th className="text-left p-4 font-semibold">Order ID</th>
-                  <th className="text-left p-4 font-semibold">Client</th>
-                  <th className="text-left p-4 px-28 font-semibold">Gig</th>
-                  <th className="text-left p-4 font-semibold">Plan</th>
-                  <th className="text-left p-4 font-semibold">Status</th>
+                <tr className="bg-indigo-700 border-b border-slate-200/60 text-white text-xs uppercase tracking-wider font-extrabold">
+                  <th className="text-left py-4 px-6">Order ID</th>
+                  <th className="text-left py-4 px-6">Client</th>
+                  <th className="text-left py-4 px-6">Gig Title</th>
+                  <th className="text-left py-4 px-6">Plan</th>
+                  <th className="text-left py-4 px-6">Status</th>
                 </tr>
               </thead>
-              <tbody>
+              <tbody className="divide-y divide-slate-100 text-sm">
                 {orderList.length > 0 ? (
                   orderList.map((list, index) => (
                     <tr
                       key={index}
-                      className="border-b border-gray-200 hover:bg-gray-100 transition-colors duration-200"
+                      className="hover:bg-indigo-200 transition-colors duration-150"
                     >
-                      <td className="p-4 text-gray-700 font-medium">#{index + 1}</td>
-                      <td className="p-4 text-gray-600">{list?.client?.name}</td>
-                      <td className="p-4 text-gray-600">{list?.gig?.title}</td>
-                      <td className="p-4 text-gray-600">{list?.plan}</td>
-                      <td className="p-4">
-                        <span className={`px-3 py-1 text-xs font-semibold rounded-full ${getStatusColor(list.status)}`}>
+                      <td className="py-4 px-6 text-slate-500 font-bold">#{index + 1}</td>
+                      <td className="py-4 px-6 font-semibold text-slate-800">{list?.client?.name}</td>
+                      <td className="py-4 px-6 text-slate-600 max-w-xs truncate font-medium">{list?.gig?.title}</td>
+                      <td className="py-4 px-6 text-slate-600 font-medium capitalize">{list?.plan}</td>
+                      <td className="py-4 px-6">
+                        <span className={`inline-flex items-center px-3 py-1 text-xs font-bold rounded-full border ${getStatusColor(list.status)}`}>
                           {list?.status}
                         </span>
                       </td>
@@ -237,15 +289,16 @@ interface DashStats {
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="p-4 text-center text-gray-500">
-                      No orders found
-                    </td>           
+                    <td colSpan={5} className="py-12 text-center text-slate-400 font-medium">
+                      No recent orders found.
+                    </td>          
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
         </div>
+
       </div>
     </div>
   )

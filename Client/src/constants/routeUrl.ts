@@ -12,7 +12,7 @@ export const userRoutes = {
     CONTACT_US : '/contact',
     PROJECTS : "/projects",
     FREELANCER_DASH : "/freelancer-dashboard",
-    Freelancer_REQUIREMENTS : "/freelancer-requirements",
+    FREELANCER_REQUIREMENTS : "/freelancer-requirements",
     COMPLETE_PROFILE : "/complete-profile",
     CREATE_GIG : "/create-gig",
     LISTED_GIG : "/listed-gig",

@@ -110,7 +110,7 @@ export function StripePaymentForm({
         <button
           type="submit"
           disabled={!stripe || loading}
-          className="w-full bg-blue-600 text-white font-medium py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
+          className="w-full bg-indigo-600 text-white font-medium py-3 rounded-lg hover:bg-indigo-800 disabled:bg-gray-400 disabled:cursor-not-allowed transition"
         >
           {loading ? "Processing Payment..." : `Pay ₹${planPrice}`}
         </button>

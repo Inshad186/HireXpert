@@ -12,18 +12,15 @@ import { Types } from "mongoose";
 import { io } from "@/socket/socket";
 import { NotificationService } from "./NotificationService";
 import { stripe } from "@/config/stripe.config";
-
-const PLATFORM_FEE_RATE = 0.2;
-
-const CLIENT_FIELDS = [
-  "name", "accountType", "companyName", "companySize", "about", "website",
-  "industry", "address", "country", "workType", "budgetRange", "preferredTechStack",
-] as const;
-
-const MAX_LENGTH: Record<string, number> = { about: 500, website: 200, address: 200, preferredTechStack: 200, budgetRange: 50 };
-const ACCOUNT_TYPES = ["individual", "company"];
-const COMPANY_SIZES = ["1", "2-10", "11-50", "51-200", "200+"];
-const WORK_TYPES = ["Short-term", "Long-term", "Both"];
+import { PLATFORM_FEE_RATE } from "@/constants/payment.constant";
+import { CLIENT_FIELDS } from "@/constants/profile.constants";
+import { MAX_LENGTH } from "@/constants/profile.constants";
+import { ACCOUNT_TYPES } from "@/constants/profile.constants";
+import { COMPANY_SIZES } from "@/constants/profile.constants";
+import { WORK_TYPES } from "@/constants/profile.constants";
+import { BUDGET_RANGES } from "@/constants/profile.constants";
+import { spentRange } from "@/constants/profile.constants";
+import { isHttpUrl } from "@/utils/validation.util";
 
 export class ClientService implements IClientService {
   constructor(
@@ -68,22 +65,24 @@ export class ClientService implements IClientService {
       if (updates.workType && !WORK_TYPES.includes(updates.workType)) {
         throw generateHttpError(HttpStatus.BAD_REQUEST, "Invalid work type");
       }
-      if (updates.website) {
-        try {
-          const url = new URL(updates.website);
-          if (!["http:", "https:"].includes(url.protocol)) throw new Error();
-        } catch {
-          throw generateHttpError(HttpStatus.BAD_REQUEST, "Website must start with http:// or https://");
-        }
+      if (updates.website && !isHttpUrl(updates.website)) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Website must start with http:// or https://");
+      }
+      if (updates.linkedinUrl && !isHttpUrl(updates.linkedinUrl, "linkedin.com")) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Please enter a valid LinkedIn link");
+      }
+      if (updates.budgetRange && !BUDGET_RANGES.includes(updates.budgetRange)) {
+        throw generateHttpError(HttpStatus.BAD_REQUEST, "Invalid budget range");
       }
 
       // 3. A company account needs a company name
       const accountType = updates.accountType ?? profile.accountType;
       const companyName = updates.companyName ?? profile.companyName;
-      if (accountType === "company" && !companyName) {
+      const onlyChoosingType = Object.keys(updates).length === 1 && "accountType" in updates;
+
+      if (!onlyChoosingType && accountType === "company" && !companyName) {
         throw generateHttpError(HttpStatus.BAD_REQUEST, "Company name is required for a company account");
       }
-
       const updated = await this.clientRepository.findByIdAndUpdate(userId, updates);
       return (updated ?? profile) as ClientProfileType;
     } catch (error) {
@@ -432,5 +431,49 @@ export class ClientService implements IClientService {
       console.error(error);
       throw error;
     }
+  }
+
+  async getMySummary(clientId: string) {
+    const profile: any = await this.clientRepository.findById(clientId);
+    if (!profile) throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
+    console.log("GET MY SUMMARY FROM SERVICE >>>>>>>>>>>>>>>>>>>>>   >>>>>>>>>>>>>>>>>> ")
+    const stats = await this.clientRepository.getClientStats(clientId);
+    return {
+      accountType: profile.accountType ?? "individual",
+      displayName: profile.accountType === "company" && profile.companyName ? profile.companyName : profile.name,
+      memberSince: profile.createdAt,
+      ...stats,                       // exact numbers: totalSpent, inEscrow, and so on
+      totalSpentRange: spentRange(stats.totalSpent),
+    };
+  }
+
+  async getPublicSummary(clientId: string, freelancerId: string) {
+    if (!Types.ObjectId.isValid(clientId)) throw generateHttpError(HttpStatus.BAD_REQUEST, "Invalid client id");
+
+    console.log("GET PUBLIC SUMMARY FROM SERVICE >>>>>>>>>>>>>>>>>>>>>   >>>>>>>>>>>>>>>>>> ")
+    // Only a freelancer who has an order with this client can see the summary
+    const related = await this.orderRepository.existsOrderBetween(clientId, freelancerId);
+    if (!related) throw generateHttpError(HttpStatus.FORBIDDEN, "You cannot view this client");
+
+    const profile: any = await this.clientRepository.findById(clientId);
+    if (!profile) throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
+
+    const stats = await this.clientRepository.getClientStats(clientId);
+
+    // Choose the safe fields here. Never send address, budgetRange, or email.
+    return {
+      accountType: profile.accountType ?? "individual",
+      displayName: profile.accountType === "company" && profile.companyName ? profile.companyName : profile.name,
+      contactTitle: profile.contactTitle,
+      industry: profile.industry,
+      country: profile.country,
+      website: profile.website,
+      memberSince: profile.createdAt,
+      paymentVerified: stats.paymentVerified,
+      projectsCompleted: stats.completedProjects,
+      reviewsGiven: stats.reviewsGiven,
+      averageRatingGiven: stats.averageRatingGiven,
+      totalSpentRange: spentRange(stats.totalSpent),
+    };
   }
 }

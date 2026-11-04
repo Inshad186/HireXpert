@@ -11,4 +11,5 @@ export interface IOrderRepository extends IBaseRepository<OrderType>{
     deleteOrder(orderId: string): Promise<void>
     findByPaymentIntentId(paymentIntentId: string): Promise<OrderType | null>
     getFreelancerReviews(freelancerId: string): Promise<any>
+    existsOrderBetween(clientId: string, freelancerId: string): Promise<boolean>
 }

@@ -19,7 +19,6 @@ export class ClientController implements IClientController {
         }
     }
 
-
     async getGigs(req: Request, res: Response, next: NextFunction): Promise<void> {
         try {
             const toNumber = (v: unknown): number | undefined => {
@@ -123,6 +122,28 @@ export class ClientController implements IClientController {
             res.status(HttpStatus.OK).json({ success: true })
         } catch (error) {
             next();
+        }
+    }
+
+    async getMySummary(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+        const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+        console.log("GET MY SUMMARY >>>>>>>>>>>>>>>>>>>>>   >>>>>>>>>>>>>>>>>> ")
+        const summary = await this.clientService.getMySummary(userId);
+        res.status(HttpStatus.OK).json({ success: true, summary });
+    } catch (error) {
+        next(error);
+        }
+    }
+
+    async getPublicSummary(req: Request, res: Response, next: NextFunction): Promise<void> {
+    try {
+        const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
+        console.log("GET PUBLIC SUMMARY >>>>>>>>>>>>>>>>>>>>>   >>>>>>>>>>>>>>>>>> ")
+        const summary = await this.clientService.getPublicSummary(req.params.clientId, userId);
+        res.status(HttpStatus.OK).json({ success: true, summary });
+    } catch (error) {
+        next(error);
         }
     }
 }

@@ -7,8 +7,6 @@ import VideoEditor from "@/assets/VideoEditor.jpg";
 import Marketer from "@/assets/Marketer.jpg";
 import VoiceArtist from "@/assets/VoiceArtist.jpg";
 import Animator from "@/assets/Animator.jpg";
-import toast from "react-hot-toast";
-// import { completeOnboarding } from "@/api/freelancer.api";  ← not used yet — keep for later
 
 const categories = [
   { title: "Designer",          image: Designer },
@@ -24,8 +22,7 @@ function FreelancerOnboarding() {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate(userRoutes.Freelancer_Requirements);
-    // Optional: toast.success("Let's build your profile! 🚀");
+    navigate(userRoutes.FREELANCER_REQUIREMENTS);
   };
 
   return (

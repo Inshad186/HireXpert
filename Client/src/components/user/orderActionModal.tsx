@@ -1,6 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { X, CheckCircle, XCircle, AlertCircle } from 'lucide-react';
 import { Order } from '@/hooks/useOrderTracking';
+import { ClientSummary } from '@/types/user.type';
+import { getClientSummary } from '@/api/client.api';
 
 interface OrderActionModalProps {
   order: Order | null;
@@ -16,8 +18,19 @@ export function OrderActionModal({ order, isOpen, onClose, onAccept, onReject, i
   const [showRejectForm, setShowRejectForm] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [clientSummary, setClientSummary] = useState<ClientSummary | null>(null);
 
   if (!isOpen || !order) return null;
+
+  useEffect(() => {
+    const clientId = (order?.client as any)?._id;
+    if (!isOpen || !clientId) return;
+    let ignore = false;
+    getClientSummary(clientId)
+      .then((res) => { if (!ignore && res.success) setClientSummary(res.data.summary); })
+      .catch(console.error);
+    return () => { ignore = true; setClientSummary(null); };
+  }, [isOpen, order?.client]);
 
   const handleAccept = async () => {
     setError(null);
@@ -43,7 +56,6 @@ export function OrderActionModal({ order, isOpen, onClose, onAccept, onReject, i
     setError(null);
     setSuccess(null);
     const result = await onReject(order._id, rejectReason);
-    console.log("Rejection Result✅ : ",result)
     if (result.success) {
       setSuccess('Order rejected successfully!');
       setTimeout(() => {

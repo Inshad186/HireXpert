@@ -2,7 +2,7 @@ import { FreelancerProfileType } from "@/types/Type"
 import { GigType, FileType, OrderType } from "@/types/Type"
 
 export interface IFreelancerService {
-    updateProfile(userId:string, userData : Partial<FreelancerProfileType>) : Promise<{userDetails : FreelancerProfileType}>
+    updateProfile(userId:string, userData : unknown) : Promise<{userDetails : FreelancerProfileType}>
     createGig(gigData: any, gallery: FileType[]): Promise<string>;
     getGigList(freelancerId: string): Promise<GigType[]>
     updateGigStatus(id: string, freelancerId: string, isActive: boolean): Promise<void>;

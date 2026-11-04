@@ -41,7 +41,7 @@ function EditableName({ name, onSave }: { name: string; onSave: (newName: string
         className="text-2xl font-bold text-gray-800 flex items-center justify-center gap-2 cursor-pointer group"
       >
         {name}
-        <span className="opacity-0 group-hover:opacity-100 text-sm text-indigo-600 transition">
+        <span className="text-sm text-indigo-600 transition">
           edit
         </span>
       </h2>

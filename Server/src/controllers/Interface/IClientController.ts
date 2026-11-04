@@ -9,4 +9,6 @@ export interface IClientController {
     getMyOrders(req: Request, res: Response, next: NextFunction): Promise<void>
     acceptOrders(req: Request, res: Response, next: NextFunction): Promise<void>
     requestRevision(req: Request, res: Response, next: NextFunction): Promise<void>
+    getMySummary(req: Request, res: Response, next: NextFunction): Promise<void>
+    getPublicSummary(req: Request, res: Response, next: NextFunction): Promise<void>
 }

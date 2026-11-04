@@ -163,7 +163,7 @@ function OrderCheckout() {
             <div className="space-y-4">
               <div className="flex justify-between">
                 <span className="text-gray-600">{project.title}</span>
-                <span className="font-semibold">₹{planPrice}</span>
+                <span className="font-semibold">${planPrice}</span>
               </div>
               <div className="flex justify-between text-sm text-gray-600">
                 <span>Delivery</span>
@@ -171,7 +171,7 @@ function OrderCheckout() {
               </div>
               <div className="border-t pt-4 flex justify-between font-bold text-lg">
                 <span>Total</span>
-                <span className="text-green-600">₹{planPrice}</span>
+                <span className="text-green-600">${planPrice}</span>
               </div>
             </div>
           </div>
@@ -183,7 +183,7 @@ function OrderCheckout() {
               setClientSecret(null);
               setOrderId(null);
             }}
-            className="mt-6 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-gray-700"
+            className="mt-6 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700"
           >
             <ArrowBigLeft className="inline-flex w-4 h-4 "/>Back
           </button>
@@ -213,7 +213,7 @@ function OrderCheckout() {
             <span className="bg-blue-300 text-blue-900 rounded-full px-4 p-2">{selectedPlan} Plan</span>
           </p>
           <p>
-            <span className="text-green-700 font-semibold mt-2">₹{planPrice} </span> / {planDelivery} days
+            <span className="text-green-700 font-semibold mt-2">${planPrice} </span> / {planDelivery} days
           </p>
         </div>
       </div>
@@ -243,7 +243,7 @@ function OrderCheckout() {
         <h1 className="font-bold text-lg text-gray-700 mb-4">Order Summary</h1>
         <div className="flex justify-between mb-4">
           <p className="text-lg">{project.title}</p>
-          <p>₹{planPrice}</p>
+          <p>${planPrice}</p>
         </div>
         <div className="flex justify-between">
           <p className="text-sm">Delivery Time</p>
@@ -251,7 +251,7 @@ function OrderCheckout() {
         </div>
         <div className="flex justify-between border-t-2 border-gray-300 mt-6 pt-4">
           <p className="text-lg font-bold">Total Amount</p>
-          <p className="text-xl font-bold text-green-600">₹{planPrice}</p>
+          <p className="text-xl font-bold text-green-600">${planPrice}</p>
         </div>
       </div>
 
@@ -265,7 +265,7 @@ function OrderCheckout() {
       {/* Action Buttons */}
       <div className="border-t pt-4 mt-6 flex justify-center items-center gap-4">
         <button
-          className="bg-gray-800 shadow-xl font-normal text-white px-6 py-2 rounded-lg hover:bg-black disabled:bg-gray-400"
+          className="bg-indigo-600 shadow-xl font-normal text-white px-6 py-2 rounded-lg hover:bg-indigo-800 disabled:bg-indigo-400"
           onClick={() => navigate(`${userRoutes.PROJECT_DETAILS}/${projectId}`)}
         >
           Go Back
@@ -273,7 +273,7 @@ function OrderCheckout() {
         <button
           disabled={paymentProcessing || !requirements.trim()}
           onClick={handleCreatePaymentIntent}
-          className="bg-gray-800 text-white px-8 py-2 rounded-lg hover:bg-black disabled:bg-gray-400 disabled:cursor-not-allowed transition font-semibold"
+          className="bg-indigo-600 text-white px-8 py-2 rounded-lg hover:bg-indigo-800 disabled:bg-indigo-500 disabled:cursor-not-allowed transition font-semibold"
         >
           {paymentProcessing ? "Loading Payment Form..." : "Proceed to Payment"}
         </button>
@@ -309,7 +309,7 @@ function OrderCheckout() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Amount Paid</p>
-                <p className="text-lg font-semibold text-green-600">₹{project.pricing[selectedPlan]?.price}</p>
+                <p className="text-lg font-semibold text-green-600">${project.pricing[selectedPlan]?.price}</p>
               </div>
               <div>
                 <p className="text-sm text-gray-600">Status</p>
@@ -322,7 +322,7 @@ function OrderCheckout() {
             </p>
 
             <button
-              className="w-full bg-blue-600 text-white font-medium px-6 py-3 rounded-lg hover:bg-blue-700 transition"
+              className="w-full bg-indigo-600 text-white font-medium px-6 py-3 rounded-lg hover:bg-indigo-700 transition"
               onClick={() => navigate(userRoutes.MY_ORDERS)}
             >
               View My Orders

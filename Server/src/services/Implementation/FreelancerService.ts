@@ -16,11 +16,13 @@ import { IUserRepository } from "@/repositories/Interface/IUserRepository";
 import { stripe } from "@/config/stripe.config";
 import { env } from "@/config/env.config";
 import { MAX_ACTIVE_GIGS } from "@/constants/gig.constants";
+import { TEXT_LIMITS } from "@/constants/profile.constants";
+import { isHttpUrl } from "@/utils/validation.util";
+import { Types } from "mongoose";
 
-const PROFILE_FIELDS = [
-  "profession", "company", "qualification", "bio", "work_experience",
-  "proficient_languages", "profileSkills", "working_days", "active_hours", "portfolio",
-] as const;
+const badRequest = (message: string) => generateHttpError(HttpStatus.BAD_REQUEST, message);
+const MAX_LANGUAGES = 10;
+const MAX_SKILLS = 15;
 
 export class FreelancerService implements IFreelancerService {
   constructor(
@@ -31,31 +33,68 @@ export class FreelancerService implements IFreelancerService {
     private notificationRepository: INotificationRepository
   ) {}
 
-  async updateProfile( userId: string, userData: FreelancerProfileType ): Promise<{ userDetails: FreelancerProfileType }> {
-    try {
-      const profile = await this.freelanceRepository.findById(userId);
-      if (!profile) {
-        throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
-      }
+async updateProfile(userId: string, userData: unknown): Promise<{ userDetails: FreelancerProfileType }> {
+  try {
+    const profile = await this.freelanceRepository.findById(userId);
+    if (!profile) throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
 
-      const updates: Record<string, unknown> = {};
-      for (const key of PROFILE_FIELDS) {
-        if (userData[key] !== undefined) updates[key] = userData[key];
-      }
-      Object.assign(profile, updates);
-      const isProfileComplete = Boolean(
-        profile.profession && profile.bio && profile.profileSkills?.length
-      );
-      profile.isProfileComplete = isProfileComplete;
-
-      await this.freelanceRepository.findByIdAndUpdate(userId, {...updates, isProfileComplete });
-
-      return { userDetails: profile };
-    } catch (error) {
-      console.error(error);
-      throw error;
+    if (typeof userData !== "object" || userData === null || Array.isArray(userData)) {
+      throw badRequest("Invalid profile data");
     }
+    const input = userData as Record<string, unknown>;
+    
+    const updates: Record<string, unknown> = {};
+
+    // 1. Text fields: must be text, trimmed, and not too long
+    for (const [key, max] of Object.entries(TEXT_LIMITS)) {
+      const value = input[key];
+      if (value === undefined) continue;
+      if (typeof value !== "string") throw badRequest(`${key} must be text`);
+
+      const text = value.trim();
+      if (text.length > max) throw badRequest(`${key} is too long`);
+      updates[key] = text;
+    }
+    if ("name" in updates && !updates.name) throw badRequest("Name cannot be empty");
+    if (updates.portfolio && !isHttpUrl(updates.portfolio as string)) {
+      throw badRequest("Portfolio must start with http:// or https://");
+    }
+
+    // 2. Languages: a short list of texts, without duplicates
+    if (input.proficient_languages !== undefined) {
+      const list = input.proficient_languages;
+      if (!Array.isArray(list) || list.some((item) => typeof item !== "string")) {
+        throw badRequest("Languages must be a list of texts");
+      }
+      const languages = [...new Set(list.map((item: string) => item.trim()).filter(Boolean))];
+      if (languages.length > MAX_LANGUAGES) throw badRequest(`You can add up to ${MAX_LANGUAGES} languages`);
+      updates.proficient_languages = languages;
+    }
+
+    // 3. Skills: a short list of valid ids
+    if (input.profileSkills !== undefined) {
+      const list = input.profileSkills;
+      if (!Array.isArray(list) || list.some((id) => typeof id !== "string" || !Types.ObjectId.isValid(id))) {
+        throw badRequest("Invalid skills");
+      }
+      const skills = [...new Set(list as string[])];
+      if (skills.length > MAX_SKILLS) throw badRequest(`You can select up to ${MAX_SKILLS} skills`);
+      updates.profileSkills = skills;
+    }
+
+    // 4. Completeness: use the new value if it exists, otherwise the saved one
+    const profession = (updates.profession ?? profile.profession) as string | undefined;
+    const bio = (updates.bio ?? profile.bio) as string | undefined;
+    const skills = (updates.profileSkills ?? profile.profileSkills) as unknown[] | undefined;
+    const isProfileComplete = Boolean(profession && bio && skills?.length);
+
+    const updated = await this.freelanceRepository.findByIdAndUpdate(userId, { ...updates, isProfileComplete });
+    return { userDetails: (updated ?? profile) as FreelancerProfileType };
+  } catch (error) {
+    console.error(error);
+    throw error;
   }
+}
 
   async createGig(gigData: any, gallery: FileType[]): Promise<string> {
     try {

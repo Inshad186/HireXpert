@@ -12,12 +12,14 @@ import toast from "react-hot-toast";
 import { getFreelancerFullProfile } from "@/api/user.api";
 import { Role } from "@/types/user.type";
 import FeatureBoxes from "@/components/user/home/FeatureBoxes";
+import { getClientFullProfile } from "@/api/user.api";
+import { updateClientProfile } from "@/api/client.api";
+import AccountTypeModal from "@/components/user/modals/AccountTypeModal";
+import RoleSelectionModal from "@/components/user/modals/RoleSelectionModal";
 
 function Home() { 
   const [role, setRole] = useState<Role>("");
   const [showModal, setShowModal] = useState(false);
-  const [leftClick, setLeftClick] = useState(false);
-  const [rightClick, setRightClick] = useState(false);
   const [loading, setLoading] = useState(false);
   const [gigs, setGigs] = useState<InitialProjectDetail[]>([]);
 
@@ -25,6 +27,43 @@ function Home() {
   const dispatch = useDispatch();
 
   const user = useSelector((state: RootState) => state.user);
+  const [showAccountModal, setShowAccountModal] = useState(false);
+  const [savingType, setSavingType] = useState(false);
+
+  useEffect(() => {
+    if (user.role !== "client") return;
+    let ignore = false;
+
+    const checkAccountType = async () => {
+      try {
+        const res = await getClientFullProfile();
+        if (!ignore && res?.success && !res.data.fullProfile?.accountType) {
+          setShowAccountModal(true);
+        }
+      } catch (error) {
+        console.error("Failed to check the account type", error);
+      }
+    };
+
+    checkAccountType();
+    return () => { ignore = true; };
+  }, [user.role]);
+
+  const handleAccountType = async (type: "individual" | "company") => {
+    setSavingType(true);
+    try {
+      const res = await updateClientProfile({ accountType: type });
+      if (res.success) {
+        setShowAccountModal(false);
+        toast.success(type === "company" ? "Let's set up your company profile" : "Let's set up your profile");
+        navigate(userRoutes.PROFILE);
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Could not save your choice");
+    } finally {
+      setSavingType(false);
+    }
+  };
 
   useEffect(() => { 
     if (user.role === "none") {
@@ -34,18 +73,6 @@ function Home() {
       return () => clearTimeout(timer);
     }
   }, [user.role]);
-
-  const handleLeftClick = () => {
-    setLeftClick(true);
-    setRightClick(false);
-    setRole("client");
-  };
-
-  const handleRightClick = () => {
-    setRightClick(true);
-    setLeftClick(false);
-    setRole("freelancer");
-  };
 
   useEffect(() => {
     const fetchProjects = async () => {
@@ -173,7 +200,7 @@ function Home() {
                       <div className="absolute bottom-3 right-3 bg-white/95 backdrop-blur-md px-3 py-1 rounded-xl border border-slate-200/50">
                         <span className="text-xs text-slate-500 font-medium">From </span>
                         <span className="text-sm font-bold text-indigo-600">
-                          ₹{gig.pricing.basic.price}
+                          ${gig.pricing.basic.price}
                         </span>
                       </div>
                     )}
@@ -210,61 +237,20 @@ function Home() {
 
         <FeatureBoxes />
 
-        {/* ─── ROLE SELECTION MODAL ─────────────────────────────── */}
-        {showModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-            <div className="bg-white rounded-2xl p-6 sm:p-8 w-full max-w-lg shadow-2xl border border-slate-100 space-y-6">
-              <div className="text-center space-y-1">
-                <h2 className="text-2xl font-extrabold text-slate-900">
-                  Welcome, {user.name}!
-                </h2>
-                <p className="text-xs sm:text-sm text-slate-500">
-                  Select your primary role to customize your experience
-                </p>
-              </div>
+      <RoleSelectionModal
+        isOpen={showModal}
+        selectedRole={role}
+        loading={loading}
+        userName={user.name}
+        onSelect={setRole}
+        onContinue={handleAssignRole}
+      />
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={handleLeftClick}
-                  className={`p-5 rounded-xl border text-left transition-colors ${
-                    leftClick
-                      ? "border-indigo-600 bg-indigo-50/50 shadow-sm"
-                      : "border-slate-200 hover:border-slate-300 bg-white"
-                  }`}
-                >
-                  <div className="font-bold text-sm text-slate-900">I'm a Client</div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Looking to hire talent and manage projects
-                  </p>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={handleRightClick}
-                  className={`p-5 rounded-xl border text-left transition-colors ${
-                    rightClick
-                      ? "border-indigo-600 bg-indigo-50/50 shadow-sm"
-                      : "border-slate-200 hover:border-slate-300 bg-white"
-                  }`}
-                >
-                  <div className="font-bold text-sm text-slate-900">I'm a Freelancer</div>
-                  <p className="text-xs text-slate-500 mt-1">
-                    Looking to offer services and complete gigs
-                  </p>
-                </button>
-              </div>
-
-              <button
-                onClick={handleAssignRole}
-                disabled={!role || loading}
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-xl font-semibold text-sm shadow-md shadow-indigo-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-              >
-                {loading ? "Saving..." : "Continue"}
-              </button>
-            </div>
-          </div>
-        )}
+      <AccountTypeModal 
+      isOpen={showAccountModal} 
+      loading={savingType} 
+      onSelect={handleAccountType} 
+      />
       </main>
 
       <Footer />

@@ -172,3 +172,19 @@ export interface Filters {
   maxPrice: string;
   minRating: string;
 }
+
+
+export interface ClientSummary {
+  accountType: "individual" | "company";
+  displayName?: string;
+  memberSince?: string;
+  paymentVerified: boolean;
+  projectsCompleted?: number;
+  completedProjects?: number;   // private version uses this name
+  reviewsGiven: number;
+  averageRatingGiven: number | null;
+  totalSpentRange: string;
+  totalSpent?: number;          // private version only
+  inEscrow?: number;            // private version only
+  activeProjects?: number;      // private version only
+}

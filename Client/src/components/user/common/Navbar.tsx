@@ -26,6 +26,14 @@ function Navbar() {
     { name: "Profile", path: userRoutes.PROFILE },
   ];
 
+  const FREELANCER_LINKS = [
+    { name: "Dashboard", path: userRoutes.FREELANCER_DASH },
+    { name: "My Gigs", path: userRoutes.LISTED_GIG },
+    { name: "Orders", path: userRoutes.LISTED_ORDER },
+    { name: "Earnings", path: userRoutes.FREELANCER_EARNINGS },
+    { name: "Profile", path: userRoutes.COMPLETE_PROFILE },
+  ];
+
   const handleLogout = async () => {
     try {
       const res = await userLogout();
@@ -45,8 +53,15 @@ function Navbar() {
 
   const isAuthenticated = !!user._id && !!accessToken;
   const isClient = isAuthenticated && user.role === "client";
+  const isFreelancer = isAuthenticated && user.role === "freelancer";
 
-  const navLinks = isClient ? [...CLIENT_LINKS, ...PUBLIC_LINKS] : PUBLIC_LINKS;
+  // Determine which navigation links to display based on user role
+  let navLinks = PUBLIC_LINKS;
+  if (isClient) {
+    navLinks = [...CLIENT_LINKS, ...PUBLIC_LINKS];
+  } else if (isFreelancer) {
+    navLinks = [...FREELANCER_LINKS, ...PUBLIC_LINKS];
+  }
 
   return (
     <nav className="bg-white border-b border-slate-200/80 sticky top-0 z-40">

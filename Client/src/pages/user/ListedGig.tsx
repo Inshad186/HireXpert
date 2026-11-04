@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { getGigList, updateGigStatus } from "@/api/freelancer.api";
 import { ProjectDetail } from "@/types/user.type";
-import SimpleNavbar from "@/components/user/simpleNavbar";
 import ListedGigsComp from "@/components/user/freelancer/listedGigsComp";
 
 function ListedGig() {

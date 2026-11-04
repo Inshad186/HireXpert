@@ -5,7 +5,7 @@ export interface IClientProfile extends Document {
   name?: string;
   email?: string;
   role?: string;
-  accountType: "individual" | "company";
+  accountType?: "individual" | "company";
   companyName?: string;
   companySize?: "1" | "2-10" | "11-50" | "51-200" | "200+";
   about?: string;
@@ -16,6 +16,8 @@ export interface IClientProfile extends Document {
   workType?: "Short-term" | "Long-term" | "Both";
   budgetRange?: string;
   preferredTechStack?: string;
+  contactTitle?: string;
+  linkedinUrl?: string;
 }
 
 const clientProfileSchema = new Schema<IClientProfile>({
@@ -23,7 +25,7 @@ const clientProfileSchema = new Schema<IClientProfile>({
   name: { type: String, trim: true, maxlength: 100 },
   email: { type: String, trim: true, lowercase: true },
   role: String,
-  accountType: { type: String, enum: ["individual", "company"], default: "individual" },
+  accountType: { type: String, enum: ["individual", "company"]},
   companyName: { type: String, trim: true, maxlength: 100 },
   companySize: { type: String, enum: ["1", "2-10", "11-50", "51-200", "200+"] },
   about: { type: String, trim: true, maxlength: 500 },
@@ -34,6 +36,8 @@ const clientProfileSchema = new Schema<IClientProfile>({
   workType: { type: String, enum: ["Short-term", "Long-term", "Both"] },
   budgetRange: { type: String, trim: true, maxlength: 50 },
   preferredTechStack: { type: String, trim: true, maxlength: 200 },
+  contactTitle: { type: String, trim: true, maxlength: 100 },
+  linkedinUrl: { type: String, trim: true, maxlength: 200 },
 }, { timestamps: true });
 
 export default mongoose.model<IClientProfile>("ClientProfile", clientProfileSchema);

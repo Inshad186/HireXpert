@@ -17,4 +17,6 @@ export interface IClientService {
     acceptOrders(orderId: string, clientId: string, feedback: string, rating: number): Promise<OrderType | null>;
     releasePayment(orderId: string, by: "client" | "system", reason: string, extra?: Record<string, unknown>): Promise<OrderType | null>;
     requestRivision(orderId: string, clientId: string, revision: string): Promise<OrderType | null>;
+    getMySummary(clientId: string) : Promise <any>
+    getPublicSummary(clientId: string, freelancerId: string) : Promise<any>
 }
