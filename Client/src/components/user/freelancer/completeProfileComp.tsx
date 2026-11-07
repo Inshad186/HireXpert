@@ -8,7 +8,7 @@ import { updateFreelancerProfile } from "@/api/freelancer.api";
 import { getSkills } from "@/api/admin.api";
 import { setUser } from "@/redux/slices/userSlice";
 import { userRoutes } from "@/constants/routeUrl";
-import ProfileImageUploader from "../profile/ProfileImageUploader";
+import ProfileImage from "../profile/ProfileImageUploader";
 import EditableName from "../profile/EditableName";
 import ProfileForm from "../profile/ProfileForm";
 
@@ -151,22 +151,26 @@ export default function CompleteFreelancerProfile() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 p-4">
       <div className="bg-white w-full max-w-2xl rounded-lg shadow p-6">
-        <h2 className="text-xl font-bold text-center mb-6 text-gray-800">
-          {wasComplete ? "Edit Your Freelancer Profile" : "Complete Your Freelancer Profile"}
-        </h2>
 
-        <div className="flex flex-col items-center">
-          <ProfileImageUploader image={profileImage} onImageChange={handleImageChange} />
-          <EditableName name={user.name} onSave={handleNameSave} />
-          <p className="text-gray-600 mb-4">{user.email}</p>
-        </div>
+        {/* Decorative Top Banner */}
+        <div className="h-32 bg-gradient-to-r from-indigo-600 to-violet-600 relative"></div>
+
+          <div className="flex flex-col items-center -mt-16 border-b border-slate-100 pb-8 mb-8">
+            <div className="relative p-1 rounded-full">
+              <ProfileImage image={profileImage} onImageChange={handleImageChange} />
+            </div>
+            <div className="mt-4 text-center">
+              <EditableName name={user.name} onSave={handleNameSave} />
+              <p className="text-slate-500 text-sm mt-1 font-medium">{user.email}</p>
+            </div>
+          </div>
 
         <ProfileForm form={form} onChange={handleChange} fields={fields} />
 
         <button
           onClick={handleSave}
           disabled={saving}
-          className="mt-6 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 disabled:bg-gray-400"
+          className="mt-6 w-full bg-indigo-600 text-white py-2 rounded hover:bg-indigo-700 disabled:bg-gray-400"
         >
           {saving ? "Saving..." : wasComplete ? "Save Changes" : "Save & Continue"}
         </button>

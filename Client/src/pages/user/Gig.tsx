@@ -4,7 +4,7 @@ import { createGig } from "@/api/freelancer.api";
 import { useNavigate } from "react-router-dom";
 import { userRoutes } from "@/constants/routeUrl";
 import toast from "react-hot-toast";
-import GigComp from "@/components/user/freelancer/gigComp";
+import GigComp from "@/components/user/freelancer/gig/gigComp";
 
 interface PricingPlan {
   price: number;

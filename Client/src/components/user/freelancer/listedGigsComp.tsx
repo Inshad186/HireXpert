@@ -49,7 +49,7 @@ function ListedGigsComp({ list, loading, error, onToggle }: ListedGigsCompProps)
           </div>
           <button
             onClick={() => navigate(userRoutes.CREATE_GIG)}
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-600 hover:bg-indigo-700 active:scale-95 text-white font-bold text-sm rounded-2xl transition-all shadow-sm shadow-indigo-100"
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-indigo-700 hover:bg-indigo-800 active:scale-95 text-white font-bold text-sm rounded-2xl transition-all shadow-sm shadow-indigo-100"
           >
             <Plus size={18} />
             Create Gig
@@ -68,8 +68,8 @@ function ListedGigsComp({ list, loading, error, onToggle }: ListedGigsCompProps)
                 onClick={() => setSelectedPlan(plan)}
                 className={`px-4 py-1.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all ${
                   selectedPlan === plan
-                    ? "bg-indigo-600 text-white shadow-sm"
-                    : "text-slate-600 hover:text-indigo-600 hover:bg-slate-50"
+                    ? "bg-indigo-700 text-white shadow-sm"
+                    : "text-slate-600 hover:text-indigo-800 hover:bg-slate-50"
                 }`}
               >
                 {plan}

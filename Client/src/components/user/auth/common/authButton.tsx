@@ -22,7 +22,7 @@ export function AuthButton({
       {...props}
       type={type}
       disabled={disabled || loading}
-      className={`w-full bg-indigo-600 hover:bg-indigo-800 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2 rounded-md transition-colors ${className}`}
+      className={`w-full bg-indigo-800 hover:bg-indigo-900 disabled:opacity-60 disabled:cursor-not-allowed text-white font-semibold py-2 rounded-md transition-colors ${className}`}
     >
       {loading ? loadingText : children}
     </button>

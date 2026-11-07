@@ -1,4 +1,4 @@
-import mongoose, {ObjectId, Types} from "mongoose"
+import {Types} from "mongoose"
 
 export type UserRole = "freelancer" | "client" | "admin" | "none";
 
@@ -180,11 +180,11 @@ export interface ClientSummary {
   memberSince?: string;
   paymentVerified: boolean;
   projectsCompleted?: number;
-  completedProjects?: number;   // private version uses this name
+  completedProjects?: number;   
   reviewsGiven: number;
   averageRatingGiven: number | null;
   totalSpentRange: string;
-  totalSpent?: number;          // private version only
-  inEscrow?: number;            // private version only
-  activeProjects?: number;      // private version only
+  totalSpent?: number;         
+  inEscrow?: number;           
+  activeProjects?: number;     
 }
