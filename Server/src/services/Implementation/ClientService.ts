@@ -436,7 +436,6 @@ export class ClientService implements IClientService {
   async getMySummary(clientId: string) {
     const profile: any = await this.clientRepository.findById(clientId);
     if (!profile) throw generateHttpError(HttpStatus.BAD_REQUEST, HttpResponse.USER_NOT_FOUND);
-    console.log("GET MY SUMMARY FROM SERVICE >>>>>>>>>>>>>>>>>>>>>   >>>>>>>>>>>>>>>>>> ")
     const stats = await this.clientRepository.getClientStats(clientId);
     return {
       accountType: profile.accountType ?? "individual",

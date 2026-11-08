@@ -128,7 +128,6 @@ export class ClientController implements IClientController {
     async getMySummary(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
-        console.log("GET MY SUMMARY >>>>>>>>>>>>>>>>>>>>>   >>>>>>>>>>>>>>>>>> ")
         const summary = await this.clientService.getMySummary(userId);
         res.status(HttpStatus.OK).json({ success: true, summary });
     } catch (error) {
@@ -139,7 +138,6 @@ export class ClientController implements IClientController {
     async getPublicSummary(req: Request, res: Response, next: NextFunction): Promise<void> {
     try {
         const { userId } = JSON.parse(req.headers["x-user-payload"] as string);
-        console.log("GET PUBLIC SUMMARY >>>>>>>>>>>>>>>>>>>>>   >>>>>>>>>>>>>>>>>> ")
         const summary = await this.clientService.getPublicSummary(req.params.clientId, userId);
         res.status(HttpStatus.OK).json({ success: true, summary });
     } catch (error) {

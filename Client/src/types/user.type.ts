@@ -108,46 +108,49 @@ export interface ProjectDetail {
 }
 
 //! OrderDetail
+
+export type OrderStatus =
+  | 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'DELIVERED' | 'REVISION'
+  | 'COMPLETED' | 'REJECTED' | 'CANCELLED' | 'DISPUTED';
+
+export type OrderPlan = 'basic' | 'standard' | 'premium';
+
+export interface PricingPlan {
+  price: number;
+  description?: string;
+  deliveryTime?: number;
+}
+
+export interface OrderStatusHistory {
+  status: OrderStatus;
+  timestamp: string;
+  changedBy: 'freelancer' | 'client' | 'system' | 'admin';
+  reason?: string;
+}
+
 export interface OrderDetail {
   _id?: string;
-  client?: {
-    _id?: string
-    name: string
-  }
-  freelancer?:{
-    _id?: string
-    name: string
-  }
-  gig?:{
-    title: string
-    pricing:{
-      basic?:{
-        price: number;
-      }
-    }
-  }
+  client?: { _id?: string; name: string };
+  freelancer?: { _id?: string; name: string };
+  gig?: {
+    title: string;
+    pricing: Partial<Record<OrderPlan, PricingPlan>>;
+  };
   requirements: string;
-  plan?: string;
-  status?: 'PENDING' | 'ACCEPTED' | 'IN_PROGRESS' | 'DELIVERED' | 'COMPLETED' | 'REVISION' | 'REJECTED' | 'CANCELLED';
+  plan?: OrderPlan;
+  status: OrderStatus;
   deliveryFiles?: string[];
   deliveryNotes?: string;
   revisionReason?: string;
   revisionsRequested?: number;
-  paymentDetails?: { amount: number; currency: string };
+  paymentDetails?: { amount: number; currency: string; status?: string };
   escrowDetails?: { escrowStatus?: string; holdUntilDate?: string };
-  statusHistory?: [
-    {changedBy?: string},
-    {reason?: string},
-    {status?: string},
-    {timestamp?: Date}
-  ],
-  clientFeedback?: {
-    rating: number;
-    comment: string;
-  }
-  acceptedAt?: Date;
-  startedAt?: Date;
-  deliveredAt?: Date;
+  statusHistory?: OrderStatusHistory[];
+  clientFeedback?: { rating: number; feedback: string; givenAt?: string };
+  acceptedAt?: string;
+  startedAt?: string;
+  deliveredAt?: string;
+  completedAt?: string;
 }
 
 //! NotificationType

@@ -8,6 +8,9 @@ import { ClientDeliveryModal } from './clientDeliveryModal';
 import { useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
 import { useMessagingContext } from '@/context/messagingContext';
+import { OrderDetailsModal } from './orderDetailsModal';
+
+type ModalType = 'details' | 'chat' | 'delivery' | null;
 
 function MyOrders() {
   const [activeTab, setActiveTab] = useState('ALL');
@@ -15,8 +18,7 @@ function MyOrders() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedOrder, setSelectedOrder] = useState<OrderDetail | null>(null)
-  const [showDeliveryModal, setShowDeliveryModal] = useState(false)
-  const [showChatModal, setShowChatModal] = useState(false)
+  const [activeModal, setActiveModal] = useState<ModalType>(null);
 
   const userId = useSelector((state: RootState) => state.user._id)
   const clientName = useSelector((state: RootState) => state.user.name)
@@ -26,6 +28,16 @@ function MyOrders() {
 
   const currentUserId = userId; 
   const currentUserName = clientName;
+
+  const openModal = (type: Exclude<ModalType, null>, order: OrderDetail) => {
+    setSelectedOrder(order);
+    setActiveModal(type);
+  };
+
+  const closeModal = () => {
+    setActiveModal(null);
+    setSelectedOrder(null);
+  };
 
   const getStatusColor = (status: string = '') => {
     switch(status) {
@@ -83,16 +95,12 @@ function MyOrders() {
   }, []);
 
   const handleViewDelivery = (order: OrderDetail) => {
-    if(order.status === "DELIVERED"){
-      setSelectedOrder(order)
-      setShowDeliveryModal(true)
-    }
-  }
+    if (order.status === 'DELIVERED') openModal('delivery', order);
+  };
 
   const handleMessageClick = (order: OrderDetail) => {
-    setSelectedOrder(order);
-    setShowChatModal(true);
-    markAsRead(order._id as string)
+    openModal('chat', order);
+    markAsRead(order._id as string);
   };
 
   return (
@@ -194,7 +202,7 @@ function MyOrders() {
                   </button>
                 ) : (
                 <button 
-                onClick={() => setSelectedOrder(order)}
+                onClick={() => openModal('details', order)}
                 className="flex items-center gap-2 px-4 py-2 text-blue-600 hover:bg-blue-50 rounded transition">
                   <Eye size={18} />
                   <span className="text-sm font-medium">View Details</span>
@@ -218,94 +226,42 @@ function MyOrders() {
                   </button>
                 )}
               </div>
-
-              {/* Modal */}
-              {selectedOrder && (
-                <div className="fixed inset-0 bg-black bg-opacity-15 flex items-center justify-center p-4 z-50">
-                <div className="bg-white rounded-lg shadow-xl max-w-3xl w-full p-8 max-h-[90vh] overflow-y-auto">
-                    <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-3xl font-bold text-gray-800">{selectedOrder.gig?.title}</h2>
-                    <button 
-                        onClick={() => setSelectedOrder(null)}
-                        className="text-gray-500 hover:text-gray-700 text-3xl font-light"
-                    >
-                        ×
-                    </button>
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-6 mb-6 pb-6 border-b">
-                    <div>
-                        <p className="text-gray-600 text-sm">Order ID</p>
-                        <p className="text-lg font-semibold">{selectedOrder._id}</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-600 text-sm">Freelancer</p>
-                        <p className="text-lg font-semibold">{selectedOrder.freelancer?.name}</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-600 text-sm">Amount</p>
-                        <p className="text-xl font-bold text-green-600">${selectedOrder.gig?.pricing.basic?.price}</p>
-                    </div>
-                    <div>
-                        <p className="text-gray-600 text-sm">Status</p>
-                        <span className={`inline-flex items-center gap-1 px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(selectedOrder.status)}`}>
-                        {getStatusIcon(selectedOrder.status)}
-                        {selectedOrder.status}
-                        </span>
-                    </div>
-                    </div>
-
-                    <div className="mb-6">
-                    <p className="text-gray-600 text-sm mb-2">Requirements</p>
-                    <p className="text-gray-800 bg-gray-50 p-4 rounded-lg">{selectedOrder.requirements}</p>
-                    </div>
-
-                    <div className="flex gap-4">
-                    <button className="flex-1 bg-blue-600 text-white px-4 py-3 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 font-medium">
-                        <MessageSquare className="w-4 h-4" />
-                        Message Freelancer
-                    </button>
-                    <button 
-                        onClick={() => setSelectedOrder(null)}
-                        className="px-6 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-medium"
-                    >
-                        Close
-                    </button>
-                    </div>
-                </div>
-                </div>
-              )}
             </div>
           ))}
         </div>
       )}
-  
-        {/* Chat Modal */}
+      {selectedOrder && activeModal === 'details' && (
+        <OrderDetailsModal
+          order={selectedOrder}
+          onClose={closeModal}
+          onMessage={() => {
+            markAsRead(selectedOrder._id as string);
+            setActiveModal('chat');
+          }}
+        />
+      )}
+
       {selectedOrder && (
         <ChatModal
-          isOpen={showChatModal}
-          onClose={() => {
-            setShowChatModal(false);
-            setSelectedOrder(null);
-          }}
+          isOpen={activeModal === 'chat'}
+          onClose={closeModal}
           orderId={selectedOrder._id as string}
           recipientId={selectedOrder.freelancer?._id || ""}
           recipientName={selectedOrder.freelancer?.name as string}
           currentUserId={currentUserId}
           currentUserName={currentUserName}
-          />
+        />
       )}
 
       <ClientDeliveryModal
-      order={selectedOrder}
-      isOpen={showDeliveryModal}
-      onClose={() => {
-        setShowDeliveryModal(false)
-        setSelectedOrder(null)
-      }}
-      onAccept={acceptDelivery}
-      onRequestRevision={requestRevision}
-      isLoading={actionLoading === selectedOrder?._id}/>
+        order={selectedOrder}
+        isOpen={activeModal === 'delivery'}
+        onClose={closeModal}
+        onAccept={acceptDelivery}
+        onRequestRevision={requestRevision}
+        isLoading={actionLoading === selectedOrder?._id}
+      />
+
     </div>
   );
 }
